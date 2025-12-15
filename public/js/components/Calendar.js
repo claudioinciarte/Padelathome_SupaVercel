@@ -1,4 +1,4 @@
-import { formatDate, formatTime } from '../utils.js';
+import { formatDate, formatTime, showNotification } from '../utils.js';
 
 /**
  * Renderiza la vista semanal (escritorio).
@@ -146,24 +146,139 @@ function getMobileStatusText(slot) {
  * @param {HTMLElement} container - El contenedor padre (puede ser el document o una sección específica).
  * @param {Function} onSlotClick - Callback (slotData) => {}.
  */
+function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
+    const wasActive = detailsContainer.classList.contains('active');
+    
+    document.querySelectorAll('.slot-details.active').forEach(d => {
+        d.classList.remove('active');
+        d.innerHTML = '';
+    });
+
+    if (wasActive) return;
+
+    detailsContainer.classList.add('active');
+
+    const { status, startTime, bookingId, participants, maxParticipants } = slotData;
+
+    const closeAccordion = () => {
+        detailsContainer.classList.remove('active');
+        detailsContainer.innerHTML = '';
+    };
+
+    switch (status) {
+        case 'available':
+            const durations = [60, 90];
+            const optionsHtml = durations.map(d => `<button class="duration-btn" data-duration="${d}">${d} min</button>`).join('');
+            
+            detailsContainer.innerHTML = `
+                <p>Elige duración:</p>
+                <div class="duration-options">${optionsHtml}</div>
+                <div class="form-group open-match-toggle">
+                    <input type="checkbox" class="open-match-checkbox">
+                    <label>Abrir partida (4 jugadores)</label>
+                </div>
+                <button class="confirm-booking-btn">Confirmar</button>
+                <button class="cancel-action-btn">Cancelar</button>
+            `;
+
+            detailsContainer.querySelector('.confirm-booking-btn').addEventListener('click', () => {
+                const duration = detailsContainer.querySelector('.duration-btn.selected')?.dataset.duration;
+                if (!duration) {
+                    showNotification('Por favor, selecciona una duración.', 'error');
+                    return;
+                }
+                const isOpenMatch = detailsContainer.querySelector('.open-match-checkbox').checked;
+                onSlotClick({ ...slotData, action: 'book', duration, isOpenMatch });
+                closeAccordion();
+            });
+            
+            detailsContainer.querySelectorAll('.duration-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    detailsContainer.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                });
+            });
+            
+            detailsContainer.querySelector('.cancel-action-btn').addEventListener('click', closeAccordion);
+            break;
+            
+        case 'open_match_available':
+            detailsContainer.innerHTML = `
+                <p>Partida abierta con ${participants}/${maxParticipants} jugadores.</p>
+                <button class="join-match-btn">Unirse a la Partida</button>
+                <button class="cancel-action-btn">Cancelar</button>
+            `;
+            detailsContainer.querySelector('.join-match-btn').addEventListener('click', () => {
+                onSlotClick({ ...slotData, action: 'join' });
+                closeAccordion();
+            });
+            detailsContainer.querySelector('.cancel-action-btn').addEventListener('click', closeAccordion);
+            break;
+
+        case 'booked':
+        case 'open_match_full':
+            detailsContainer.innerHTML = `
+                <p>Este horario está ocupado.</p>
+                <button class="join-waitlist-btn">Apuntarse a Lista de Espera</button>
+                <button class="cancel-action-btn">Cancelar</button>
+            `;
+            detailsContainer.querySelector('.join-waitlist-btn').addEventListener('click', () => {
+                onSlotClick({ ...slotData, action: 'waitlist' });
+                closeAccordion();
+            });
+            detailsContainer.querySelector('.cancel-action-btn').addEventListener('click', closeAccordion);
+            break;
+            
+        case 'my_private_booking':
+            detailsContainer.innerHTML = `<p>Tienes una reserva privada aquí.</p><button class="cancel-booking-btn">Cancelar Reserva</button> <button class="cancel-action-btn">Cerrar</button>`;
+            detailsContainer.querySelector('.cancel-booking-btn').addEventListener('click', () => {
+                onSlotClick({ ...slotData, action: 'cancel' });
+                closeAccordion();
+            });
+            detailsContainer.querySelector('.cancel-action-btn').addEventListener('click', closeAccordion);
+            break;
+
+        case 'my_open_match':
+            detailsContainer.innerHTML = `<p>Estás en esta partida.</p><button class="leave-match-btn">Abandonar Partida</button> <button class="cancel-action-btn">Cerrar</button>`;
+            detailsContainer.querySelector('.leave-match-btn').addEventListener('click', () => {
+                onSlotClick({ ...slotData, action: 'leave' });
+                closeAccordion();
+            });
+            detailsContainer.querySelector('.cancel-action-btn').addEventListener('click', closeAccordion);
+            break;
+
+        default:
+            detailsContainer.innerHTML = `<p>No hay acciones disponibles.</p><button class="cancel-action-btn">Cerrar</button>`;
+            detailsContainer.querySelector('.cancel-action-btn').addEventListener('click', closeAccordion);
+    }
+}
+
 export function init(container, onSlotClick) {
-
-    // Delegación para Grid (Escritorio)
     container.addEventListener('click', (e) => {
-        const cell = e.target.closest('.slot');
-        if (!cell) return;
+        const desktopCell = e.target.closest('.slot');
+        const mobileHeader = e.target.closest('.slot-header');
 
-        const dataset = cell.dataset;
-        // Convertimos dataset a objeto plano y casteamos tipos básicos
-        const slotData = {
-            status: dataset.status,
-            startTime: dataset.starttime,
-            bookingId: dataset.bookingId,
-            participationType: dataset.participationType,
-            participants: dataset.participants,
-            maxParticipants: dataset.maxParticipants
-        };
-
-        onSlotClick(slotData);
+        if (desktopCell) {
+            const dataset = desktopCell.dataset;
+            const slotData = {
+                status: dataset.status,
+                startTime: dataset.starttime,
+                bookingId: dataset.bookingId,
+                participationType: dataset.participationType,
+                participants: dataset.participants,
+                maxParticipants: dataset.maxParticipants
+            };
+            if (slotData.status && slotData.status !== 'past') {
+                onSlotClick(slotData);
+            }
+        } else if (mobileHeader) {
+            const slotData = mobileHeader._slotData;
+            if (slotData && slotData.status !== 'past') {
+                const detailsContainer = mobileHeader.nextElementSibling;
+                if (detailsContainer && detailsContainer.classList.contains('slot-details')) {
+                    renderSlotDetails(detailsContainer, slotData, onSlotClick);
+                }
+            }
+        }
     });
 }

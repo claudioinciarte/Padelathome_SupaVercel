@@ -55,13 +55,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalHandlers = {
         onConfirmBooking: async (data) => {
             try {
-                const body = { ...data, courtId: selectedCourtId };
-                if (data.isOpenMatch) body.maxParticipants = 4;
+                const body = { 
+                    startTime: data.startTime,
+                    durationMinutes: data.duration, // Renamed from duration
+                    isOpenMatch: data.isOpenMatch,
+                    courtId: selectedCourtId 
+                };
+                if (data.isOpenMatch) {
+                    body.maxParticipants = 4;
+                }
                 await fetchApi('/bookings', { method: 'POST', body: JSON.stringify(body) });
                 showNotification('Reserva creada con éxito', 'success');
                 Modals.hideAllModals();
                 refreshData();
-            } catch (e) { showNotification(e.message, 'error'); }
+            } catch (e) { 
+                showNotification(e.message, 'error'); 
+            }
         },
         onJoinWaitlist: async (data) => {
             try {
@@ -226,30 +235,50 @@ document.addEventListener('DOMContentLoaded', () => {
             onLeave: modalHandlers.onLeaveMatch
         });
 
-        Calendar.init(calendarContainer, (slotData) => {
-            // Lógica centralizada de qué modal abrir según el click en el calendario
-            const { status, startTime, bookingId, participationType, participants, maxParticipants } = slotData;
+        const calendarRoot = document.getElementById('weekly-calendar-container').parentElement;
+        Calendar.init(calendarRoot, (slotData) => {
+            const { action, status, startTime, bookingId, participationType, participants, maxParticipants, duration, isOpenMatch } = slotData;
 
-            switch (status) {
+            const effectiveStatus = action || status;
+
+            switch (effectiveStatus) {
+                case 'book': 
                 case 'available':
-                    Modals.showBookingModal(startTime, [60, 90]);
+                    if (action === 'book') { 
+                        modalHandlers.onConfirmBooking({ startTime, duration: parseInt(duration), isOpenMatch });
+                        refreshData();
+                    } else { 
+                        Modals.showBookingModal(startTime, [60, 90]);
+                    }
                     break;
+                case 'cancel':
                 case 'my_private_booking':
-                    Modals.showMyBookingModal(bookingId, startTime);
+                     modalHandlers.onCancelBooking(bookingId);
                     break;
+                case 'leave':
                 case 'my_open_match':
-                    fetchApi(`/matches/${bookingId}/participants`).then(({ participants: p }) => {
-                        Modals.showMyMatchModal({ bookingId, startTime, isOwner: participationType === 'owner' }, p);
-                    });
+                    if(action === 'leave'){
+                        modalHandlers.onLeaveMatch(bookingId);
+                    } else {
+                        fetchApi(`/matches/${bookingId}/participants`).then(({ participants: p }) => {
+                            Modals.showMyMatchModal({ bookingId, startTime, isOwner: participationType === 'owner' }, p);
+                        });
+                    }
                     break;
+                case 'join':
                 case 'open_match_available':
-                    fetchApi(`/matches/${bookingId}/participants`).then(({ participants: p }) => {
-                        Modals.showOpenMatchModal({ bookingId, starttime: startTime, participants, maxParticipants }, p);
-                    });
+                    if(action === 'join'){
+                        modalHandlers.onJoinMatch(slotData)
+                    }else {
+                        fetchApi(`/matches/${bookingId}/participants`).then(({ participants: p }) => {
+                            Modals.showOpenMatchModal({ bookingId, starttime: startTime, participants, maxParticipants }, p);
+                        });
+                    }
                     break;
+                case 'waitlist':
                 case 'booked':
                 case 'open_match_full':
-                    Modals.showWaitlistModal(startTime, selectedCourtId);
+                    modalHandlers.onJoinWaitlist({startTime, courtId: selectedCourtId});
                     break;
             }
         });
