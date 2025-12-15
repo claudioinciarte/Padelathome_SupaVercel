@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedCourtId = null;
     let courtsData = [];
     let dailySlotsData = [];
+    let userActiveBookings = [];
 
     // --- Elementos del DOM ---
     const welcomeMessage = document.getElementById('welcome-message');
@@ -80,7 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const bookings = await fetchApi('/bookings/me'); // Espera array o null
             // Si la API devuelve null o undefined, tratamos como array vacío
-            renderMyBookings(bookings ? (Array.isArray(bookings) ? bookings : [bookings]) : []);
+            userActiveBookings = bookings ? (Array.isArray(bookings) ? bookings : [bookings]) : [];
+            renderMyBookings(userActiveBookings);
         } catch (error) {
             console.error(error);
             myBookingContainer.innerHTML = '<p class="error-text">Error al cargar reservas.</p>';
