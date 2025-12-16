@@ -13,12 +13,16 @@ const waitlistModalOverlay = document.getElementById('waitlist-modal-overlay');
 const waitlistJoinBtn = document.getElementById('waitlist-join-btn');
 const waitlistCancelBtn = document.getElementById('waitlist-cancel-btn');
 
+// Join Match Modal Elements
 const joinMatchModalOverlay = document.getElementById('join-match-modal-overlay');
-const joinMatchTime = document.getElementById('join-match-time');
-const joinMatchParticipants = document.getElementById('join-match-participants');
-const joinMatchParticipantsList = document.getElementById('join-match-participants-list');
+const joinMatchDateEl = document.getElementById('join-match-date');
+const joinMatchTimeEl = document.getElementById('join-match-time');
+const joinMatchParticipantsCountEl = document.getElementById('join-match-participants-count');
+const joinMatchParticipantsListEl = document.getElementById('join-match-participants-list');
 const joinMatchConfirmBtn = document.getElementById('join-match-confirm-btn');
 const joinMatchCancelBtn = document.getElementById('join-match-cancel-btn');
+const joinMatchCloseBtnTop = document.getElementById('join-match-close-btn-top');
+
 
 const myBookingModalOverlay = document.getElementById('my-booking-modal-overlay');
 const myBookingModalTime = document.getElementById('my-booking-modal-time');
@@ -63,7 +67,7 @@ export function initModals(handlers) {
         });
     });
 
-    [bookingModalCancelBtn, waitlistCancelBtn, joinMatchCancelBtn, myBookingCloseBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => btn.addEventListener('click', hideAllModals));
+    [bookingModalCancelBtn, waitlistCancelBtn, joinMatchCancelBtn, joinMatchCloseBtnTop, myBookingCloseBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => btn.addEventListener('click', hideAllModals));
 
     // Action listeners
     if (handlers.onConfirmBooking) {
@@ -174,32 +178,75 @@ export function showWaitlistModal(startTime, courtId) {
     waitlistModalOverlay.classList.remove('hidden');
 }
 
+
 /**
  * Shows the modal to confirm joining an open match.
  * @param {object} matchData - Data about the match.
- * @param {string} matchData.bookingId
- * @param {number} matchData.participants
- * @param {number} matchData.maxParticipants
- * @param {string} matchData.starttime
- * @param {Array<object>} participantsList - Array of participant objects with a 'name' property.
+ * @param {Array<object>} participantsList - Array of participant objects.
  */
 export function showOpenMatchModal(matchData, participantsList) {
     const { bookingId, participants, maxParticipants, starttime } = matchData;
-    joinMatchTime.textContent = new Date(starttime).toLocaleString('es-ES');
-    joinMatchParticipants.textContent = `${participants}/${maxParticipants}`;
+
+    const date = new Date(starttime);
+    const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+    joinMatchDateEl.textContent = formattedDate;
+    joinMatchTimeEl.textContent = formattedTime;
     joinMatchConfirmBtn.dataset.bookingId = bookingId;
 
-    // 1. ARREGLADO: Lógica de renderizado de la lista de participantes
-    joinMatchParticipantsList.innerHTML = ''; // Limpiar lista anterior
-    if (participantsList && participantsList.length > 0) {
-        participantsList.forEach(p => {
-            const li = document.createElement('li');
-            li.textContent = p.name;
-            joinMatchParticipantsList.appendChild(li);
-        });
-    } else {
-        // Este mensaje solo aparece si la API devuelve una lista vacía
-        joinMatchParticipantsList.innerHTML = '<li>Sé el primero en unirte.</li>';
+    joinMatchParticipantsCountEl.innerHTML = `
+        <span class="material-icons-round" style="font-size: 1rem;">groups</span>
+        ${participants}/${maxParticipants}
+    `;
+
+    joinMatchParticipantsListEl.innerHTML = ''; // Clear previous list
+
+    // Render existing participants
+    participantsList.forEach((p, index) => {
+        const item = document.createElement('li');
+        item.className = 'participant-item';
+
+        const avatar = document.createElement('div');
+        const gradientClass = `avatar-gradient-${(index % 4) + 1}`;
+        avatar.className = `participant-avatar ${gradientClass}`;
+        avatar.textContent = getInitials(p.name);
+
+        const name = document.createElement('span');
+        name.className = 'participant-name';
+        name.textContent = p.name;
+
+        const role = document.createElement('span');
+        role.className = 'participant-role';
+        if (p.is_owner) { // Assuming an is_owner flag
+            role.textContent = 'Organizador';
+        }
+
+        item.appendChild(avatar);
+        item.appendChild(name);
+        if (p.is_owner) {
+            item.appendChild(role);
+        }
+        joinMatchParticipantsListEl.appendChild(item);
+    });
+
+    // Render placeholder for available slots
+    const availableSlots = maxParticipants - participants;
+    for (let i = 0; i < availableSlots; i++) {
+        const placeholder = document.createElement('li');
+        placeholder.className = 'participant-placeholder';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'participant-avatar';
+        avatar.innerHTML = `<span class="material-icons-round" style="font-size: 1rem;">add</span>`;
+
+        const name = document.createElement('span');
+        name.className = 'participant-name';
+        name.textContent = 'Disponible';
+
+        placeholder.appendChild(avatar);
+        placeholder.appendChild(name);
+        joinMatchParticipantsListEl.appendChild(placeholder);
     }
 
     joinMatchModalOverlay.classList.remove('hidden');

@@ -120,15 +120,43 @@
     </div>
 
     <div id="join-match-modal-overlay" class="hidden">
-        <div id="join-match-modal" class="card">
-            <h3>Unirse a Partida Abierta</h3>
-            <p>Has seleccionado una partida abierta para el <strong id="join-match-time">--:--</strong>.</p>
-            <p>Participantes actuales: <strong id="join-match-participants">--/--</strong>.</p>
-            <ul id="join-match-participants-list"></ul> <!-- New element -->
-            <p>¿Quieres unirte a esta partida?</p>
-            <div id="join-match-modal-options">
-                <button id="join-match-confirm-btn">Sí, unirme</button>
-                <button id="join-match-cancel-btn">No, gracias</button>
+        <div id="join-match-modal" class="join-match-modal-container">
+            <div class="join-match-modal-header">
+                <h2 class="join-match-modal-title">
+                    <span class="material-icons-round">manage_search</span>
+                    Unirse a Partida Abierta
+                </h2>
+                <button id="join-match-close-btn-top" class="my-match-modal-close-button-top">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="join-match-modal-content">
+                <div class="join-match-modal-time-banner">
+                    <span class="material-icons-round">calendar_today</span>
+                    <p>Has seleccionado una partida abierta para el <strong id="join-match-date">--/--/--</strong>, a las <strong id="join-match-time">--:--</strong>.</p>
+                </div>
+                <div class="join-match-modal-participants-section">
+                    <div class="join-match-modal-participants-header">
+                        <h3>PARTICIPANTES ACTUALES</h3>
+                        <span id="join-match-participants-count" class="participants-count-chip">
+                            <span class="material-icons-round">groups</span>
+                            1/4
+                        </span>
+                    </div>
+                    <ul id="join-match-participants-list" class="join-match-modal-participants-list">
+                    </ul>
+                </div>
+                <div class="join-match-modal-confirmation-section">
+                    <h3>¿Quieres unirte a esta partida?</h3>
+                    <p>Se enviará una notificación al organizador.</p>
+                </div>
+            </div>
+            <div class="join-match-modal-footer">
+                <button id="join-match-cancel-btn" class="modal-button-cancel">No, gracias</button>
+                <button id="join-match-confirm-btn" class="modal-button-confirm">
+                    <span class="material-icons-round">check_circle</span>
+                    Sí, unirme
+                </button>
             </div>
         </div>
     </div>
