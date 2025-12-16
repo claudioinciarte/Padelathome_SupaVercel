@@ -13,12 +13,16 @@ const waitlistModalOverlay = document.getElementById('waitlist-modal-overlay');
 const waitlistJoinBtn = document.getElementById('waitlist-join-btn');
 const waitlistCancelBtn = document.getElementById('waitlist-cancel-btn');
 
+// Join Match Modal Elements
 const joinMatchModalOverlay = document.getElementById('join-match-modal-overlay');
-const joinMatchTime = document.getElementById('join-match-time');
-const joinMatchParticipants = document.getElementById('join-match-participants');
-const joinMatchParticipantsList = document.getElementById('join-match-participants-list');
+const joinMatchDateEl = document.getElementById('join-match-date');
+const joinMatchTimeEl = document.getElementById('join-match-time');
+const joinMatchParticipantsCountEl = document.getElementById('join-match-participants-count');
+const joinMatchParticipantsListEl = document.getElementById('join-match-participants-list');
 const joinMatchConfirmBtn = document.getElementById('join-match-confirm-btn');
 const joinMatchCancelBtn = document.getElementById('join-match-cancel-btn');
+const joinMatchCloseBtnTop = document.getElementById('join-match-close-btn-top');
+
 
 const myBookingModalOverlay = document.getElementById('my-booking-modal-overlay');
 const myBookingModalTime = document.getElementById('my-booking-modal-time');
@@ -31,6 +35,7 @@ const myMatchParticipantsList = document.getElementById('my-match-participants-l
 const myMatchCancelMatchBtn = document.getElementById('my-match-cancel-match-btn');
 const myMatchLeaveBtn = document.getElementById('my-match-leave-btn');
 const myMatchCloseBtn = document.getElementById('my-match-close-btn');
+const myMatchCloseBtnTop = document.getElementById('my-match-close-btn-top');
 
 /**
  * Hides all modals.
@@ -62,7 +67,7 @@ export function initModals(handlers) {
         });
     });
 
-    [bookingModalCancelBtn, waitlistCancelBtn, joinMatchCancelBtn, myBookingCloseBtn, myMatchCloseBtn].forEach(btn => btn.addEventListener('click', hideAllModals));
+    [bookingModalCancelBtn, waitlistCancelBtn, joinMatchCancelBtn, joinMatchCloseBtnTop, myBookingCloseBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => btn.addEventListener('click', hideAllModals));
 
     // Action listeners
     if (handlers.onConfirmBooking) {
@@ -173,32 +178,75 @@ export function showWaitlistModal(startTime, courtId) {
     waitlistModalOverlay.classList.remove('hidden');
 }
 
+
 /**
  * Shows the modal to confirm joining an open match.
  * @param {object} matchData - Data about the match.
- * @param {string} matchData.bookingId
- * @param {number} matchData.participants
- * @param {number} matchData.maxParticipants
- * @param {string} matchData.starttime
- * @param {Array<object>} participantsList - Array of participant objects with a 'name' property.
+ * @param {Array<object>} participantsList - Array of participant objects.
  */
 export function showOpenMatchModal(matchData, participantsList) {
     const { bookingId, participants, maxParticipants, starttime } = matchData;
-    joinMatchTime.textContent = new Date(starttime).toLocaleString('es-ES');
-    joinMatchParticipants.textContent = `${participants}/${maxParticipants}`;
+
+    const date = new Date(starttime);
+    const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+    joinMatchDateEl.textContent = formattedDate;
+    joinMatchTimeEl.textContent = formattedTime;
     joinMatchConfirmBtn.dataset.bookingId = bookingId;
 
-    // 1. ARREGLADO: Lógica de renderizado de la lista de participantes
-    joinMatchParticipantsList.innerHTML = ''; // Limpiar lista anterior
-    if (participantsList && participantsList.length > 0) {
-        participantsList.forEach(p => {
-            const li = document.createElement('li');
-            li.textContent = p.name;
-            joinMatchParticipantsList.appendChild(li);
-        });
-    } else {
-        // Este mensaje solo aparece si la API devuelve una lista vacía
-        joinMatchParticipantsList.innerHTML = '<li>Sé el primero en unirte.</li>';
+    joinMatchParticipantsCountEl.innerHTML = `
+        <span class="material-icons-round" style="font-size: 1rem;">groups</span>
+        ${participants}/${maxParticipants}
+    `;
+
+    joinMatchParticipantsListEl.innerHTML = ''; // Clear previous list
+
+    // Render existing participants
+    participantsList.forEach((p, index) => {
+        const item = document.createElement('li');
+        item.className = 'participant-item';
+
+        const avatar = document.createElement('div');
+        const gradientClass = `avatar-gradient-${(index % 4) + 1}`;
+        avatar.className = `participant-avatar ${gradientClass}`;
+        avatar.textContent = getInitials(p.name);
+
+        const name = document.createElement('span');
+        name.className = 'participant-name';
+        name.textContent = p.name;
+
+        const role = document.createElement('span');
+        role.className = 'participant-role';
+        if (p.is_owner) { // Assuming an is_owner flag
+            role.textContent = 'Organizador';
+        }
+
+        item.appendChild(avatar);
+        item.appendChild(name);
+        if (p.is_owner) {
+            item.appendChild(role);
+        }
+        joinMatchParticipantsListEl.appendChild(item);
+    });
+
+    // Render placeholder for available slots
+    const availableSlots = maxParticipants - participants;
+    for (let i = 0; i < availableSlots; i++) {
+        const placeholder = document.createElement('li');
+        placeholder.className = 'participant-placeholder';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'participant-avatar';
+        avatar.innerHTML = `<span class="material-icons-round" style="font-size: 1rem;">add</span>`;
+
+        const name = document.createElement('span');
+        name.className = 'participant-name';
+        name.textContent = 'Disponible';
+
+        placeholder.appendChild(avatar);
+        placeholder.appendChild(name);
+        joinMatchParticipantsListEl.appendChild(placeholder);
     }
 
     joinMatchModalOverlay.classList.remove('hidden');
@@ -219,58 +267,62 @@ export function showMyBookingModal(bookingId, startTime) {
 
 
 /**
- * Muestra el modal para gestionar una partida en la que el usuario participa.
- * @param {object} matchData - Datos de la partida.
- * @param {Array<object>} participantsList - Array de participantes.
+ * Generates initials from a user's name.
+ * @param {string} name - The full name.
+ * @returns {string} - The initials (e.g., "JL").
+ */
+function getInitials(name) {
+    if (!name) return '';
+    const nameParts = name.trim().split(' ');
+    if (nameParts.length > 1) {
+        return nameParts[0].charAt(0).toUpperCase() + nameParts[nameParts.length - 1].charAt(0).toUpperCase();
+    } else if (nameParts.length === 1 && nameParts[0].length > 1) {
+        return nameParts[0].substring(0, 2).toUpperCase();
+    }
+    return name.charAt(0).toUpperCase();
+}
+
+/**
+ * Shows the modal for managing a match the user is part of.
+ * @param {object} matchData - Data about the match.
+ * @param {Array<object>} participantsList - Array of participant objects.
  */
 export function showMyMatchModal(matchData, participantsList) {
     const { bookingId, startTime, isOwner } = matchData;
-    myMatchModalTime.textContent = new Date(startTime).toLocaleString('es-ES');
     
-    // 2. ARREGLADO: Asignar bookingId y alternar visibilidad de botones
+    const date = new Date(startTime);
+    const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    myMatchModalTime.innerHTML = `${formattedDate} <span class="date-separator">|</span> ${formattedTime}`;
+
     myMatchCancelMatchBtn.classList.toggle('hidden', !isOwner);
     myMatchLeaveBtn.classList.toggle('hidden', isOwner);
     myMatchCancelMatchBtn.dataset.bookingId = bookingId;
     myMatchLeaveBtn.dataset.bookingId = bookingId;
-    
-    myMatchParticipantsList.innerHTML = ''; // Limpiar
-    if (participantsList && participantsList.length > 0) {
-        participantsList.forEach(p => {
-            const li = document.createElement('li');
-            li.textContent = p.name;
-            myMatchParticipantsList.appendChild(li);
-        });
-    } else {
-         myMatchParticipantsList.innerHTML = '<li>No se pudieron cargar los participantes.</li>';
-    }
-    
-    myMatchModalOverlay.classList.remove('hidden');
-}
 
-/**
- * Shows the modal for a participant of an open match, allowing them to leave.
- * @param {object} matchData - Data about the match.
- * @param {Array<object>} participantsList - Array of participant objects with a 'name' property.
- */
-export function showParticipantMatchModal(matchData, participantsList) {
-    const { bookingId, startTime } = matchData;
-    myMatchModalTime.textContent = new Date(startTime).toLocaleString('es-ES');
-    
-    myMatchCancelMatchBtn.classList.add('hidden');
-    myMatchLeaveBtn.classList.remove('hidden');
-    myMatchLeaveBtn.dataset.bookingId = bookingId;
-    
-    myMatchParticipantsList.innerHTML = ''; // Clear previous list
+    myMatchParticipantsList.innerHTML = '';
     if (participantsList && participantsList.length > 0) {
-        participantsList.forEach(p => {
-            const li = document.createElement('li');
-            li.textContent = p.name;
-            myMatchParticipantsList.appendChild(li);
+        participantsList.forEach((p, index) => {
+            const item = document.createElement('div');
+            item.className = 'participant-item';
+
+            const avatar = document.createElement('div');
+            const gradientClass = `avatar-gradient-${(index % 4) + 1}`;
+            avatar.className = `participant-avatar ${gradientClass}`;
+            avatar.textContent = getInitials(p.name);
+
+            const name = document.createElement('span');
+            name.className = 'participant-name';
+            name.textContent = p.name;
+
+            item.appendChild(avatar);
+            item.appendChild(name);
+            myMatchParticipantsList.appendChild(item);
         });
     } else {
-        myMatchParticipantsList.innerHTML = '<li>No se pudieron cargar los participantes.</li>';
+        myMatchParticipantsList.innerHTML = '<p>No se pudieron cargar los participantes.</p>';
     }
-    
+
     myMatchModalOverlay.classList.remove('hidden');
 }
 

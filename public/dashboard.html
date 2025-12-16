@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/style.css">
     <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -119,15 +120,43 @@
     </div>
 
     <div id="join-match-modal-overlay" class="hidden">
-        <div id="join-match-modal" class="card">
-            <h3>Unirse a Partida Abierta</h3>
-            <p>Has seleccionado una partida abierta para el <strong id="join-match-time">--:--</strong>.</p>
-            <p>Participantes actuales: <strong id="join-match-participants">--/--</strong>.</p>
-            <ul id="join-match-participants-list"></ul> <!-- New element -->
-            <p>¿Quieres unirte a esta partida?</p>
-            <div id="join-match-modal-options">
-                <button id="join-match-confirm-btn">Sí, unirme</button>
-                <button id="join-match-cancel-btn">No, gracias</button>
+        <div id="join-match-modal" class="join-match-modal-container">
+            <div class="join-match-modal-header">
+                <h2 class="join-match-modal-title">
+                    <span class="material-icons-round">manage_search</span>
+                    Unirse a Partida Abierta
+                </h2>
+                <button id="join-match-close-btn-top" class="my-match-modal-close-button-top">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="join-match-modal-content">
+                <div class="join-match-modal-time-banner">
+                    <span class="material-icons-round">calendar_today</span>
+                    <p>Has seleccionado una partida abierta para el <strong id="join-match-date">--/--/--</strong>, a las <strong id="join-match-time">--:--</strong>.</p>
+                </div>
+                <div class="join-match-modal-participants-section">
+                    <div class="join-match-modal-participants-header">
+                        <h3>PARTICIPANTES ACTUALES</h3>
+                        <span id="join-match-participants-count" class="participants-count-chip">
+                            <span class="material-icons-round">groups</span>
+                            1/4
+                        </span>
+                    </div>
+                    <ul id="join-match-participants-list" class="join-match-modal-participants-list">
+                    </ul>
+                </div>
+                <div class="join-match-modal-confirmation-section">
+                    <h3>¿Quieres unirte a esta partida?</h3>
+                    <p>Se enviará una notificación al organizador.</p>
+                </div>
+            </div>
+            <div class="join-match-modal-footer">
+                <button id="join-match-cancel-btn" class="modal-button-cancel">No, gracias</button>
+                <button id="join-match-confirm-btn" class="modal-button-confirm">
+                    <span class="material-icons-round">check_circle</span>
+                    Sí, unirme
+                </button>
             </div>
         </div>
     </div>
@@ -147,14 +176,53 @@
 
     <!-- Nuevo Modal para Mi Partida Abierta -->
     <div id="my-match-modal-overlay" class="hidden">
-        <div id="my-match-modal" class="card">
-            <h3>Mi Partida Abierta</h3>
-            <p>Estás inscrito en esta partida abierta para el <strong id="my-match-modal-time">--:--</strong>.</p>
-            <p>Participantes: <ul id="my-match-participants-list"></ul></p>
-            <div id="my-match-modal-options">
-                <button id="my-match-cancel-match-btn" class="hidden">Cancelar Partida Completa</button>
-                <button id="my-match-leave-btn">Abandonar Partida</button>
-                <button id="my-match-close-btn">Cerrar</button>
+        <div id="my-match-modal" class="my-match-modal-container">
+             <button id="my-match-close-btn-top" class="my-match-modal-close-button-top">
+                <span class="material-icons">close</span>
+            </button>
+            <div class="my-match-modal-header">
+                <div class="my-match-modal-header-icon-container">
+                    <span class="material-icons">sports_tennis</span>
+                </div>
+                <div>
+                    <h2 class="my-match-modal-title">Mi Partida Abierta</h2>
+                    <p class="my-match-modal-subtitle">Detalles de tu reserva</p>
+                </div>
+            </div>
+            <div class="my-match-modal-time-banner">
+                <span class="material-icons">calendar_today</span>
+                <div>
+                    <p class="my-match-modal-time-banner-text">
+                        Estás inscrito en esta partida abierta para el:
+                    </p>
+                    <p id="my-match-modal-time" class="my-match-modal-time-text">
+                        <!-- Time will be injected by JS -->
+                    </p>
+                </div>
+            </div>
+            <div class="my-match-modal-participants-section">
+                <h3 class="my-match-modal-participants-title">
+                    <span class="material-icons">group</span>
+                    Participantes Confirmados
+                </h3>
+                <div id="my-match-participants-list" class="my-match-modal-participants-list-container">
+                    <!-- Participants will be injected by JS -->
+                </div>
+            </div>
+            <div class="my-match-modal-footer">
+                <button id="my-match-close-btn" class="my-match-modal-button-close">
+                    Cerrar
+                </button>
+                <div class="my-match-modal-footer-actions">
+                    <button id="my-match-cancel-match-btn" class="my-match-modal-button-cancel-match hidden">
+                        <span class="material-icons">cancel</span>
+                        Cancelar Partida
+                    </button>
+                    <button id="my-match-leave-btn" class="my-match-modal-button-leave">
+                        <span class="material-icons">logout</span>
+                        Abandonar Partida
+                    </button>
+                </div>
             </div>
         </div>
     </div>
