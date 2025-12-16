@@ -7,6 +7,7 @@ const bookingModalTime = document.getElementById('modal-time');
 const bookingModalOptions = document.getElementById('modal-options-container');
 const openMatchCheckbox = document.getElementById('open-match-checkbox');
 const bookingModalCancelBtn = document.getElementById('modal-cancel-btn');
+const bookingModalConfirmBtn = document.getElementById('modal-confirm-btn');
 
 const waitlistModalOverlay = document.getElementById('waitlist-modal-overlay');
 const waitlistJoinBtn = document.getElementById('waitlist-join-btn');
@@ -65,10 +66,14 @@ export function initModals(handlers) {
 
     // Action listeners
     if (handlers.onConfirmBooking) {
-        bookingModalOptions.addEventListener('click', (event) => {
-            if (event.target.tagName !== 'BUTTON') return;
-            const { starttime, duration } = event.target.dataset;
-            if (!starttime || !duration) return;
+        bookingModalConfirmBtn.addEventListener('click', () => {
+            const selectedDurationButton = bookingModalOptions.querySelector('.selected');
+            if (!selectedDurationButton) {
+                console.error("No duration selected");
+                // Optionally, show a message to the user
+                return;
+            }
+            const { starttime, duration } = selectedDurationButton.dataset;
             handlers.onConfirmBooking({
                 startTime: starttime,
                 durationMinutes: parseInt(duration, 10),
@@ -110,28 +115,49 @@ export function initModals(handlers) {
     }
 }
 
-/**
- * Shows the booking confirmation modal.
- * @param {string} startTime - The start time of the slot (ISO format).
- * @param {number[]} availableDurations - Array of available durations in minutes (e.g., [60, 90]).
- */
 export function showBookingModal(startTime, availableDurations) {
-    bookingModalTitle.textContent = "Confirmar Reserva";
     openMatchCheckbox.checked = false;
-    bookingModalTime.textContent = `Has seleccionado el horario de las ${formatTime(new Date(startTime))}.`;
+    bookingModalTime.textContent = formatTime(new Date(startTime));
     bookingModalOptions.innerHTML = ''; // Clear previous options
 
-    // Show standard desktop booking options
-    document.querySelector('#booking-modal .form-group').style.display = 'block';
-    document.querySelector('#booking-modal p:nth-of-type(2)').style.display = 'block';
-
-    availableDurations.forEach(duration => {
+    availableDurations.forEach((duration, index) => {
         const button = document.createElement('button');
-        button.textContent = `${duration} min`;
+        button.className = 'duration-button';
+        if (index === 0) { // Select the first duration by default
+            button.classList.add('selected');
+        }
         button.dataset.duration = duration;
         button.dataset.starttime = startTime;
+
+        const title = document.createElement('span');
+        title.className = 'duration-button-title';
+        title.textContent = `${duration} min`;
+
+        const subtitle = document.createElement('span');
+        subtitle.className = 'duration-button-subtitle';
+        subtitle.textContent = duration === 60 ? 'Estándar' : 'Extendido';
+
+        const checkIcon = document.createElement('span');
+        checkIcon.className = 'material-icons-round check-icon';
+        checkIcon.textContent = 'check_circle';
+
+        button.appendChild(checkIcon);
+        button.appendChild(title);
+        button.appendChild(subtitle);
+
+        button.addEventListener('click', () => {
+            // Deselect any currently selected button
+            const currentSelected = bookingModalOptions.querySelector('.selected');
+            if (currentSelected) {
+                currentSelected.classList.remove('selected');
+            }
+            // Select the new one
+            button.classList.add('selected');
+        });
+
         bookingModalOptions.appendChild(button);
     });
+
     bookingModalOverlay.classList.remove('hidden');
 }
 
@@ -248,31 +274,3 @@ export function showParticipantMatchModal(matchData, participantsList) {
     myMatchModalOverlay.classList.remove('hidden');
 }
 
-/**
- * Shows a simplified booking confirmation modal for mobile view.
- * @param {string} startTime
- * @param {string} duration
- * @param {boolean} isOpenMatch
- */
-export function showMobileConfirmationModal(startTime, duration, isOpenMatch) {
-    const openMatchText = isOpenMatch ? " (Partida Abierta)" : "";
-    bookingModalTitle.textContent = "Confirmar Reserva";
-    bookingModalTime.textContent = `¿Reservar a las ${formatTime(new Date(startTime))} por ${duration} min${openMatchText}?`;
-
-    // Hide desktop-specific elements
-    document.querySelector('#booking-modal .form-group').style.display = 'none';
-    document.querySelector('#booking-modal p:nth-of-type(2)').style.display = 'none';
-    
-    bookingModalOptions.innerHTML = ''; // Clear previous options
-    
-    const confirmBtn = document.createElement('button');
-    confirmBtn.textContent = 'Confirmar Reserva';
-    confirmBtn.dataset.starttime = startTime;
-    confirmBtn.dataset.duration = duration;
-    
-    // We need to set the global checkbox state so the handler can read it
-    openMatchCheckbox.checked = isOpenMatch;
-
-    bookingModalOptions.appendChild(confirmBtn);
-    bookingModalOverlay.classList.remove('hidden');
-}
