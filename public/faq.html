@@ -1,97 +1,388 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Padel@Home - Preguntas Frecuentes</title>
-  <link rel="stylesheet" href="/style.css">
-  <link rel="manifest" href="/manifest.json">
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Preguntas Frecuentes - Padel@Home</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563EB", // Vibrant Royal Blue typical for Padel courts
+                        "background-light": "#F3F4F6", // Gray 100
+                        "background-dark": "#111827", // Gray 900
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1F2937", // Gray 800
+                        "text-main-light": "#1F2937",
+                        "text-main-dark": "#F3F4F6",
+                        "text-muted-light": "#6B7280",
+                        "text-muted-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "0.75rem",
+                        '2xl': "1rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] summary ~ * {
+            animation: sweep .3s ease-in-out;
+        }
+        @keyframes sweep {
+            0%    {opacity: 0; transform: translateY(-10px)}
+            100%  {opacity: 1; transform: translateY(0)}
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        details[open] summary .accordion-icon {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
-<body>
+<body class="bg-background-light dark:bg-background-dark font-body antialiased transition-colors duration-300 min-h-screen flex flex-col">
+<header class="sticky top-0 z-50 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-16">
+<div class="flex items-center gap-3">
+<span class="material-icons-round text-primary text-3xl">sports_tennis</span>
+<h1 class="text-xl font-bold text-text-main-light dark:text-text-main-dark tracking-tight">
+                        Padel@Home <span class="font-normal text-text-muted-light dark:text-text-muted-dark text-base hidden sm:inline">| Centro de Ayuda</span>
+</h1>
+</div>
+<a class="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm font-medium text-text-main-light dark:text-text-main-dark hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-transparent hover:border-gray-300 dark:hover:border-gray-600" href="/dashboard.html">
+<span class="material-icons-round text-lg group-hover:-translate-x-1 transition-transform duration-200">arrow_back</span>
+                    Volver al Dashboard
+                </a>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-4xl mx-auto px-4 sm:px-6 py-10">
+<div class="text-center mb-12">
+<h2 class="text-3xl sm:text-4xl font-extrabold text-text-main-light dark:text-text-main-dark mb-4">
+                Preguntas Frecuentes (F.A.Q.)
+            </h2>
+<p class="text-lg text-text-muted-light dark:text-text-muted-dark max-w-2xl mx-auto leading-relaxed">
+                Todo lo que necesitas saber para gestionar tus reservas, entender el calendario y administrar tu cuenta en tu comunidad residencial.
+            </p>
+</div>
+<div class="space-y-4">
+<details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden" open="">
+<summary class="flex justify-between items-center p-6 cursor-pointer bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+<span class="material-icons-round text-primary">calendar_month</span>
+</div>
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">
+                            ¿Cómo usar el Calendario y entender los colores?
+                        </h3>
+</div>
+<span class="material-icons-round text-text-muted-light dark:text-text-muted-dark accordion-icon">expand_more</span>
+</summary>
+<div class="p-6 pt-2 border-t border-gray-100 dark:border-gray-700">
+<p class="text-text-muted-light dark:text-text-muted-dark mb-6 leading-relaxed">
+                        La pantalla principal muestra un calendario semanal con la disponibilidad de las pistas. Para facilitarte la vida, utilizamos un código de colores simple:
+                    </p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+<span class="w-3 h-3 mt-1.5 rounded-full bg-green-500 shadow-sm flex-shrink-0"></span>
+<div>
+<span class="block font-medium text-text-main-light dark:text-text-main-dark text-sm">Libre</span>
+<span class="text-xs text-text-muted-light dark:text-text-muted-dark">Puedes reservar este horario inmediatamente.</span>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+<span class="w-3 h-3 mt-1.5 rounded-full bg-yellow-400 shadow-sm flex-shrink-0"></span>
+<div>
+<span class="block font-medium text-text-main-light dark:text-text-main-dark text-sm">Partida Abierta</span>
+<span class="text-xs text-text-muted-light dark:text-text-muted-dark">Un usuario busca jugadores. ¡Puedes unirte!</span>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+<span class="w-3 h-3 mt-1.5 rounded-full bg-red-500 shadow-sm flex-shrink-0"></span>
+<div>
+<span class="block font-medium text-text-main-light dark:text-text-main-dark text-sm">Ocupado</span>
+<span class="text-xs text-text-muted-light dark:text-text-muted-dark">Reserva privada o partida completa. Puedes apuntarte a lista de espera.</span>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+<span class="w-3 h-3 mt-1.5 rounded-full bg-gray-400 shadow-sm flex-shrink-0"></span>
+<div>
+<span class="block font-medium text-text-main-light dark:text-text-main-dark text-sm">No disponible</span>
+<span class="text-xs text-text-muted-light dark:text-text-muted-dark">Horario pasado o bloqueado por administración.</span>
+</div>
+</div>
+</div>
+</div>
+</details>
+<details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+<summary class="flex justify-between items-center p-6 cursor-pointer bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+<span class="material-icons-round text-purple-600 dark:text-purple-400">manage_accounts</span>
+</div>
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">
+                            Gestión de Cuenta y Acceso
+                        </h3>
+</div>
+<span class="material-icons-round text-text-muted-light dark:text-text-muted-dark accordion-icon">expand_more</span>
+</summary>
+<div class="p-6 pt-2 border-t border-gray-100 dark:border-gray-700 space-y-4">
+<div class="flex gap-4">
+<span class="material-icons-round text-gray-400 mt-1">login</span>
+<div>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Primer Inicio de Sesión</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">
+                                Si tu cuenta fue creada por un administrador, revisa tu correo electrónico. Recibirás un enlace único (temporal) para establecer tu contraseña personal.
+                            </p>
+</div>
+</div>
+<div class="flex gap-4">
+<span class="material-icons-round text-gray-400 mt-1">lock_reset</span>
+<div>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Restablecer Contraseña</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">
+                                ¿Olvidaste tu clave? Usa la opción <strong>"Restablecer Contraseña"</strong> en la pantalla de login. También puedes cambiarla en cualquier momento desde la sección <strong>"Mi Perfil"</strong>.
+                            </p>
+</div>
+</div>
+</div>
+</details>
+<details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+<summary class="flex justify-between items-center p-6 cursor-pointer bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
+<span class="material-icons-round text-green-600 dark:text-green-400">sports_score</span>
+</div>
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">
+                            Paso a paso: ¿Cómo reservar una pista?
+                        </h3>
+</div>
+<span class="material-icons-round text-text-muted-light dark:text-text-muted-dark accordion-icon">expand_more</span>
+</summary>
+<div class="p-6 pt-2 border-t border-gray-100 dark:border-gray-700">
+<ol class="relative border-l border-gray-200 dark:border-gray-700 ml-3 space-y-6 mt-2">
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-green-600 dark:text-green-400 font-bold text-sm">1</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Selecciona un horario</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Haz clic en cualquier slot de color <strong>Libre</strong> (Verde) en el calendario.</p>
+</li>
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-green-600 dark:text-green-400 font-bold text-sm">2</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Configura la reserva</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">En la ventana emergente, elige la duración (60 o 90 min) si ambas están disponibles.</p>
+</li>
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-green-600 dark:text-green-400 font-bold text-sm">3</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Tipo de partida</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Opcionalmente, marca <em>"Abrir partida para que otros se unan"</em> si buscas compañeros de juego.</p>
+</li>
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-green-600 dark:text-green-400 font-bold text-sm">4</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Confirmación</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Recibirás un correo electrónico con los detalles y un archivo .ics para tu calendario personal.</p>
+</li>
+</ol>
+</div>
+</details>
+<details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-orange-200 dark:border-orange-900/50 overflow-hidden">
+<summary class="flex justify-between items-center p-6 cursor-pointer bg-white dark:bg-surface-dark hover:bg-orange-50 dark:hover:bg-orange-900/10 transition-colors">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+<span class="material-icons-round text-orange-600 dark:text-orange-400">warning_amber</span>
+</div>
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">
+                            Reglas Importantes
+                        </h3>
+</div>
+<span class="material-icons-round text-text-muted-light dark:text-text-muted-dark accordion-icon">expand_more</span>
+</summary>
+<div class="p-6 pt-2 border-t border-gray-100 dark:border-gray-700">
+<ul class="space-y-3">
+<li class="flex items-start gap-3">
+<span class="material-icons-round text-orange-500 text-sm mt-1">fiber_manual_record</span>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm">
+<strong class="text-text-main-light dark:text-text-main-dark">Límite de Reservas Activas:</strong>
+                                Solo puedes tener una reserva activa a la vez. Esto no aplica si te unes a partidas abiertas creadas por otros usuarios, en cuyo caso puedes tener múltiples participaciones.
+                            </p>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-icons-round text-orange-500 text-sm mt-1">fiber_manual_record</span>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm">
+<strong class="text-text-main-light dark:text-text-main-dark">Cancelaciones:</strong>
+                                Debes cancelar con al menos 24 horas de antelación para evitar penalizaciones en el sistema de reservas.
+                            </p>
+</li>
+</ul>
+</div>
+</details>
+<details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+<summary class="flex justify-between items-center p-6 cursor-pointer bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-red-50 dark:bg-red-900/30 rounded-lg">
+<span class="material-icons-round text-red-600 dark:text-red-400">cancel</span>
+</div>
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">
+                            ¿Cómo cancelar una reserva o abandonar una partida?
+                        </h3>
+</div>
+<span class="material-icons-round text-text-muted-light dark:text-text-muted-dark accordion-icon">expand_more</span>
+</summary>
+<div class="p-6 pt-2 border-t border-gray-100 dark:border-gray-700">
+<ul class="space-y-3">
+<li class="flex items-start gap-3">
+<span class="material-icons-round text-gray-400 mt-1">no_meeting_room</span>
+<div>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Cancelar una Reserva Privada</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">
+                                Si eres el creador de una reserva privada, ve a la sección "Mi Próxima Reserva" en el dashboard y haz clic en "Cancelar Reserva".
+                            </p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-icons-round text-gray-400 mt-1">directions_run</span>
+<div>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Abandonar una Partida Abierta</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">
+                                Si te has unido a una partida abierta o la has creado, en la sección "Mi Próxima Reserva", haz clic en "Abandonar Partida".
+                            </p>
+</div>
+</li>
+</ul>
+</div>
+</details>
+<details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+<summary class="flex justify-between items-center p-6 cursor-pointer bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+<span class="material-icons-round text-yellow-600 dark:text-yellow-400">groups</span>
+</div>
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">
+                            ¿Cómo funcionan las Partidas Abiertas?
+                        </h3>
+</div>
+<span class="material-icons-round text-text-muted-light dark:text-text-muted-dark accordion-icon">expand_more</span>
+</summary>
+<div class="p-6 pt-2 border-t border-gray-100 dark:border-gray-700">
+<ol class="relative border-l border-gray-200 dark:border-gray-700 ml-3 space-y-6 mt-2">
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-yellow-600 dark:text-yellow-400 font-bold text-sm">1</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Crear una Partida Abierta</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Al reservar un slot, marca la opción "Abrir partida para que otros se unan". Tú serás el primer participante.</p>
+</li>
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-yellow-600 dark:text-yellow-400 font-bold text-sm">2</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Unirse a una Partida Abierta</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">En el calendario, haz clic en un slot de color <strong>Partida Abierta</strong> (Amarillo). Verás cuántos jugadores hay y podrás unirte si hay plazas disponibles.</p>
+</li>
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-yellow-600 dark:text-yellow-400 font-bold text-sm">3</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Cambio de Organizador</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Si el creador original de una partida abierta la abandona, el segundo jugador en unirse se convertirá automáticamente en el nuevo organizador.</p>
+</li>
+</ol>
+</div>
+</details>
+<details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+<summary class="flex justify-between items-center p-6 cursor-pointer bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+<span class="material-icons-round text-indigo-600 dark:text-indigo-400">hourglass_top</span>
+</div>
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">
+                            ¿Qué es la Lista de Espera?
+                        </h3>
+</div>
+<span class="material-icons-round text-text-muted-light dark:text-text-muted-dark accordion-icon">expand_more</span>
+</summary>
+<div class="p-6 pt-2 border-t border-gray-100 dark:border-gray-700">
+<p class="text-text-muted-light dark:text-text-muted-dark mb-6 leading-relaxed">
+                        Si un horario está <strong>Ocupado</strong> por una reserva privada, puedes apuntarte a la lista de espera:
+                    </p>
+<ol class="relative border-l border-gray-200 dark:border-gray-700 ml-3 space-y-6 mt-2">
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-indigo-100 dark:bg-indigo-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-indigo-600 dark:text-indigo-400 font-bold text-sm">1</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Apúntate</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Haz clic en el slot ocupado y selecciona "Sí, agregarme a la lista".</p>
+</li>
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-indigo-100 dark:bg-indigo-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-indigo-600 dark:text-indigo-400 font-bold text-sm">2</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Recibe la notificación</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Si la reserva se cancela, el primer usuario en la lista de espera recibirá una notificación por correo electrónico.</p>
+</li>
+<li class="mb-2 ml-6">
+<span class="absolute flex items-center justify-center w-8 h-8 bg-indigo-100 dark:bg-indigo-900 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800">
+<span class="text-indigo-600 dark:text-indigo-400 font-bold text-sm">3</span>
+</span>
+<h4 class="font-medium text-text-main-light dark:text-text-main-dark">Confirma tu reserva</h4>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Tendrás un tiempo limitado (30 o 60 minutos) para confirmar la reserva a través de un enlace en el correo. Si no confirmas a tiempo, tu turno expirará y se notificará al siguiente en la lista.</p>
+</li>
+</ol>
+</div>
+</details>
+</div>
+<div class="mt-12 text-center py-8 border-t border-gray-200 dark:border-gray-700">
+<h4 class="text-text-main-light dark:text-text-main-dark font-medium mb-2">¿No encuentras lo que buscas?</h4>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm mb-4">Contacta con el administrador de tu comunidad.</p>
+<a class="inline-flex items-center gap-2 text-primary hover:text-blue-700 dark:hover:text-blue-400 font-semibold transition-colors" href="mailto:soporte@padelhome.com">
+<span class="material-icons-round text-sm">mail_outline</span>
+                Enviar un correo
+            </a>
+</div>
+</main>
+<footer class="bg-white dark:bg-surface-dark py-6 border-t border-gray-200 dark:border-gray-700 mt-auto">
+<div class="max-w-5xl mx-auto px-4 text-center">
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark">
+                © 2023 Padel@Home. Todos los derechos reservados.
+            </p>
+</div>
+</footer>
+<script>
+        // Check local storage or system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 
-  <div class="container">
-    <header class="main-header">
-      <h1>Preguntas Frecuentes (F.A.Q)</h1>
-      <div class="header-buttons">
-        <button id="dashboard-btn">Volver al Dashboard</button>
-      </div>
-    </header>
-
-    <section class="card">
-      <h2>¿Cómo usar Padel@Home?</h2>
-      <p>Padel@Home es una aplicación diseñada para facilitar la reserva de pistas de pádel en tu comunidad. Aquí te explicamos cómo sacarle el máximo partido:</p>
-      <ul>
-        <li><strong>Visualización del Calendario:</strong> La pantalla principal muestra un calendario semanal con la disponibilidad de las pistas. Los colores indican el estado:
-          <ul>
-            <li><span class="color-box available"></span> <strong>Libre:</strong> Puedes reservar este horario.</li>
-            <li><span class="color-box open-match"></span> <strong>Partida Abierta:</strong> Un usuario ha reservado y busca jugadores. Puedes unirte.</li>
-            <li><span class="color-box booked"></span> <strong>Ocupado:</strong> Reserva privada o partida abierta completa. Puedes apuntarte a la lista de espera.</li>
-            <li><span class="color-box blocked"></span> <strong>No disponible:</strong> Horario que ya ha pasado o ha sido bloqueado por un administrador. No se puede reservar.</li>
-          </ul>
-        </li>
-        <li><strong>Mi Perfil:</strong> Accede a "Mi Perfil" para actualizar tus datos personales o cambiar tu contraseña.</li>
-
-    <section class="card">
-      <h2>Gestión de Cuenta</h2>
-      <ul>
-        <li><strong>Primer Inicio de Sesión y Contraseña:</strong> Si tu cuenta ha sido creada por un administrador, recibirás un correo electrónico con un enlace único y de tiempo limitado. Haz clic en este enlace para establecer tu contraseña personal y acceder a la aplicación por primera vez.</li>
-        <li><strong>Inicio de Sesión:</strong> Accede a la aplicación utilizando tu dirección de correo electrónico y la contraseña que hayas establecido.</li>
-        <li><strong>Restablecer Contraseña:</strong> Si olvidas tu contraseña, puedes usar la opción de "Restablecer Contraseña" en la pantalla de inicio de sesión.</li>
-        <li><strong>Mi Perfil:</strong> Una vez dentro, puedes acceder a "Mi Perfil" para actualizar tus datos personales o cambiar tu contraseña en cualquier momento.</li>
-      </ul>
-    </section>
-
-    <section class="card">
-      <h2>¿Cómo reservar una pista?</h2>
-      <ol>
-        <li>En el calendario, haz clic en un slot de color <span class="color-box available"></span> <strong>Libre</strong>.</li>
-        <li>Aparecerá una ventana emergente donde podrás elegir la duración de tu reserva (60 o 90 minutos, si están disponibles).</li>
-        <li>Opcionalmente, puedes marcar la casilla "Abrir partida para que otros se unan" si quieres que otros jugadores se unan a tu reserva.</li>
-                    <li>Confirma tu reserva. Recibirás un correo electrónico con los detalles y un archivo .ics para añadirlo a tu calendario personal.</li>
-                    <li><strong>Reglas Importantes:</strong>
-                      <ul>
-                        <li>Solo puedes tener una reserva activa a la vez (esto no aplica si te unes a partidas abiertas de otros usuarios).</li>
-                        <li>Existe un límite de días de antelación para reservar, configurable por el administrador de tu comunidad.</li>
-                      </ul>
-                    </li>      </ol>
-    </section>
-
-    <section class="card">
-      <h2>¿Cómo cancelar una reserva o abandonar una partida?</h2>
-      <ul>
-        <li><strong>Cancelar una Reserva Privada:</strong> Si eres el creador de una reserva privada, ve a la sección "Mi Próxima Reserva" en el dashboard y haz clic en "Cancelar Reserva".</li>
-        <li><strong>Abandonar una Partida Abierta:</strong> Si te has unido a una partida abierta o la has creado, en la sección "Mi Próxima Reserva", haz clic en "Abandonar Partida".</li>
-        <li><strong>Reglas de Cancelación de Partidas Abiertas:</strong>
-          <ul>
-            <li>Si una partida abierta no está llena (menos de 4 jugadores) 6 horas antes de su inicio, se cancelará automáticamente y se notificará a todos los apuntados.</li>
-            <li>Si un jugador abandona una partida a menos de 6 horas de su inicio, la partida NO se cancela. Su plaza se libera para que otro jugador pueda unirse.</li>
-          </ul>
-        </li>
-      </ul>
-    </section>
-
-    <section class="card">
-      <h2>¿Cómo funcionan las Partidas Abiertas?</h2>
-      <p>Las Partidas Abiertas son una excelente forma de encontrar compañeros de juego:</p>
-      <ol>
-        <li><strong>Crear una Partida Abierta:</strong> Al reservar un slot, marca la opción "Abrir partida para que otros se unan". Tú serás el primer participante.</li>
-        <li><strong>Unirse a una Partida Abierta:</strong> En el calendario, haz clic en un slot de color <span class="color-box open-match"></span> <strong>Partida Abierta</strong>. Verás cuántos jugadores hay y podrás unirte si hay plazas disponibles.</li>
-        <li><strong>Cambio de Organizador:</strong> Si el creador original de una partida abierta la abandona, el segundo jugador en unirse se convertirá automáticamente en el nuevo organizador.</li>
-      </ol>
-    </section>
-
-    <section class="card">
-      <h2>¿Qué es la Lista de Espera?</h2>
-      <p>Si un horario está <span class="color-box booked"></span> <strong>Ocupado</strong> por una reserva privada, puedes apuntarte a la lista de espera:</p>
-      <ol>
-        <li>Haz clic en el slot ocupado y selecciona "Sí, agregarme a la lista".</li>
-        <li>Si la reserva se cancela, el primer usuario en la lista de espera recibirá una notificación por correo electrónico.</li>
-        <li>Tendrás un tiempo limitado (30 o 60 minutos) para confirmar la reserva a través de un enlace en el correo. Si no confirmas a tiempo, tu turno expirará y se notificará al siguiente en la lista.</li>
-      </ol>
-    </section>
-  </div>
-
-  <script src="faq.js"></script>
-  <script src="main.js"></script>
-</body>
-</html>
+</body></html>
