@@ -6,6 +6,7 @@
     <title>Padel@Home - Dashboard</title>
     <link rel="stylesheet" href="/style.css">
     <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -51,18 +52,57 @@
     </div>
 
     <div id="modal-overlay" class="hidden">
-        <div id="booking-modal" class="card">
-            <h3 id="modal-title">Confirmar Reserva</h3>
-            <p>Has seleccionado el horario de las <strong id="modal-time">--:--</strong>.</p>
-            <div class="form-group open-match-toggle">
-                <input type="checkbox" id="open-match-checkbox">
-                <label for="open-match-checkbox">Abrir partida (4 jugadores)</label>
-            </div>
-            <p>Por favor, elige la duración:</p>
-            <div id="modal-options-container">
+        <div id="booking-modal" class="booking-modal-container">
+            <div class="booking-modal-header-bar"></div>
+            <div class="booking-modal-padding">
+                <div class="booking-modal-header">
+                    <div>
+                        <h2 id="modal-title" class="booking-modal-title-text">
+                            Confirmar Reserva
+                        </h2>
+                        <p class="booking-modal-subtitle">
+                            Revisa los detalles antes de finalizar.
+                        </p>
+                    </div>
+                    <div class="booking-modal-header-icon-container">
+                        <span class="material-icons-round">sports_tennis</span>
+                    </div>
                 </div>
-            <hr>
-            <button id="modal-cancel-btn">Cancelar</button>
+                <div class="booking-modal-time-banner">
+                    <span class="material-icons-round">schedule</span>
+                    <p>Has seleccionado el horario de las <strong id="modal-time">--:--</strong>.</p>
+                </div>
+                <div class="booking-modal-open-match-section">
+                    <label for="open-match-checkbox" class="open-match-label">
+                        <div class="open-match-checkbox-wrapper">
+                            <input id="open-match-checkbox" name="open-match" type="checkbox"/>
+                        </div>
+                        <div class="open-match-text-wrapper">
+                            <span class="open-match-title">Abrir partida</span>
+                            <span id="open-match-description" class="open-match-description">Permitir que otros se unan (4 jugadores)</span>
+                        </div>
+                        <span class="material-icons-round open-match-icon">groups</span>
+                    </label>
+                </div>
+                <div class="booking-modal-duration-section">
+                    <label class="duration-label">
+                        Por favor, elige la duración:
+                    </label>
+                    <div id="modal-options-container" class="duration-options-grid">
+                        <!-- Duration buttons will be injected by JS -->
+                    </div>
+                </div>
+                <hr class="booking-modal-divider"/>
+                <div class="booking-modal-footer">
+                    <button id="modal-cancel-btn" class="modal-button-cancel" type="button">
+                        Cancelar
+                    </button>
+                    <button id="modal-confirm-btn" class="modal-button-confirm" type="button">
+                        <span>Confirmar</span>
+                        <span class="material-icons-round">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
   

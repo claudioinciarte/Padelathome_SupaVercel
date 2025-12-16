@@ -393,3 +393,261 @@ tr:nth-child(even) { background-color: #f8f9fa; }
 .notification-success { border-color: var(--success-color); }
 .notification-error { border-color: var(--danger-color); }
 .notification-info { border-color: var(--primary-color); }
+
+/* --- New Modal Styles --- */
+
+/* Color variables from the new design */
+:root {
+    --pah-primary: #2563eb;
+    --pah-primary-dark: #1d4ed8;
+    --pah-surface: #ffffff;
+    --pah-background: #f8fafc;
+    --pah-border: #e2e8f0;
+    --pah-text-primary: #1e293b;
+    --pah-text-secondary: #64748b;
+    --pah-blue-light-bg: #eff6ff;
+}
+
+/* Override the modal overlay to match the design */
+#modal-overlay {
+    background-color: rgba(9, 24, 51, 0.4); /* Equivalent to slate-900/40 */
+    backdrop-filter: blur(4px);
+}
+
+.booking-modal-container {
+    max-width: 448px; /* max-w-md */
+    width: 100%;
+    margin: 1.5rem;
+    background-color: var(--pah-surface);
+    border-radius: 1.5rem; /* rounded-2xl */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+    overflow: hidden;
+    border: 1px solid var(--pah-border);
+    transform: scale(1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.booking-modal-header-bar {
+    height: 0.5rem; /* h-2 */
+    width: 100%;
+    background-image: linear-gradient(to right, #60a5fa, var(--pah-primary));
+}
+
+.booking-modal-padding {
+    padding: 2rem; /* p-8 */
+}
+
+.booking-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+.booking-modal-title-text {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 700;
+    color: var(--pah-text-primary);
+    letter-spacing: -0.025em; /* tracking-tight */
+    margin: 0;
+}
+
+.booking-modal-subtitle {
+    font-size: 0.875rem; /* text-sm */
+    color: var(--pah-text-secondary);
+    margin-top: 0.25rem; /* mt-1 */
+    margin-bottom: 0;
+}
+
+.booking-modal-header-icon-container {
+    flex-shrink: 0;
+    background-color: var(--pah-blue-light-bg);
+    padding: 0.5rem; /* p-2 */
+    border-radius: 0.5rem; /* rounded-lg */
+    color: var(--pah-primary);
+}
+
+.booking-modal-header-icon-container .material-icons-round {
+    font-size: 2rem; /* text-3xl approx */
+    display: block; /* Fixes alignment issues */
+}
+
+.booking-modal-time-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* gap-3 */
+    background-color: var(--pah-background);
+    border: 1px solid var(--pah-border);
+    padding: 1rem; /* p-4 */
+    border-radius: 0.75rem; /* rounded-xl */
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+.booking-modal-time-banner p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--pah-text-primary);
+}
+.booking-modal-time-banner .material-icons-round {
+    color: var(--pah-primary);
+}
+
+.open-match-label {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem; /* p-4 */
+    border-radius: 0.75rem; /* rounded-xl */
+    border: 1px solid var(--pah-border);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.open-match-label:hover {
+    background-color: var(--pah-background);
+}
+.open-match-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    height: 1.25rem; /* h-5 */
+}
+#open-match-checkbox {
+    height: 1.25rem; /* h-5 */
+    width: 1.25rem; /* w-5 */
+    accent-color: var(--pah-primary); /* Replaces custom styling for simplicity */
+}
+.open-match-text-wrapper {
+    margin-left: 0.75rem; /* ml-3 */
+}
+.open-match-title {
+    font-weight: 600;
+    color: var(--pah-text-primary);
+}
+.open-match-description {
+    display: block;
+    font-size: 0.75rem; /* text-xs */
+    color: var(--pah-text-secondary);
+    margin-top: 2px;
+}
+.open-match-icon {
+    position: absolute;
+    right: 1rem; /* right-4 */
+    top: 1rem; /* top-4 */
+    color: #94a3b8; /* slate-400 */
+}
+.open-match-label:hover .open-match-icon {
+    color: var(--pah-primary);
+}
+
+.booking-modal-duration-section {
+    margin-top: 1.5rem; /* Equivalent to mb-6 on the element above */
+    margin-bottom: 2rem; /* mb-8 */
+}
+.duration-label {
+    display: block;
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500;
+    color: var(--pah-text-primary);
+    margin-bottom: 0.75rem; /* mb-3 */
+}
+.duration-options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem; /* gap-4 */
+}
+.duration-button {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem; /* p-3 horizontal padding increased */
+    border-radius: 0.75rem; /* rounded-xl */
+    border: 1px solid var(--pah-border);
+    background-color: var(--pah-surface);
+    color: var(--pah-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.duration-button:hover {
+    border-color: #cbd5e1; /* slate-300 */
+    background-color: var(--pah-background);
+}
+.duration-button.selected {
+    border-width: 2px;
+    border-color: var(--pah-primary);
+    background-color: var(--pah-blue-light-bg);
+    color: var(--pah-primary);
+}
+.duration-button .check-icon {
+    position: absolute;
+    top: 0.5rem; /* top-2 */
+    right: 0.5rem; /* right-2 */
+    display: none;
+    font-size: 1rem; /* text-base */
+}
+.duration-button.selected .check-icon {
+    display: block;
+}
+.duration-button-title {
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 700;
+}
+.duration-button-subtitle {
+    font-size: 0.75rem; /* text-xs */
+    opacity: 0.8;
+}
+
+.booking-modal-divider {
+    border: 0;
+    border-top: 1px solid var(--pah-border);
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+.booking-modal-footer {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.75rem; /* gap-3 */
+}
+
+.modal-button-cancel, .modal-button-confirm {
+    width: 100%;
+    padding: 0.7rem 1.25rem; /* px-5 py-2.5 approx */
+    border-radius: 0.5rem; /* rounded-lg */
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.modal-button-cancel {
+    border-color: var(--pah-border);
+    color: var(--pah-text-primary);
+}
+.modal-button-cancel:hover {
+    background-color: var(--pah-background);
+}
+
+.modal-button-confirm {
+    background-color: var(--pah-primary);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3), 0 2px 4px -2px rgba(37, 99, 235, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* gap-2 */
+}
+.modal-button-confirm:hover {
+    background-color: var(--pah-primary-dark);
+}
+.modal-button-confirm .material-icons-round {
+    font-size: 1rem;
+}
+
+/* Responsive adjustments for the footer */
+@media (min-width: 640px) { /* sm breakpoint */
+    .booking-modal-footer {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+    .modal-button-cancel, .modal-button-confirm {
+        width: auto;
+    }
+}
