@@ -24,6 +24,37 @@ const createBooking = async (req, res) => {
   try {
     await client.query('BEGIN');
 
+    // --- NEW LOGIC START ---
+    // 0. Consultar instance_settings para límites de partidas abiertas
+    const settingsResult = await client.query(
+      "SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('limit_open_matches_enabled', 'max_open_matches_per_user')"
+    );
+
+    const settings = settingsResult.rows.reduce((acc, s) => {
+      acc[s.setting_key] = s.setting_value;
+      return acc;
+    }, {});
+
+    const limitOpenMatchesEnabled = settings.limit_open_matches_enabled === 'true';
+    const maxOpenMatchesPerUser = parseInt(settings.max_open_matches_per_user || '0', 10);
+
+    if (isOpenMatch && limitOpenMatchesEnabled) {
+      const userOpenMatchesResult = await client.query(
+        `SELECT COUNT(*) as count FROM bookings 
+         WHERE user_id = $1 
+         AND is_open_match = TRUE 
+         AND status = 'confirmed' 
+         AND end_time > NOW()`,
+        [userId]
+      );
+      const currentOpenMatchesCount = parseInt(userOpenMatchesResult.rows[0].count, 10);
+
+      if (currentOpenMatchesCount >= maxOpenMatchesPerUser) {
+        throw new Error(`Ya has alcanzado el límite de ${maxOpenMatchesPerUser} partidas abiertas activas.`);
+      }
+    }
+    // --- NEW LOGIC END ---
+
     // Regla 1: ¿El usuario ya tiene una reserva activa?
     const activeBookingResult = await client.query("SELECT id FROM bookings WHERE user_id = $1 AND status = 'confirmed' AND end_time > (NOW() AT TIME ZONE 'UTC')", [userId]);
     if (activeBookingResult.rows.length > 0 && !isOpenMatch) {

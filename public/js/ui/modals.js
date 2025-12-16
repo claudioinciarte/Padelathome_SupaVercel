@@ -94,18 +94,18 @@ export function initModals(handlers) {
     if (handlers.onCancelBooking) {
         myBookingCancelBtn.addEventListener('click', (event) => {
             const { bookingId } = event.target.dataset;
-            handlers.onCancelBooking({ bookingId });
+            handlers.onCancelBooking(bookingId); // Corrected here
         });
         myMatchCancelMatchBtn.addEventListener('click', (event) => {
             const { bookingId } = event.target.dataset;
-            handlers.onCancelBooking({ bookingId });
+            handlers.onCancelBooking(bookingId); // Corrected here
         });
     }
     
     if (handlers.onLeaveMatch) {
         myMatchLeaveBtn.addEventListener('click', (event) => {
             const { bookingId } = event.target.dataset;
-            handlers.onLeaveMatch({ bookingId });
+            handlers.onLeaveMatch(bookingId); // Corrected here
         });
     }
 }

@@ -55,13 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalHandlers = {
         onConfirmBooking: async (data) => {
             try {
-                const body = { 
-                    startTime: data.startTime,
-                    durationMinutes: data.duration, // Renamed from duration
-                    isOpenMatch: data.isOpenMatch,
-                    courtId: selectedCourtId 
-                };
-                if (data.isOpenMatch) {
+                            const body = { 
+                                startTime: data.startTime,
+                                durationMinutes: data.durationMinutes, // Fix: Use data.durationMinutes
+                                isOpenMatch: data.isOpenMatch,
+                                courtId: selectedCourtId 
+                            };                if (data.isOpenMatch) {
                     body.maxParticipants = 4;
                 }
                 await fetchApi('/bookings', { method: 'POST', body: JSON.stringify(body) });
@@ -245,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'book': 
                 case 'available':
                     if (action === 'book') { 
-                        modalHandlers.onConfirmBooking({ startTime, duration: parseInt(duration), isOpenMatch });
+                        modalHandlers.onConfirmBooking({ startTime, durationMinutes: parseInt(duration), isOpenMatch });
                         refreshData();
                     } else { 
                         Modals.showBookingModal(startTime, [60, 90]);

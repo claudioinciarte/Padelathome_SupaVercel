@@ -89,10 +89,22 @@ async function fetchAndDisplayStats() {
 async function fetchAndDisplaySettings() {
     try {
         const settings = await fetchApi('/admin/settings');
-        document.getElementById('setting-open-time').value = settings.operating_open_time || '08:00';
-        document.getElementById('setting-close-time').value = settings.operating_close_time || '22:00';
-        document.getElementById('setting-advance-days').value = settings.booking_advance_days || '7';
-        document.getElementById('setting-gap-optimization').checked = settings.enable_booking_gap_optimization === 'true';
+        const openTimeInput = document.getElementById('setting-open-time');
+        const closeTimeInput = document.getElementById('setting-close-time');
+        const advanceDaysInput = document.getElementById('setting-advance-days');
+        const gapOptimizationCheckbox = document.getElementById('setting-gap-optimization');
+        const limitOpenMatchesEnabledCheckbox = document.getElementById('setting-limit-open-matches-enabled');
+        const maxOpenMatchesPerUserInput = document.getElementById('setting-max-open-matches-per-user');
+
+        if (openTimeInput) openTimeInput.value = settings.operating_open_time || '08:00';
+        if (closeTimeInput) closeTimeInput.value = settings.operating_close_time || '22:00';
+        if (advanceDaysInput) advanceDaysInput.value = settings.booking_advance_days || '7';
+        if (gapOptimizationCheckbox) gapOptimizationCheckbox.checked = settings.enable_booking_gap_optimization === 'true';
+        if (limitOpenMatchesEnabledCheckbox) limitOpenMatchesEnabledCheckbox.checked = settings.limit_open_matches_enabled === 'true';
+        if (maxOpenMatchesPerUserInput) {
+            maxOpenMatchesPerUserInput.value = settings.max_open_matches_per_user || '0';
+            maxOpenMatchesPerUserInput.disabled = !limitOpenMatchesEnabledCheckbox.checked;
+        }
     } catch (error) {
         console.error('Error al obtener los ajustes:', error);
         showNotification('No se pudieron cargar los ajustes.', 'error');
@@ -131,6 +143,10 @@ function setupGlobalEventListeners() {
     const settingsForm = document.getElementById('settings-form');
     const createBlockForm = document.getElementById('create-block-form');
     const blocksListContainer = document.getElementById('blocks-list-container');
+
+    // New element references for general settings
+    const limitOpenMatchesEnabledCheckbox = document.getElementById('setting-limit-open-matches-enabled');
+    const maxOpenMatchesPerUserInput = document.getElementById('setting-max-open-matches-per-user');
 
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
@@ -173,7 +189,9 @@ function setupGlobalEventListeners() {
                 operating_open_time: document.getElementById('setting-open-time').value,
                 operating_close_time: document.getElementById('setting-close-time').value,
                 booking_advance_days: document.getElementById('setting-advance-days').value,
-                enable_booking_gap_optimization: document.getElementById('setting-gap-optimization').checked.toString()
+                enable_booking_gap_optimization: document.getElementById('setting-gap-optimization').checked.toString(),
+                limit_open_matches_enabled: limitOpenMatchesEnabledCheckbox.checked.toString(),
+                max_open_matches_per_user: maxOpenMatchesPerUserInput.value
             };
             if (!confirm('¿Guardar nuevos ajustes?')) return;
             try {
@@ -182,6 +200,13 @@ function setupGlobalEventListeners() {
             } catch (error) {
                 showNotification(error.message, 'error');
             }
+        });
+    }
+
+    // Event listener for the new checkbox to enable/disable numeric input
+    if (limitOpenMatchesEnabledCheckbox && maxOpenMatchesPerUserInput) {
+        limitOpenMatchesEnabledCheckbox.addEventListener('change', () => {
+            maxOpenMatchesPerUserInput.disabled = !limitOpenMatchesEnabledCheckbox.checked;
         });
     }
 
