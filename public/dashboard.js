@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) { showNotification(e.message, 'error'); }
         },
         onCancelBooking: async (bookingId) => {
-            if (!confirm('¿Seguro que quieres cancelar?')) return;
+            // Remove confirm(), assuming confirmation is handled by the UI (modal or other button)
             try {
                 await fetchApi(`/bookings/${bookingId}`, { method: 'DELETE' });
                 showNotification('Reserva cancelada', 'success');
@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'cancel':
                 case 'my_private_booking':
-                     modalHandlers.onCancelBooking(bookingId);
+                    Modals.showMyBookingModal(bookingId, startTime);
                     break;
                 case 'leave':
                 case 'my_open_match':
