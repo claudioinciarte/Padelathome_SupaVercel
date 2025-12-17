@@ -283,46 +283,73 @@ function getInitials(name) {
 }
 
 /**
- * Shows the modal for managing a match the user is part of.
+ * Shows the modal for managing a match the user is part of, using the new design.
  * @param {object} matchData - Data about the match.
+ * @param {boolean} matchData.isOwner - Whether the current user is the owner of the match.
+ * @param {string} matchData.bookingId - The ID of the booking.
+ * @param {string} matchData.startTime - The start time of the match.
  * @param {Array<object>} participantsList - Array of participant objects.
+ * @param {string} participantsList[].name - The name of the participant.
+ * @param {boolean} participantsList[].is_owner - Whether the participant is the owner.
  */
 export function showMyMatchModal(matchData, participantsList) {
     const { bookingId, startTime, isOwner } = matchData;
-    
-    const date = new Date(startTime);
-    const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
-    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-    myMatchModalTime.innerHTML = `${formattedDate} <span class="date-separator">|</span> ${formattedTime}`;
 
+    // --- 1. Update Time Display ---
+    const date = new Date(startTime);
+    const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+    let formattedDate = new Intl.DateTimeFormat('es-ES', dateOptions).format(date);
+    // Capitalize the first letter for consistency
+    formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+    const formattedTime = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+    // Using a separator as it's more robust against different text lengths than a <br>
+    myMatchModalTime.innerHTML = `${formattedDate} <span class="date-separator" style="color: #9ca3af; margin: 0 0.25rem;">•</span> ${formattedTime}`;
+
+    // --- 2. Update Buttons based on ownership ---
     myMatchCancelMatchBtn.classList.toggle('hidden', !isOwner);
     myMatchLeaveBtn.classList.toggle('hidden', isOwner);
+
+    // Assign bookingId to buttons for the handlers
     myMatchCancelMatchBtn.dataset.bookingId = bookingId;
     myMatchLeaveBtn.dataset.bookingId = bookingId;
 
-    myMatchParticipantsList.innerHTML = '';
+    // --- 3. Render Participants List ---
+    myMatchParticipantsList.innerHTML = ''; // Clear previous list
     if (participantsList && participantsList.length > 0) {
         participantsList.forEach((p, index) => {
             const item = document.createElement('div');
             item.className = 'participant-item';
 
+            // Avatar with cycling gradient
             const avatar = document.createElement('div');
             const gradientClass = `avatar-gradient-${(index % 4) + 1}`;
             avatar.className = `participant-avatar ${gradientClass}`;
             avatar.textContent = getInitials(p.name);
 
+            // Name
             const name = document.createElement('span');
             name.className = 'participant-name';
             name.textContent = p.name;
 
             item.appendChild(avatar);
             item.appendChild(name);
+
+            // Role Badge (if participant is the owner)
+            if (p.is_owner) {
+                const role = document.createElement('span');
+                role.className = 'participant-role';
+                role.textContent = 'Organizador';
+                item.appendChild(role);
+            }
+
             myMatchParticipantsList.appendChild(item);
         });
     } else {
-        myMatchParticipantsList.innerHTML = '<p>No se pudieron cargar los participantes.</p>';
+        myMatchParticipantsList.innerHTML = '<p>No se encontraron participantes.</p>';
     }
 
+    // --- 4. Show the modal ---
     myMatchModalOverlay.classList.remove('hidden');
 }
 
