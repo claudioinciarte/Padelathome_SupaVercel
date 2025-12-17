@@ -3,7 +3,7 @@ import { formatDate, formatTime, showNotification } from '../utils.js';
 /**
  * Renderiza la vista semanal (escritorio).
  */
-export function renderWeekly(container, scheduleData, weekStart, weekEnd, userActiveBookings, selectedCourtId) {
+export function renderWeekly(container, scheduleData, weekStart, weekEnd, userActiveBookings, userWaitingListEntries, selectedCourtId) {
     container.innerHTML = '';
 
     // Título o header opcional si se quiere renderizar dentro
@@ -63,11 +63,45 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
                 cell.dataset.bookingId = daySlot.bookingId;
             }
 
+            // Check if user is on the waiting list for this slot
+            if (status === 'booked' || status === 'open_match_full') {
+                let isOnWaitlist = false;
+                for (const entry of userWaitingListEntries) {
+                    if (entry.court_id !== selectedCourtId) continue;
+
+                    const entryStartTime = new Date(entry.slot_start_time).getTime();
+                    // Use the stored duration, default to 90 if it's somehow missing.
+                    const entryDuration = parseInt(entry.duration, 10) || 90;
+                    const entryEndTime = entryStartTime + (entryDuration * 60 * 1000);
+                    
+                    const currentSlotTime = slotTime.getTime();
+
+                    // Check if the current slot's start time is within the waiting list entry's range
+                    if (currentSlotTime >= entryStartTime && currentSlotTime < entryEndTime) {
+                        isOnWaitlist = true;
+                        break; // Found a match, no need to check other entries
+                    }
+                }
+
+                if (isOnWaitlist) {
+                    status = 'on_waitlist';
+                }
+            }
+
+            cell.className = `grid-cell slot ${status}`;
+
             // Atributos de datos
             cell.dataset.status = status;
             cell.dataset.starttime = daySlot.startTime;
             if (daySlot.participants) cell.dataset.participants = daySlot.participants;
             if (daySlot.maxParticipants) cell.dataset.maxParticipants = daySlot.maxParticipants;
+
+            // Add duration to dataset from booking info
+            if (myBooking && myBooking.duration_minutes) {
+                cell.dataset.duration = myBooking.duration_minutes;
+            } else if (daySlot.durationMinutes) {
+                cell.dataset.duration = daySlot.durationMinutes;
+            }
 
             // Texto de la celda
             let text = '';
@@ -76,6 +110,7 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
             else if (status === 'blocked') text = daySlot.reason || 'X';
             else if (status === 'open_match_available') text = `Abierta ${daySlot.participants}/${daySlot.maxParticipants}`;
             else if (status === 'open_match_full') text = 'Llena';
+            else if (status === 'on_waitlist') text = 'En lista';
             else if (status === 'my_private_booking') text = 'Mía';
             else if (status === 'my_open_match') text = 'Inscrito';
             else if (status === 'past') text = '.';
@@ -266,7 +301,8 @@ export function init(container, onSlotClick) {
                 bookingId: dataset.bookingId,
                 participationType: dataset.participationType,
                 participants: dataset.participants,
-                maxParticipants: dataset.maxParticipants
+                maxParticipants: dataset.maxParticipants,
+                duration: dataset.duration
             };
             if (slotData.status && slotData.status !== 'past') {
                 onSlotClick(slotData);

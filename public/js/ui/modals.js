@@ -13,6 +13,11 @@ const waitlistModalOverlay = document.getElementById('waitlist-modal-overlay');
 const waitlistJoinBtn = document.getElementById('waitlist-join-btn');
 const waitlistCancelBtn = document.getElementById('waitlist-cancel-btn');
 
+// Already on Waitlist Modal Elements
+const alreadyOnWaitlistModalOverlay = document.getElementById('already-on-waitlist-modal-overlay');
+const withdrawWaitlistBtn = document.getElementById('withdraw-waitlist-btn');
+const stayOnWaitlistBtn = document.getElementById('stay-on-waitlist-btn');
+
 // Join Match Modal Elements
 const joinMatchModalOverlay = document.getElementById('join-match-modal-overlay');
 const joinMatchDateEl = document.getElementById('join-match-date');
@@ -43,6 +48,7 @@ const myMatchCloseBtnTop = document.getElementById('my-match-close-btn-top');
 export function hideAllModals() {
     bookingModalOverlay.classList.add('hidden');
     waitlistModalOverlay.classList.add('hidden');
+    alreadyOnWaitlistModalOverlay.classList.add('hidden');
     joinMatchModalOverlay.classList.add('hidden');
     myBookingModalOverlay.classList.add('hidden');
     myMatchModalOverlay.classList.add('hidden');
@@ -59,7 +65,7 @@ export function hideAllModals() {
  */
 export function initModals(handlers) {
     // General close listeners
-    [bookingModalOverlay, waitlistModalOverlay, joinMatchModalOverlay, myBookingModalOverlay, myMatchModalOverlay].forEach(overlay => {
+    [bookingModalOverlay, waitlistModalOverlay, alreadyOnWaitlistModalOverlay, joinMatchModalOverlay, myBookingModalOverlay, myMatchModalOverlay].forEach(overlay => {
         overlay.addEventListener('click', (event) => {
             if (event.target === overlay) {
                 hideAllModals();
@@ -67,7 +73,7 @@ export function initModals(handlers) {
         });
     });
 
-    [bookingModalCancelBtn, waitlistCancelBtn, joinMatchCancelBtn, joinMatchCloseBtnTop, myBookingCloseBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => btn.addEventListener('click', hideAllModals));
+    [bookingModalCancelBtn, waitlistCancelBtn, stayOnWaitlistBtn, joinMatchCancelBtn, joinMatchCloseBtnTop, myBookingCloseBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => btn.addEventListener('click', hideAllModals));
 
     // Action listeners
     if (handlers.onConfirmBooking) {
@@ -89,8 +95,16 @@ export function initModals(handlers) {
 
     if (handlers.onJoinWaitlist) {
         waitlistJoinBtn.addEventListener('click', () => {
-             const { courtid, starttime } = waitlistJoinBtn.dataset;
-             handlers.onJoinWaitlist({ courtId: courtid, startTime: starttime });
+             const { courtid, starttime, duration } = waitlistJoinBtn.dataset;
+             // Pass all required data to the handler
+             handlers.onJoinWaitlist({ courtId: courtid, startTime: starttime, duration: duration });
+        });
+    }
+
+    if (handlers.onWithdrawWaitlist) {
+        withdrawWaitlistBtn.addEventListener('click', () => {
+            const { courtid, starttime } = withdrawWaitlistBtn.dataset;
+            handlers.onWithdrawWaitlist({ courtId: courtid, startTime: starttime });
         });
     }
     
@@ -169,13 +183,36 @@ export function showBookingModal(startTime, availableDurations) {
 
 /**
  * Shows the waitlist join confirmation modal.
- * @param {string} startTime - The start time of the slot (ISO format).
- * @param {string} courtId - The ID of the court.
+ * @param {object} data - Data for the waitlist slot.
+ * @param {string} data.startTime - The start time of the slot (ISO format).
+ * @param {string} data.courtId - The ID of the court.
+ * @param {number} data.duration - The duration of the slot in minutes.
  */
-export function showWaitlistModal(startTime, courtId) {
+export function showWaitlistModal(data) {
+    const { startTime, courtId, duration } = data;
     waitlistJoinBtn.dataset.courtid = courtId;
     waitlistJoinBtn.dataset.starttime = startTime;
+    // Store duration so the handler can retrieve it
+    if (duration) {
+        waitlistJoinBtn.dataset.duration = duration;
+    } else {
+        // Clear it if not provided to avoid using stale data
+        delete waitlistJoinBtn.dataset.duration;
+    }
     waitlistModalOverlay.classList.remove('hidden');
+}
+
+/**
+ * Shows the modal indicating the user is already on a waitlist.
+ * @param {object} data - Data for the waitlist slot.
+ * @param {string} data.startTime - The start time of the slot (ISO format).
+ * @param {string} data.courtId - The ID of the court.
+ */
+export function showAlreadyOnWaitlistModal(data) {
+    const { startTime, courtId } = data;
+    withdrawWaitlistBtn.dataset.courtid = courtId;
+    withdrawWaitlistBtn.dataset.starttime = startTime;
+    alreadyOnWaitlistModalOverlay.classList.remove('hidden');
 }
 
 

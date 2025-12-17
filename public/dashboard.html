@@ -226,6 +226,19 @@
             </div>
         </div>
     </div>
+
+    <!-- New Modal for Already on Waitlist -->
+    <div id="already-on-waitlist-modal-overlay" class="hidden">
+        <div id="already-on-waitlist-modal" class="card">
+            <h3>Ya estás en la Lista</h3>
+            <p>Estás apuntado en la lista de espera para este horario.</p>
+            <p>¿Deseas retirarte?</p>
+            <div class="modal-actions" style="margin-top: 1rem;">
+                <button id="withdraw-waitlist-btn" class="button button-danger">Sí, retirarme</button>
+                <button id="stay-on-waitlist-btn" class="button">No, gracias</button>
+            </div>
+        </div>
+    </div>
   
     <div id="notification-container"></div>
     <script src="/socket.io/socket.io.js"></script>

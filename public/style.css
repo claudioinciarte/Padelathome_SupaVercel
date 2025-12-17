@@ -263,7 +263,7 @@ a:hover { text-decoration: underline; }
 .mobile-actions button { flex: 1; }
 
 /* --- Modales --- */
-#modal-overlay, #waitlist-modal-overlay, #join-match-modal-overlay, #my-booking-modal-overlay, #my-match-modal-overlay {
+#modal-overlay, #waitlist-modal-overlay, #join-match-modal-overlay, #my-booking-modal-overlay, #my-match-modal-overlay, #already-on-waitlist-modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
   display: flex; justify-content: center; align-items: center;

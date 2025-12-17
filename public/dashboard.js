@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDisplayedDate = new Date();
     let selectedCourtId = null;
     let userActiveBookings = [];
+    let userWaitingListEntries = [];
 
     // --- Elementos del DOM ---
     const welcomeMessage = document.getElementById('welcome-message');
@@ -73,14 +74,69 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         onJoinWaitlist: async (data) => {
             try {
-                const end = new Date(new Date(data.startTime).getTime() + 90*60000).toISOString();
+                if (!data.startTime || !data.courtId) {
+                    throw new Error('No se pudieron obtener los datos del slot.');
+                }
+                const startDate = new Date(data.startTime);
+                if (isNaN(startDate.getTime())) {
+                    throw new Error('La hora de inicio recibida no es válida.');
+                }
+                // Use a default duration (90 min) as the API may not provide it for already-booked slots.
+                const defaultDurationInMs = 90 * 60 * 1000;
+                const endDate = new Date(startDate.getTime() + defaultDurationInMs);
+
                 await fetchApi('/waiting-list', {
                     method: 'POST',
-                    body: JSON.stringify({ courtId: parseInt(data.courtId), slotStartTime: data.startTime, slotEndTime: end })
+                    body: JSON.stringify({
+                        courtId: data.courtId,
+                        slotStartTime: data.startTime,
+                        slotEndTime: endDate.toISOString()
+                    })
                 });
-                showNotification('Apuntado a lista de espera', 'success');
+                // If the POST succeeds, they were NOT on the list. They are now.
+                showNotification('¡Apuntado! Se te notificará si la pista se libera.', 'success');
                 Modals.hideAllModals();
-            } catch (e) { showNotification(e.message, 'error'); }
+                // Update client-side array immediately, now including duration.
+                userWaitingListEntries.push({ court_id: data.courtId, slot_start_time: data.startTime, duration: data.duration });
+                updateCalendarView(); // Use updateCalendarView to avoid extra 404 noise.
+            } catch (e) {
+                // The POST failed. Check if it's because they were already on the list.
+                if (e.message && e.message.includes('Ya estás en la lista de espera')) {
+                    // The API confirmed the state. Update our client-side knowledge if it's not already known.
+                    const alreadyKnown = userWaitingListEntries.some(entry => 
+                        entry.court_id === data.courtId && entry.slot_start_time === data.startTime
+                    );
+                    if (!alreadyKnown) {
+                        // Add to client-side state, including duration.
+                        userWaitingListEntries.push({ court_id: data.courtId, slot_start_time: data.startTime, duration: data.duration });
+                        // Trigger a re-render in the background to visually update the slot to "En lista".
+                        updateCalendarView();
+                    }
+                    
+                    // Now, show the correct modal for the current state.
+                    Modals.hideAllModals(); 
+                    Modals.showAlreadyOnWaitlistModal({ startTime: data.startTime, courtId: data.courtId });
+                } else {
+                    // Any other error.
+                    showNotification(e.message, 'error');
+                }
+            }
+        },
+        onWithdrawWaitlist: async (data) => {
+            try {
+                await fetchApi('/waiting-list', {
+                    method: 'DELETE',
+                    body: JSON.stringify({
+                        courtId: data.courtId,
+                        slotStartTime: data.startTime
+                    })
+                });
+                showNotification('Has sido retirado de la lista de espera.', 'success');
+                Modals.hideAllModals();
+                refreshData();
+            } catch (e) {
+                showNotification(e.message, 'error');
+            }
         },
         onJoinMatch: async (data) => {
             try {
@@ -112,7 +168,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Funciones de Datos ---
     const refreshData = async () => {
-        await Promise.all([fetchMyBooking(), updateCalendarView()]);
+        await Promise.all([fetchMyBooking(), fetchMyWaitingListEntries(), updateCalendarView()]);
+    };
+
+    const fetchMyWaitingListEntries = async () => {
+        try {
+            // This endpoint is required for the "on waitlist" visual feature.
+            const entries = await fetchApi('/waiting-list/me');
+            userWaitingListEntries = Array.isArray(entries) ? entries : [];
+        } catch (e) {
+            console.error('Could not fetch waiting list entries. The feature to visually see your status on slots will not work until the API endpoint /api/waiting-list/me is available.');
+            userWaitingListEntries = []; // Ensure it does not crash the app.
+        }
     };
 
     const fetchUserProfile = async () => {
@@ -160,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await fetchApi(`/schedule/week?courtId=${selectedCourtId}&date=${dateString}`);
             weekDatesTitle.textContent = `Semana del ${formatDate(data.weekStart)} al ${formatDate(data.weekEnd)}`;
-            Calendar.renderWeekly(calendarContainer, data.schedule, data.weekStart, data.weekEnd, userActiveBookings, selectedCourtId);
+            Calendar.renderWeekly(calendarContainer, data.schedule, data.weekStart, data.weekEnd, userActiveBookings, userWaitingListEntries, selectedCourtId);
         } catch (e) {
             calendarContainer.innerHTML = `<p class="error-text">${e.message}</p>`;
         }
@@ -274,10 +341,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
                     break;
+                case 'on_waitlist':
+                    Modals.showAlreadyOnWaitlistModal({ startTime, courtId: selectedCourtId });
+                    break;
                 case 'waitlist':
                 case 'booked':
                 case 'open_match_full':
-                    modalHandlers.onJoinWaitlist({startTime, courtId: selectedCourtId});
+                    Modals.showWaitlistModal({startTime, courtId: selectedCourtId, duration});
                     break;
             }
         });

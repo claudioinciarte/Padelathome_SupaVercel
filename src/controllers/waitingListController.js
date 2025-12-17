@@ -96,7 +96,62 @@ const confirmBookingFromWaitlist = async (req, res) => {
   }
 };
 
+const getUserWaitingListEntries = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const { rows } = await pool.query(
+      "SELECT court_id, slot_start_time, slot_end_time FROM waiting_list_entries WHERE user_id = $1 AND status = 'waiting'",
+      [userId]
+    );
+
+    // Frontend expects duration in minutes. Calculate it.
+    const entriesWithDuration = rows.map(entry => {
+      const duration = (new Date(entry.slot_end_time).getTime() - new Date(entry.slot_start_time).getTime()) / 60000;
+      return {
+        court_id: entry.court_id,
+        slot_start_time: entry.slot_start_time,
+        duration: duration,
+      };
+    });
+
+    res.status(200).json(entriesWithDuration);
+  } catch (error) {
+    console.error('Error fetching user waiting list entries:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
+const withdrawFromWaitingList = async (req, res) => {
+  const userId = req.user.id;
+  const { courtId, slotStartTime } = req.body;
+
+  if (!courtId || !slotStartTime) {
+    return res.status(400).json({ message: 'Se requiere courtId y slotStartTime.' });
+  }
+
+  try {
+    const deleteResult = await pool.query(
+      "DELETE FROM waiting_list_entries WHERE user_id = $1 AND court_id = $2 AND slot_start_time = $3 AND status = 'waiting'",
+      [userId, courtId, slotStartTime]
+    );
+
+    if (deleteResult.rowCount === 0) {
+      // This could happen if they were already removed or confirmed a booking. Not a critical error.
+      return res.status(200).json({ message: 'No se encontró una entrada activa en la lista de espera para eliminar.' });
+    }
+
+    res.status(200).json({ message: 'Has sido retirado de la lista de espera.' });
+    io.emit('waitlist:withdrawn', { courtId, slotStartTime, userId });
+
+  } catch (error) {
+    console.error('Error al retirarse de la lista de espera:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
 module.exports = {
   joinWaitingList,
   confirmBookingFromWaitlist,
+  getUserWaitingListEntries,
+  withdrawFromWaitingList,
 };
