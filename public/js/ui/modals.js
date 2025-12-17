@@ -12,11 +12,13 @@ const bookingModalConfirmBtn = document.getElementById('modal-confirm-btn');
 const waitlistModalOverlay = document.getElementById('waitlist-modal-overlay');
 const waitlistJoinBtn = document.getElementById('waitlist-join-btn');
 const waitlistCancelBtn = document.getElementById('waitlist-cancel-btn');
+const waitlistCloseIconBtn = document.getElementById('waitlist-close-icon-btn');
 
 // Already on Waitlist Modal Elements
 const alreadyOnWaitlistModalOverlay = document.getElementById('already-on-waitlist-modal-overlay');
 const withdrawWaitlistBtn = document.getElementById('withdraw-waitlist-btn');
 const stayOnWaitlistBtn = document.getElementById('stay-on-waitlist-btn');
+const alreadyListedCloseIconBtn = document.getElementById('already-listed-close-icon-btn');
 
 // Join Match Modal Elements
 const joinMatchModalOverlay = document.getElementById('join-match-modal-overlay');
@@ -73,7 +75,9 @@ export function initModals(handlers) {
         });
     });
 
-    [bookingModalCancelBtn, waitlistCancelBtn, stayOnWaitlistBtn, joinMatchCancelBtn, joinMatchCloseBtnTop, myBookingCloseBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => btn.addEventListener('click', hideAllModals));
+    [bookingModalCancelBtn, waitlistCancelBtn, waitlistCloseIconBtn, stayOnWaitlistBtn, alreadyListedCloseIconBtn, joinMatchCancelBtn, joinMatchCloseBtnTop, myBookingCloseBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => {
+        if (btn) btn.addEventListener('click', hideAllModals);
+    });
 
     // Action listeners
     if (handlers.onConfirmBooking) {

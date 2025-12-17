@@ -8,6 +8,7 @@
     <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -108,13 +109,32 @@
     </div>
   
     <div id="waitlist-modal-overlay" class="hidden">
-        <div id="waitlist-modal" class="card">
-            <h3>Horario Ocupado</h3>
-            <p>Este horario ya está reservado.</p>
-            <p>¿Quieres que te notifiquemos si se libera?</p>
-            <div id="waitlist-modal-options">
-                <button id="waitlist-join-btn">Sí, agregarme a la lista</button>
-                <button id="waitlist-cancel-btn">No, gracias</button>
+        <div id="waitlist-modal" class="waitlist-card">
+            <button id="waitlist-close-icon-btn" class="modal-close-icon-btn">
+                <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+            </button>
+            <div class="waitlist-content">
+                <div class="waitlist-icon-wrapper">
+                    <span class="material-symbols-outlined" style="font-size: 32px;">notifications_active</span>
+                </div>
+                <div class="waitlist-text-wrapper">
+                    <h2 class="waitlist-title">
+                        Horario Ocupado
+                    </h2>
+                </div>
+                <div class="waitlist-text-wrapper mb-8">
+                    <p class="waitlist-description">
+                        Esta pista ya está reservada para el horario seleccionado. ¿Quieres que te notifiquemos si la reserva se cancela y el horario queda libre?
+                    </p>
+                </div>
+                <div class="waitlist-actions">
+                    <button id="waitlist-cancel-btn" class="waitlist-btn-secondary">
+                        <span class="truncate">No, gracias</span>
+                    </button>
+                    <button id="waitlist-join-btn" class="waitlist-btn-primary">
+                        <span class="truncate">Sí, agregarme a la lista</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -229,13 +249,36 @@
 
     <!-- New Modal for Already on Waitlist -->
     <div id="already-on-waitlist-modal-overlay" class="hidden">
-        <div id="already-on-waitlist-modal" class="card">
-            <h3>Ya estás en la Lista</h3>
-            <p>Estás apuntado en la lista de espera para este horario.</p>
-            <p>¿Deseas retirarte?</p>
-            <div class="modal-actions" style="margin-top: 1rem;">
-                <button id="withdraw-waitlist-btn" class="button button-danger">Sí, retirarme</button>
-                <button id="stay-on-waitlist-btn" class="button">No, gracias</button>
+        <div id="already-on-waitlist-modal" class="already-listed-card">
+            <button id="already-listed-close-icon-btn" class="modal-close-icon-btn">
+                <span class="material-icons-round" style="font-size: 24px;">close</span>
+            </button>
+            <div class="already-listed-content">
+                <div class="already-listed-header">
+                    <div class="already-listed-icon-wrapper">
+                        <span class="material-icons-round text-3xl text-primary" style="font-size: 30px;">playlist_add_check</span>
+                    </div>
+                    <div class="already-listed-text-group">
+                        <h3 class="already-listed-title" id="already-listed-modal-title">
+                            Ya estás en la lista
+                        </h3>
+                        <div class="mt-3">
+                            <p class="already-listed-description">
+                                Actualmente tienes un turno reservado en la lista de espera para este horario. <br class="hidden sm:block"/>
+                                ¿Deseas cancelar tu solicitud y ser eliminado de la lista?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="already-listed-actions">
+                <button id="withdraw-waitlist-btn" class="already-listed-btn-danger">
+                    <span class="material-icons-round text-lg mr-2" style="font-size: 18px; margin-right: 8px;">delete_outline</span>
+                    Sí, eliminar
+                </button>
+                <button id="stay-on-waitlist-btn" class="already-listed-btn-primary">
+                    No, mantener
+                </button>
             </div>
         </div>
     </div>

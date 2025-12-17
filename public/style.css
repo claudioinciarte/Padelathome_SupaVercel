@@ -1026,3 +1026,344 @@ tr:nth-child(even) { background-color: #f8f9fa; }
         width: auto;
     }
 }
+
+/* --- Waitlist Modal Styles (Join) --- */
+.waitlist-card {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 1rem; /* rounded-2xl approx */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+    border: 1px solid #f1f5f9; /* slate-100 */
+    overflow: hidden;
+    transform: scale(1);
+    transition: all 0.2s;
+}
+
+.modal-close-icon-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    border-radius: 9999px; /* rounded-full */
+    color: #94a3b8; /* slate-400 */
+    background-color: transparent;
+    cursor: pointer;
+    transition: color 0.2s, background-color 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-close-icon-btn:hover {
+    color: #475569; /* slate-600 */
+    background-color: #f8fafc; /* slate-50 */
+}
+.modal-close-icon-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #f1f5f9; /* ring-slate-100 */
+}
+
+.waitlist-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem 2rem 2rem; /* pt-12 pb-8 px-8 */
+    text-align: center;
+}
+
+.waitlist-icon-wrapper {
+    width: 4rem; /* 16 */
+    height: 4rem; /* 16 */
+    border-radius: 9999px;
+    background-color: #eff6ff; /* blue-50 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem; /* mb-6 */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+    box-shadow: 0 0 0 4px white; /* ring-4 ring-white */
+}
+
+.waitlist-icon-wrapper .material-symbols-outlined {
+    color: #137fec; /* primary from design */
+}
+
+.waitlist-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.waitlist-text-wrapper.mb-8 {
+    margin-bottom: 2rem;
+}
+
+.waitlist-title {
+    color: #0f172a; /* slate-900 */
+    letter-spacing: -0.025em; /* tracking-tight */
+    font-size: 1.5rem; /* 24px */
+    font-weight: 700;
+    line-height: 1.25; /* leading-tight */
+    padding: 0 0.5rem; /* px-2 */
+    margin: 0 0 0.75rem 0; /* mb-3 equivalent */
+}
+
+.waitlist-description {
+    color: #475569; /* slate-600 */
+    font-size: 1rem; /* text-base */
+    font-weight: 500;
+    line-height: 1.625; /* leading-relaxed */
+    padding: 0 0.5rem; /* px-2 */
+    margin: 0;
+}
+
+.waitlist-actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem; /* gap-3 */
+}
+@media (min-width: 640px) {
+    .waitlist-actions {
+        flex-direction: row;
+        gap: 1rem; /* gap-4 */
+    }
+}
+
+.waitlist-btn-secondary, .waitlist-btn-primary {
+    flex: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem; /* rounded-xl */
+    height: 3rem; /* h-12 */
+    padding: 0 1.5rem; /* px-6 */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 0.015em;
+    transition: all 0.2s;
+    border: none;
+}
+
+.waitlist-btn-secondary {
+    background-color: white;
+    border: 1px solid #e2e8f0; /* slate-200 */
+    color: #334155; /* slate-700 */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+    order: 2;
+}
+@media (min-width: 640px) { .waitlist-btn-secondary { order: 1; } }
+
+.waitlist-btn-secondary:hover {
+    background-color: #f8fafc; /* slate-50 */
+    border-color: #cbd5e1; /* slate-300 */
+}
+.waitlist-btn-secondary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #e2e8f0; /* ring-2 ring-slate-200 */
+}
+
+.waitlist-btn-primary {
+    background-color: #137fec; /* primary */
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.25); /* shadow-lg shadow-blue-500/25 (approx) */
+    order: 1;
+}
+@media (min-width: 640px) { .waitlist-btn-primary { order: 2; } }
+
+.waitlist-btn-primary:hover {
+    background-color: #2563eb; /* blue-600 */
+}
+.waitlist-btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #137fec, 0 0 0 4px white; /* ring-primary ring-offset-2 */
+}
+
+
+/* --- Already Listed Modal Styles (Remove) --- */
+.already-listed-card {
+    position: relative;
+    width: 100%;
+    max-width: 28rem; /* max-w-md (448px) */
+    overflow: hidden;
+    border-radius: 1rem; /* rounded-2xl */
+    background-color: white; /* surface-light */
+    padding: 1.5rem; /* p-6 */
+    text-align: left;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+    border: 1px solid #f1f5f9; /* slate-100 */
+    transform: scale(1);
+    transition: all 0.2s;
+}
+
+.already-listed-content {
+    /* flex col items-center sm:items-start */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+@media (min-width: 640px) { .already-listed-content { align-items: flex-start; } }
+
+.already-listed-header {
+    /* Wrapper for icon and text to handle responsive layout if needed,
+       but based on HTML structure: div -> div(icon) + div(text) */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+@media (min-width: 640px) {
+    .already-listed-header {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1rem; /* Adding some gap for row layout */
+    }
+}
+
+.already-listed-icon-wrapper {
+    /* mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-blue-50 sm:mx-0 */
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    height: 3.5rem; /* h-14 */
+    width: 3.5rem; /* w-14 */
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: #eff6ff; /* blue-50 */
+}
+@media (min-width: 640px) { .already-listed-icon-wrapper { margin-left: 0; margin-right: 0; } }
+
+.already-listed-icon-wrapper .material-icons-round {
+    color: #0ea5e9; /* primary (sky blue) */
+}
+
+.already-listed-text-group {
+    /* mt-5 text-center sm:mt-4 sm:text-left w-full */
+    margin-top: 1.25rem; /* mt-5 */
+    text-align: center;
+    width: 100%;
+}
+@media (min-width: 640px) {
+    .already-listed-text-group {
+        margin-top: 0; /* The design uses sm:mt-4 but flex-row might not need it if using gap.
+                          Wait, the HTML had icon and text in same wrapper?
+                          Let's look at HTML again:
+                          <div class="flex flex-col items-center sm:items-start">
+                             <div class="mx-auto flex ..."></div>
+                             <div class="mt-5 text-center sm:mt-4 sm:text-left w-full">...</div>
+                          </div>
+                          My CSS .already-listed-header mimics this.
+                          If I used flex-row in media query for header, I should adjust margins.
+                       */
+        /* Actually the HTML structure provided was flex-col even on SM,
+           just items-start. Wait, the design image 2 shows icon LEFT of title?
+           The image shows icon on top left, title below it?
+           No, the HTML says:
+           <div class="flex flex-col items-center sm:items-start">
+             <div icon></div>
+             <div text></div>
+           </div>
+           This means stacked vertically, but aligned left on desktop.
+           So my .already-listed-header should NOT be flex-row.
+        */
+        text-align: left;
+        margin-top: 1rem; /* sm:mt-4 */
+    }
+}
+/* Correction: remove flex-row from header media query */
+@media (min-width: 640px) {
+    .already-listed-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+    }
+}
+
+
+.already-listed-title {
+    /* text-xl font-semibold leading-6 text-slate-900 */
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 600;
+    line-height: 1.5rem; /* leading-6 */
+    color: #0f172a; /* slate-900 */
+    margin: 0;
+}
+
+.already-listed-description {
+    /* text-sm text-slate-500 leading-relaxed */
+    font-size: 0.875rem; /* text-sm */
+    color: #64748b; /* slate-500 */
+    line-height: 1.625; /* leading-relaxed */
+    margin: 0;
+}
+
+.already-listed-actions {
+    /* mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end */
+    margin-top: 2rem; /* mt-8 */
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.75rem; /* gap-3 */
+}
+@media (min-width: 640px) {
+    .already-listed-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+}
+
+.already-listed-btn-danger, .already-listed-btn-primary {
+    /* inline-flex w-full justify-center items-center rounded-lg px-4 py-2.5 text-sm font-medium shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto */
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.5rem; /* rounded-lg */
+    padding: 0.625rem 1rem; /* px-4 py-2.5 */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+@media (min-width: 640px) {
+    .already-listed-btn-danger, .already-listed-btn-primary {
+        width: auto;
+    }
+}
+
+.already-listed-btn-danger {
+    /* border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-red-600 hover:border-red-100 focus:ring-red-500 */
+    border: 1px solid #e2e8f0; /* slate-200 */
+    background-color: white;
+    color: #334155; /* slate-700 */
+}
+.already-listed-btn-danger:hover {
+    background-color: #f8fafc; /* slate-50 */
+    color: #dc2626; /* red-600 */
+    border-color: #fee2e2; /* red-100 */
+}
+.already-listed-btn-danger:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #ef4444; /* ring-red-500 */
+}
+
+.already-listed-btn-primary {
+    /* bg-primary text-white hover:bg-primary-dark focus:ring-primary */
+    background-color: #0ea5e9; /* primary (sky blue) */
+    color: white;
+}
+.already-listed-btn-primary:hover {
+    background-color: #0284c7; /* primary-dark */
+}
+.already-listed-btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #0ea5e9, 0 0 0 2px white; /* ring-primary ring-offset-2 */
+}
