@@ -35,6 +35,7 @@ const myBookingModalOverlay = document.getElementById('my-booking-modal-overlay'
 const myBookingModalTime = document.getElementById('my-booking-modal-time');
 const myBookingCancelBtn = document.getElementById('my-booking-cancel-btn');
 const myBookingCloseBtn = document.getElementById('my-booking-close-btn');
+const myBookingCloseIconBtn = document.getElementById('my-booking-close-icon-btn');
 
 const myMatchModalOverlay = document.getElementById('my-match-modal-overlay');
 const myMatchModalTime = document.getElementById('my-match-modal-time');
@@ -75,7 +76,7 @@ export function initModals(handlers) {
         });
     });
 
-    [bookingModalCancelBtn, waitlistCancelBtn, waitlistCloseIconBtn, stayOnWaitlistBtn, alreadyListedCloseIconBtn, joinMatchCancelBtn, joinMatchCloseBtnTop, myBookingCloseBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => {
+    [bookingModalCancelBtn, waitlistCancelBtn, waitlistCloseIconBtn, stayOnWaitlistBtn, alreadyListedCloseIconBtn, joinMatchCancelBtn, joinMatchCloseBtnTop, myBookingCloseBtn, myBookingCloseIconBtn, myMatchCloseBtn, myMatchCloseBtnTop].forEach(btn => {
         if (btn) btn.addEventListener('click', hideAllModals);
     });
 

@@ -183,13 +183,45 @@
 
     <!-- Nuevo Modal para Mi Reserva -->
     <div id="my-booking-modal-overlay" class="hidden">
-        <div id="my-booking-modal" class="card">
-            <h3>Mi Reserva</h3>
-            <p>Esta pista ya está reservada por ti para el <strong id="my-booking-modal-time">--:--</strong>.</p>
-            <p>¿Quieres cancelarla?</p>
-            <div id="my-booking-modal-options">
-                <button id="my-booking-cancel-btn">Sí, cancelar</button>
-                <button id="my-booking-close-btn">No, mantener</button>
+        <div id="my-booking-modal" class="my-booking-card">
+            <div class="my-booking-header">
+                <div class="my-booking-header-content">
+                    <div class="my-booking-icon-wrapper">
+                        <span class="material-icons-round text-xl">calendar_today</span>
+                    </div>
+                    <h3 class="my-booking-title">
+                        Mi Reserva
+                    </h3>
+                </div>
+                <button id="my-booking-close-icon-btn" class="my-booking-close-icon-btn">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="my-booking-body">
+                <div class="my-booking-info-box">
+                    <span class="material-icons-round text-primary info-icon">info</span>
+                    <p class="my-booking-info-text">
+                        Esta pista ya está reservada por ti para el <br/>
+                        <span id="my-booking-modal-time" class="my-booking-time-display">--:--</span>
+                    </p>
+                </div>
+                <div class="my-booking-confirmation-text">
+                    <p class="my-booking-question">
+                        ¿Quieres cancelarla?
+                    </p>
+                    <p class="my-booking-subtext">
+                        Esta acción liberará la pista para otros usuarios.
+                    </p>
+                </div>
+            </div>
+            <div class="my-booking-footer">
+                <button id="my-booking-close-btn" class="btn-my-booking-keep">
+                    No, mantener
+                </button>
+                <button id="my-booking-cancel-btn" class="btn-my-booking-cancel">
+                    <span class="material-icons-round text-sm mr-2">cancel</span>
+                    Sí, cancelar
+                </button>
             </div>
         </div>
     </div>
