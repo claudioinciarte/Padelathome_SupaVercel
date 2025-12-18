@@ -13,36 +13,12 @@
   --warning-color: #ffc107;      /* Amarillo de advertencia */
 }
 
-/* --- 2. Estilos Globales y Reset Básico --- */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  margin: 0;
-  background-color: var(--background-color);
-  color: var(--text-color);
-  line-height: 1.5;
-}
+/* --- 2. Estilos Globales y Reset Básico (SCOPEADO A LEGACY o MODALS) --- */
+/* Eliminamos selectores globales puros para no romper el nuevo diseño Tailwind */
+/* body, h1, h2, h3 { ... }  <-- REMOVED */
 
-h1, h2, h3 {
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-/* --- 3. Clases de Utilidad --- */
-.container {
-  max-width: 960px;
-  margin: 20px auto;
-  padding: 0 15px;
-}
-
-.card {
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
+/* --- 3. Clases de Utilidad (Legacy Support) --- */
+/* Mantener solo lo necesario para el Calendario antiguo si se usa */
 .hidden {
   display: none !important;
 }
@@ -51,109 +27,16 @@ h1, h2, h3 {
 .error-text { color: var(--danger-color); font-weight: bold; }
 .success-text { color: var(--success-color); font-weight: bold; }
 
-/* Botones con colores */
+/* Botones legacy - SOLO si tienen clase .btn-* */
 .btn-primary { background-color: var(--primary-color); color: white; }
 .btn-secondary { background-color: var(--secondary-color); color: white; }
 .btn-success { background-color: var(--success-color); color: white; }
 .btn-danger { background-color: var(--danger-color); color: white; }
 .btn-warning { background-color: var(--warning-color); color: #212529; }
 
-/* --- Estilos para Botones --- */
-button {
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1em;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  opacity: 0.9;
-}
-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
 
-/* --- Estilos para Formularios --- */
-.form-group {
-  margin-bottom: 1.5em;
-}
-.form-group label {
-  display: block;
-  margin-bottom: 0.5em;
-  font-weight: 500;
-}
-input, textarea, select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-sizing: border-box;
-  font-size: 1em;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-input:focus, textarea:focus, select:focus {
-  border-color: var(--primary-color);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25);
-}
-.form-group-inline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 1em;
-}
-.form-group-inline input[type="checkbox"] {
-    width: auto;
-}
-
-/* --- Estilos para Páginas de Login/Registro --- */
-.auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
-  box-sizing: border-box;
-}
-.auth-card {
-  width: 100%;
-  max-width: 400px;
-}
-.auth-card h1 { text-align: center; margin-bottom: 0.5em; }
-.auth-card p { text-align: center; color: var(--secondary-color); margin-top: 0; margin-bottom: 2em; }
-button.full-width { width: 100%; margin-top: 1em; }
-.switch-form-text { text-align: center; margin-top: 1.5em; }
-a { color: var(--primary-color); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* --- Estilos para el Dashboard --- */
-.main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap; /* Para móviles */
-  gap: 15px;
-}
-.header-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-#logout-button { background-color: var(--secondary-color); }
-
-.booking-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid var(--border-color);
-}
-.booking-item:last-child { border-bottom: none; }
-.booking-item p { margin: 0; }
-
-/* --- Estilos para el Calendario Semanal (Escritorio) --- */
+/* --- Estilos para el Calendario Semanal (Grid - Componente Reutilizado) --- */
+/* Estos estilos son necesarios porque el calendario se genera via JS con estas clases */
 .calendar-header {
   display: flex;
   justify-content: space-between;
@@ -167,6 +50,7 @@ a:hover { text-decoration: underline; }
   gap: 2px;
   background-color: var(--border-color);
   border: 1px solid var(--border-color);
+  border-radius: 0.5rem; /* Rounded corners for consistency */
 }
 .grid-cell {
   background-color: var(--surface-color);
@@ -180,50 +64,27 @@ a:hover { text-decoration: underline; }
   text-align: center;
 }
 .day-header, .time-header, .header {
-  background-color: #e9ecef;
+  background-color: #f8fafc; /* Updated to match Tailwind bg-slate-50 */
   font-weight: bold;
   position: sticky; top: 0; z-index: 10;
+  color: #64748b; /* slate-500 */
 }
 .time-header { left: 0; z-index: 20; position: sticky; }
 .slot { cursor: pointer; transition: background-color 0.2s ease; }
 .slot:hover { filter: brightness(0.95); }
 
 /* Estados del slot (Grid) */
-.slot.available { background-color: #d4edda; }
+.slot.available { background-color: #dcfce7; color: #15803d; } /* green-100 / green-700 */
 .slot.booked { background-color: #f8d7da; color: #58151d; }
-.slot.blocked { background-color: #6c757d; color: white; }
-.slot.open_match_available { background-color: #fff3cd; }
-.slot.open_match_full { background-color: #ffeeba; }
-.slot.past { background-color: #e9ecef; color: #6c757d; cursor: not-allowed; }
+.slot.blocked { background-color: #64748b; color: white; } /* slate-500 */
+.slot.open_match_available { background-color: #fef3c7; color: #b45309; } /* amber-100 / amber-700 */
+.slot.open_match_full { background-color: #fcd34d; }
+.slot.past { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; } /* slate-100 / slate-400 */
 .slot.my-booking { border: 2px solid var(--primary-color); font-weight: bold; }
 
 
-/* --- Estilos para la Vista Móvil (Acordeón) --- */
-.date-strip-container {
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 15px;
-    padding-bottom: 5px;
-}
-.date-strip { display: inline-flex; gap: 10px; }
-.date-item {
-    padding: 10px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    text-align: center;
-    cursor: pointer;
-    background-color: var(--surface-color);
-    min-width: 50px;
-}
-.date-item.selected {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-.date-item .day-name { display: block; font-size: 0.8em; text-transform: uppercase; }
-.date-item .day-number { display: block; font-size: 1.2em; font-weight: bold; }
-
+/* --- Estilos para la Vista Móvil (Acordeón Legacy) --- */
+/* Mantener para cuando JS inyecta el calendario móvil */
 .daily-slot {
     background-color: var(--surface-color);
     border: 1px solid var(--border-color);
@@ -260,9 +121,9 @@ a:hover { text-decoration: underline; }
 }
 .slot-details.active { display: block; }
 .mobile-actions { display: flex; gap: 10px; margin-bottom: 15px; }
-.mobile-actions button { flex: 1; }
+.mobile-actions button { flex: 1; } /* SCOPED button style */
 
-/* --- Modales --- */
+/* --- Modales (Legacy/Hybrid) --- */
 #modal-overlay, #waitlist-modal-overlay, #join-match-modal-overlay, #my-booking-modal-overlay, #my-match-modal-overlay, #already-on-waitlist-modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
@@ -272,131 +133,20 @@ a:hover { text-decoration: underline; }
 #booking-modal, #waitlist-modal, #join-match-modal, #my-booking-modal, #my-match-modal {
   width: 90%; max-width: 450px;
 }
-.open-match-toggle {
-  display: flex; align-items: center; justify-content: center;
-  gap: 10px; background-color: #f8f9fa; padding: 10px;
-  border-radius: 5px; margin-bottom: 1em;
-}
-#modal-options-container, #waitlist-modal-options, #join-match-modal-options, #my-booking-modal-options, #my-match-modal-options {
-  display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap;
-}
 
-
-/* --- Estilos para el Panel de Administración --- */
-.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.full-width-card { grid-column: 1 / -1; }
-table { width: 100%; border-collapse: collapse; margin-top: 1em; }
-th, td { border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; vertical-align: middle; }
-th { background-color: #f8f9fa; font-weight: 600; }
-tr:nth-child(even) { background-color: #f8f9fa; }
-/* Pestañas */
-.tabs-nav { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; overflow-x: auto; }
-.tab-link {
-  padding: 10px 20px; cursor: pointer; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px;
-  font-size: 1.1em; color: var(--secondary-color); white-space: nowrap;
-}
-.tab-link.active { border-bottom-color: var(--primary-color); color: var(--primary-color); font-weight: 600; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* Acordeones Admin */
-.accordion-item { border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; }
-.accordion-header { background-color: var(--background-color); padding: 15px; cursor: pointer; font-weight: 500; display: flex; justify-content: space-between; }
-.accordion-content { padding: 20px; display: none; border-top: 1px solid var(--border-color); }
-
-/* --- Estadísticas --- */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-.stat-item { background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; }
-.stat-item p { font-size: 2em; font-weight: bold; color: var(--accent-color); margin: 10px 0; }
-.stat-item ul { text-align: left; padding-left: 20px; }
-
-
-/* --- Media Queries --- */
-@media (max-width: 768px) {
-    .desktop-only { display: none !important; }
-    .mobile-only { display: block !important; }
-
-    .main-header { justify-content: center; }
-    .header-buttons { width: 100%; justify-content: space-between; }
-    .header-buttons button { flex: 1; padding: 10px; font-size: 0.9em; }
-
-    .admin-grid { grid-template-columns: 1fr; }
-
-    /* En móvil ocultamos el calendario grid y mostramos solo el acordeón */
-    #weekly-calendar-container, .calendar-header > button, .calendar-header > h3 { display: none; }
-    #daily-slots-container { display: block; }
-}
-
-@media (min-width: 769px) {
-    .mobile-only { display: none !important; }
-    .desktop-only { display: block !important; }
-    #daily-slots-container { display: none; }
-}
-
-/* Styles for duration buttons in mobile view */
-.duration-options {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    justify-content: center;
-}
-
-.duration-btn {
-    padding: 10px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--surface-color);
+/* Scoped Button Resets for Modals */
+#booking-modal button, #join-match-modal button, #my-match-modal button {
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* Resetting generic browser styles, but allowing component classes to rule */
 }
 
-.duration-btn:hover {
-    background-color: var(--background-color);
-}
 
-.duration-btn.selected {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-    font-weight: bold;
-}
+/* --- Booking Modal Specifics (From previous design, kept for functionality) --- */
+/* Note: The HTML uses classes like .booking-modal-container. We ensure they are defined here or mapped. */
+/* The NEW Dashboard HTML uses the OLD Booking Modal structure with these classes:
+   booking-modal-container, booking-modal-header-bar, etc.
+   These MUST be preserved. */
 
-/* --- Notification Styles --- */
-#notification-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 2000;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
-}
-
-.notification {
-    background-color: var(--surface-color);
-    color: var(--text-color);
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    border-left: 5px solid;
-}
-
-.notification.show {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.notification-success { border-color: var(--success-color); }
-.notification-error { border-color: var(--danger-color); }
-.notification-info { border-color: var(--primary-color); }
-
-/* --- New Modal Styles --- */
-
-/* Color variables from the new design */
 :root {
     --pah-primary: #2563eb;
     --pah-primary-dark: #1d4ed8;
@@ -408,19 +158,18 @@ tr:nth-child(even) { background-color: #f8f9fa; }
     --pah-blue-light-bg: #eff6ff;
 }
 
-/* Override the modal overlay to match the design */
 #modal-overlay {
-    background-color: rgba(9, 24, 51, 0.4); /* Equivalent to slate-900/40 */
+    background-color: rgba(9, 24, 51, 0.4);
     backdrop-filter: blur(4px);
 }
 
 .booking-modal-container {
-    max-width: 448px; /* max-w-md */
+    max-width: 448px;
     width: 100%;
     margin: 1.5rem;
     background-color: var(--pah-surface);
-    border-radius: 1.5rem; /* rounded-2xl */
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     overflow: hidden;
     border: 1px solid var(--pah-border);
     transform: scale(1);
@@ -428,609 +177,164 @@ tr:nth-child(even) { background-color: #f8f9fa; }
 }
 
 .booking-modal-header-bar {
-    height: 0.5rem; /* h-2 */
+    height: 0.5rem;
     width: 100%;
     background-image: linear-gradient(to right, #60a5fa, var(--pah-primary));
 }
 
-.booking-modal-padding {
-    padding: 2rem; /* p-8 */
-}
+.booking-modal-padding { padding: 2rem; }
 
 .booking-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1.5rem; /* mb-6 */
+    margin-bottom: 1.5rem;
 }
 
 .booking-modal-title-text {
-    font-size: 1.5rem; /* text-2xl */
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--pah-text-primary);
-    letter-spacing: -0.025em; /* tracking-tight */
+    letter-spacing: -0.025em;
     margin: 0;
 }
 
 .booking-modal-subtitle {
-    font-size: 0.875rem; /* text-sm */
+    font-size: 0.875rem;
     color: var(--pah-text-secondary);
-    margin-top: 0.25rem; /* mt-1 */
+    margin-top: 0.25rem;
     margin-bottom: 0;
 }
 
 .booking-modal-header-icon-container {
     flex-shrink: 0;
     background-color: var(--pah-blue-light-bg);
-    padding: 0.5rem; /* p-2 */
-    border-radius: 0.5rem; /* rounded-lg */
+    padding: 0.5rem;
+    border-radius: 0.5rem;
     color: var(--pah-primary);
 }
 
 .booking-modal-header-icon-container .material-icons-round {
-    font-size: 2rem; /* text-3xl approx */
-    display: block; /* Fixes alignment issues */
+    font-size: 2rem;
+    display: block;
 }
 
 .booking-modal-time-banner {
     display: flex;
     align-items: center;
-    gap: 0.75rem; /* gap-3 */
+    gap: 0.75rem;
     background-color: var(--pah-background);
     border: 1px solid var(--pah-border);
-    padding: 1rem; /* p-4 */
-    border-radius: 0.75rem; /* rounded-xl */
-    margin-bottom: 1.5rem; /* mb-6 */
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
 }
-.booking-modal-time-banner p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--pah-text-primary);
-}
-.booking-modal-time-banner .material-icons-round {
-    color: var(--pah-primary);
-}
+.booking-modal-time-banner p { margin: 0; font-size: 0.9rem; color: var(--pah-text-primary); }
+.booking-modal-time-banner .material-icons-round { color: var(--pah-primary); }
 
 .open-match-label {
     position: relative;
     display: flex;
     align-items: flex-start;
-    padding: 1rem; /* p-4 */
-    border-radius: 0.75rem; /* rounded-xl */
+    padding: 1rem;
+    border-radius: 0.75rem;
     border: 1px solid var(--pah-border);
     cursor: pointer;
     transition: background-color 0.2s;
 }
-.open-match-label:hover {
-    background-color: var(--pah-background);
-}
-.open-match-checkbox-wrapper {
-    display: flex;
-    align-items: center;
-    height: 1.25rem; /* h-5 */
-}
-#open-match-checkbox {
-    height: 1.25rem; /* h-5 */
-    width: 1.25rem; /* w-5 */
-    accent-color: var(--pah-primary); /* Replaces custom styling for simplicity */
-}
-.open-match-text-wrapper {
-    margin-left: 0.75rem; /* ml-3 */
-}
-.open-match-title {
-    font-weight: 600;
-    color: var(--pah-text-primary);
-}
-.open-match-description {
-    display: block;
-    font-size: 0.75rem; /* text-xs */
-    color: var(--pah-text-secondary);
-    margin-top: 2px;
-}
-.open-match-icon {
-    position: absolute;
-    right: 1rem; /* right-4 */
-    top: 1rem; /* top-4 */
-    color: #94a3b8; /* slate-400 */
-}
-.open-match-label:hover .open-match-icon {
-    color: var(--pah-primary);
-}
+.open-match-label:hover { background-color: var(--pah-background); }
+.open-match-checkbox-wrapper { display: flex; align-items: center; height: 1.25rem; }
+#open-match-checkbox { height: 1.25rem; width: 1.25rem; accent-color: var(--pah-primary); }
+.open-match-text-wrapper { margin-left: 0.75rem; }
+.open-match-title { font-weight: 600; color: var(--pah-text-primary); }
+.open-match-description { display: block; font-size: 0.75rem; color: var(--pah-text-secondary); margin-top: 2px; }
+.open-match-icon { position: absolute; right: 1rem; top: 1rem; color: #94a3b8; }
+.open-match-label:hover .open-match-icon { color: var(--pah-primary); }
 
-.booking-modal-duration-section {
-    margin-top: 1.5rem; /* Equivalent to mb-6 on the element above */
-    margin-bottom: 2rem; /* mb-8 */
-}
-.duration-label {
-    display: block;
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 500;
-    color: var(--pah-text-primary);
-    margin-bottom: 0.75rem; /* mb-3 */
-}
-.duration-options-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem; /* gap-4 */
-}
+.booking-modal-duration-section { margin-top: 1.5rem; margin-bottom: 2rem; }
+.duration-label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--pah-text-primary); margin-bottom: 0.75rem; }
+.duration-options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
 .duration-button {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 1.5rem; /* p-3 horizontal padding increased */
-    border-radius: 0.75rem; /* rounded-xl */
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
     border: 1px solid var(--pah-border);
     background-color: var(--pah-surface);
     color: var(--pah-text-secondary);
     cursor: pointer;
     transition: all 0.2s;
 }
-.duration-button:hover {
-    border-color: #cbd5e1; /* slate-300 */
-    background-color: var(--pah-background);
-}
-.duration-button.selected {
-    border-width: 2px;
-    border-color: var(--pah-primary);
-    background-color: var(--pah-blue-light-bg);
-    color: var(--pah-primary);
-}
-.duration-button .check-icon {
-    position: absolute;
-    top: 0.5rem; /* top-2 */
-    right: 0.5rem; /* right-2 */
-    display: none;
-    font-size: 1rem; /* text-base */
-}
-.duration-button.selected .check-icon {
-    display: block;
-}
-.duration-button-title {
-    font-size: 1.125rem; /* text-lg */
-    font-weight: 700;
-}
-.duration-button-subtitle {
-    font-size: 0.75rem; /* text-xs */
-    opacity: 0.8;
-}
+.duration-button:hover { border-color: #cbd5e1; background-color: var(--pah-background); }
+.duration-button.selected { border-width: 2px; border-color: var(--pah-primary); background-color: var(--pah-blue-light-bg); color: var(--pah-primary); }
+.duration-button .check-icon { position: absolute; top: 0.5rem; right: 0.5rem; display: none; font-size: 1rem; }
+.duration-button.selected .check-icon { display: block; }
+.duration-button-title { font-size: 1.125rem; font-weight: 700; }
+.duration-button-subtitle { font-size: 0.75rem; opacity: 0.8; }
 
-.booking-modal-divider {
-    border: 0;
-    border-top: 1px solid var(--pah-border);
-    margin-bottom: 1.5rem; /* mb-6 */
-}
-
-.booking-modal-footer {
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 0.75rem; /* gap-3 */
-}
+.booking-modal-divider { border: 0; border-top: 1px solid var(--pah-border); margin-bottom: 1.5rem; }
+.booking-modal-footer { display: flex; flex-direction: column-reverse; gap: 0.75rem; }
 
 .modal-button-cancel, .modal-button-confirm {
     width: 100%;
-    padding: 0.7rem 1.25rem; /* px-5 py-2.5 approx */
-    border-radius: 0.5rem; /* rounded-lg */
+    padding: 0.7rem 1.25rem;
+    border-radius: 0.5rem;
     font-weight: 500;
     transition: all 0.2s;
     border: 1px solid transparent;
 }
-
-.modal-button-cancel {
-    border-color: var(--pah-border);
-    color: var(--pah-text-primary);
-}
-.modal-button-cancel:hover {
-    background-color: var(--pah-background);
-}
-
+.modal-button-cancel { border-color: var(--pah-border); color: var(--pah-text-primary); }
+.modal-button-cancel:hover { background-color: var(--pah-background); }
 .modal-button-confirm {
     background-color: var(--pah-primary);
     color: white;
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3), 0 2px 4px -2px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem; /* gap-2 */
-}
-.modal-button-confirm:hover {
-    background-color: var(--pah-primary-dark);
-}
-.modal-button-confirm .material-icons-round {
-    font-size: 1rem;
-}
-
-/* Responsive adjustments for the footer */
-@media (min-width: 640px) { /* sm breakpoint */
-    .booking-modal-footer {
-        flex-direction: row;
-        justify-content: flex-end;
-    }
-    .modal-button-cancel, .modal-button-confirm {
-        width: auto;
-    }
-}
-
-/* --- Join Match Modal Styles --- */
-
-.join-match-modal-container {
-    max-width: 448px; /* max-w-md */
-    width: 100%;
-    margin: 1.5rem;
-    background-color: var(--pah-surface);
-    border-radius: 1rem; /* rounded-xl */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
-    overflow: hidden;
-    border: 1px solid var(--pah-border);
-}
-
-.join-match-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--pah-border);
-}
-
-.join-match-modal-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.125rem; /* text-lg */
-    font-weight: 600;
-    color: var(--pah-primary);
-    margin: 0;
-}
-
-.join-match-modal-content {
-    padding: 1.5rem;
-}
-
-.join-match-modal-time-banner {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem;
-    background-color: var(--pah-blue-light-bg);
-    border-radius: 0.75rem;
-    margin-bottom: 1.5rem;
-    color: var(--pah-text-primary);
-}
-.join-match-modal-time-banner .material-icons-round {
-    color: var(--pah-primary);
-}
-
-.join-match-modal-participants-section {
-    background-color: #f8fafc; /* slate-50 */
-    border-radius: 0.75rem;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--pah-border);
-}
-
-.join-match-modal-participants-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-.join-match-modal-participants-header h3 {
-    margin: 0;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--pah-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.participants-count-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background-color: #e0f2fe; /* light-blue-100 approx */
-    color: #0284c7; /* light-blue-600 approx */
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.join-match-modal-participants-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
     gap: 0.5rem;
 }
-
-.join-match-modal-participants-list .participant-item {
-    background-color: var(--pah-surface);
-}
-
-/* Placeholder for available slot */
-.participant-placeholder {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    opacity: 0.7;
-}
-.participant-placeholder .participant-avatar {
-    background-color: transparent;
-    border: 2px dashed #cbd5e1; /* slate-300 */
-    color: #cbd5e1;
-}
-.participant-placeholder .participant-name {
-    color: #94a3b8; /* slate-400 */
-    font-style: italic;
-}
-
-.join-match-modal-confirmation-section {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-.join-match-modal-confirmation-section h3 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--pah-text-primary);
-}
-.join-match-modal-confirmation-section p {
-    margin: 0;
-    color: var(--pah-text-secondary);
-}
-
-.join-match-modal-footer {
-    display: flex;
-    gap: 0.75rem;
-    padding: 1.5rem;
-    background-color: #f8fafc; /* slate-50 */
-    border-top: 1px solid var(--pah-border);
-}
-.join-match-modal-footer .modal-button-cancel,
-.join-match-modal-footer .modal-button-confirm {
-    flex: 1;
-    justify-content: center;
-}
-.join-match-modal-footer .modal-button-confirm .material-icons-round {
-    font-size: 1.25rem;
-    margin-right: 0.25rem;
-}
-
-
-/* --- My Open Match Modal Styles --- */
-
-.my-match-modal-container {
-    max-width: 448px;
-    width: 100%;
-    margin: 1.5rem;
-    background-color: var(--pah-surface);
-    border-radius: 0.75rem; /* rounded-xl */
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    padding: 2rem;
-    position: relative;
-    border: 1px solid var(--pah-border);
-}
-
-.my-match-modal-close-button-top {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: #9ca3af; /* gray-400 */
-    cursor: pointer;
-    padding: 0;
-}
-.my-match-modal-close-button-top:hover {
-    color: #4b5563; /* gray-600 */
-}
-.my-match-modal-close-button-top .material-icons {
-    font-size: 1.25rem; /* text-xl */
-}
-
-.my-match-modal-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem; /* space-x-3 */
-    margin-bottom: 1.5rem; /* mb-6 */
-}
-
-.my-match-modal-header-icon-container {
-    padding: 0.75rem; /* p-3 */
-    background-color: var(--pah-blue-light-bg);
-    border-radius: 9999px; /* rounded-full */
-    flex-shrink: 0;
-}
-.my-match-modal-header-icon-container .material-icons {
-    color: var(--pah-primary);
-    font-size: 1.5rem; /* text-2xl */
-    display: block;
-}
-
-.my-match-modal-title {
-    font-size: 1.25rem; /* text-xl */
-    font-weight: 700;
-    color: var(--pah-primary);
-    margin: 0;
-}
-
-.my-match-modal-subtitle {
-    font-size: 0.875rem; /* text-sm */
-    color: var(--pah-text-secondary);
-    margin: 0;
-}
-
-.my-match-modal-time-banner {
-    background-color: rgba(239, 246, 255, 0.5); /* blue-50/50 */
-    border-radius: 0.5rem; /* rounded-lg */
-    padding: 1rem;
-    margin-bottom: 1.5rem; /* mb-6 */
-    border: 1px solid rgba(219, 234, 254, 1); /* blue-100 */
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-}
-.my-match-modal-time-banner .material-icons {
-    color: var(--pah-primary);
-    margin-top: 2px;
-}
-.my-match-modal-time-banner-text {
-    color: var(--pah-text-secondary);
-    font-size: 0.875rem; /* text-sm */
-    line-height: 1.5;
-    margin: 0;
-}
-.my-match-modal-time-text {
-    color: var(--pah-text-primary);
-    font-weight: 700;
-    font-size: 1.125rem; /* text-lg */
-    margin-top: 0.25rem;
-    margin: 0;
-}
-#my-match-modal-time .date-separator {
-    color: #9ca3af; /* gray-400 */
-    margin: 0 0.25rem;
-}
-
-.my-match-modal-participants-section {
-    margin-bottom: 2rem; /* mb-8 */
-}
-
-.my-match-modal-participants-title {
-    font-size: 0.75rem; /* text-sm */
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--pah-text-secondary);
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-}
-.my-match-modal-participants-title .material-icons {
-    font-size: 0.875rem;
-    margin-right: 0.25rem;
-}
-
-.my-match-modal-participants-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem; /* space-y-3 */
-}
-
-.participant-item {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem;
-    background-color: var(--pah-background);
-    border-radius: 0.5rem;
-    border: 1px solid var(--pah-border);
-    transition: background-color 0.2s;
-}
-.participant-item:hover {
-    background-color: #f1f5f9; /* gray-100 */
-}
-
-.participant-avatar {
-    height: 2rem; /* h-8 */
-    width: 2rem; /* w-8 */
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 0.75rem;
-    margin-right: 0.75rem;
-}
-/* Utility classes for avatar gradients */
-.avatar-gradient-1 { background-image: linear-gradient(to bottom right, #60a5fa, #3b82f6); }
-.avatar-gradient-2 { background-image: linear-gradient(to bottom right, #4ade80, #16a34a); }
-.avatar-gradient-3 { background-image: linear-gradient(to bottom right, #f87171, #ef4444); }
-.avatar-gradient-4 { background-image: linear-gradient(to bottom right, #fbbf24, #f59e0b); }
-
-
-.participant-name {
-    color: var(--pah-text-primary);
-    font-weight: 500;
-    flex-grow: 1; /* Allow name to take up space */
-}
-
-.participant-role {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #059669; /* emerald-600 */
-    background-color: #d1fae5; /* emerald-100 */
-    padding: 0.125rem 0.5rem;
-    border-radius: 9999px;
-}
-
-.my-match-modal-footer {
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--pah-border);
-}
-.my-match-modal-footer-actions {
-    display: flex;
-    gap: 0.5rem;
-    width: 100%;
-}
-.my-match-modal-button-close, .my-match-modal-button-leave, .my-match-modal-button-cancel-match {
-    width: 100%;
-    padding: 0.6rem 1.25rem;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.my-match-modal-button-close {
-    color: var(--pah-text-secondary);
-    background-color: transparent;
-}
-.my-match-modal-button-close:hover {
-    background-color: var(--pah-background);
-    color: var(--pah-text-primary);
-}
-
-.my-match-modal-button-leave, .my-match-modal-button-cancel-match {
-    color: white;
-    background-color: #ef4444; /* red-500 */
-    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-}
-.my-match-modal-button-leave:hover, .my-match-modal-button-cancel-match:hover {
-    background-color: #dc2626; /* red-600 */
-}
-.my-match-modal-button-leave .material-icons, .my-match-modal-button-cancel-match .material-icons {
-    font-size: 1rem;
-    margin-right: 0.5rem;
-}
+.modal-button-confirm:hover { background-color: var(--pah-primary-dark); }
+.modal-button-confirm .material-icons-round { font-size: 1rem; }
 
 @media (min-width: 640px) {
-    .my-match-modal-footer {
-        flex-direction: row;
-    }
-    .my-match-modal-button-close, .my-match-modal-button-leave, .my-match-modal-button-cancel-match,
-    .my-match-modal-footer-actions {
-        width: auto;
-    }
+    .booking-modal-footer { flex-direction: row; justify-content: flex-end; }
+    .modal-button-cancel, .modal-button-confirm { width: auto; }
 }
 
-/* --- Waitlist Modal Styles (Replaced by Tailwind) --- */
-/* The styles for .waitlist-card and .already-listed-card have been removed
-   as these components now use Tailwind CSS utility classes directly in the HTML. */
+/* Join Match & My Match styles also preserved (abbreviated here as they are unique classes) */
+.join-match-modal-container { background-color: var(--pah-surface); border-radius: 1rem; border: 1px solid var(--pah-border); padding-bottom: 0; overflow: hidden;}
+.join-match-modal-header, .join-match-modal-footer { border-color: var(--pah-border); }
+.join-match-modal-footer { background-color: #f8fafc; }
+.join-match-modal-participants-section { background-color: #f8fafc; border: 1px solid var(--pah-border); }
+.participants-count-chip { background-color: #e0f2fe; color: #0284c7; }
 
-/* --- My Booking Modal Styles (Replaced by Tailwind) --- */
-/* The styles for .my-booking-card and related classes have been removed
-   as this component now uses Tailwind CSS utility classes directly in the HTML. */
+/* Notification Styles */
+#notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+.notification {
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    border-left: 5px solid;
+}
+.notification.show { opacity: 1; transform: translateX(0); }
+.notification-success { border-color: var(--success-color); }
+.notification-error { border-color: var(--danger-color); }
+.notification-info { border-color: var(--primary-color); }
