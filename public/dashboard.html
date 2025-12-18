@@ -9,6 +9,30 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "primary-dark": "#0284c7",
+                        "background-dark": "#0f172a",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -108,33 +132,38 @@
         </div>
     </div>
   
-    <div id="waitlist-modal-overlay" class="hidden">
-        <div id="waitlist-modal" class="waitlist-card">
-            <button id="waitlist-close-icon-btn" class="modal-close-icon-btn">
-                <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+    <div id="waitlist-modal-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm transition-opacity">
+        <div class="relative w-full max-w-[480px] flex flex-col bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-100">
+            <button id="waitlist-close-icon-btn" class="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-100">
+                <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
-            <div class="waitlist-content">
-                <div class="waitlist-icon-wrapper">
-                    <span class="material-symbols-outlined" style="font-size: 32px;">notifications_active</span>
+            <div class="flex flex-col items-center px-8 pt-12 pb-8 text-center">
+                <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-6 ring-4 ring-white shadow-sm">
+                    <span class="material-symbols-outlined text-[32px] text-primary">notifications_active</span>
                 </div>
-                <div class="waitlist-text-wrapper">
-                    <h2 class="waitlist-title">
+                <div class="flex flex-col w-full mb-3">
+                    <h2 class="text-slate-900 tracking-tight text-[24px] font-bold leading-tight px-2">
                         Horario Ocupado
                     </h2>
                 </div>
-                <div class="waitlist-text-wrapper mb-8">
-                    <p class="waitlist-description">
+                <div class="flex flex-col w-full mb-8">
+                    <p class="text-slate-600 text-base font-medium leading-relaxed px-2">
                         Esta pista ya está reservada para el horario seleccionado. ¿Quieres que te notifiquemos si la reserva se cancela y el horario queda libre?
                     </p>
                 </div>
-                <div class="waitlist-actions">
-                    <button id="waitlist-cancel-btn" class="waitlist-btn-secondary">
+                <div class="flex flex-col w-full gap-3 sm:flex-row sm:gap-4">
+                    <button id="waitlist-cancel-btn" class="flex-1 cursor-pointer items-center justify-center rounded-xl h-12 px-6 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 text-sm font-bold leading-normal tracking-[0.015em] transition-all focus:ring-2 focus:ring-slate-200 focus:outline-none order-2 sm:order-1 shadow-sm">
                         <span class="truncate">No, gracias</span>
                     </button>
-                    <button id="waitlist-join-btn" class="waitlist-btn-primary">
+                    <button id="waitlist-join-btn" class="flex-1 cursor-pointer items-center justify-center rounded-xl h-12 px-6 bg-primary hover:bg-blue-600 text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-lg shadow-blue-500/25 transition-all focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none order-1 sm:order-2">
                         <span class="truncate">Sí, agregarme a la lista</span>
                     </button>
                 </div>
+            </div>
+            <!-- Footer hidden as requested -->
+            <div class="bg-slate-50 px-6 py-3.5 border-t border-slate-100 flex justify-center items-center gap-2 hidden">
+                <span class="material-symbols-outlined text-[18px] text-slate-500">info</span>
+                <p class="text-xs text-slate-500 font-semibold">Hay 3 personas en lista de espera</p>
             </div>
         </div>
     </div>
@@ -181,45 +210,45 @@
         </div>
     </div>
 
-    <!-- Nuevo Modal para Mi Reserva -->
-    <div id="my-booking-modal-overlay" class="hidden">
-        <div id="my-booking-modal" class="my-booking-card">
-            <div class="my-booking-header">
-                <div class="my-booking-header-content">
-                    <div class="my-booking-icon-wrapper">
+    <!-- Nuevo Modal para Mi Reserva (Converted to Tailwind) -->
+    <div id="my-booking-modal-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div id="my-booking-modal" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-white/20 overflow-hidden transform transition-all scale-100 flex flex-col">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
                         <span class="material-icons-round text-xl">calendar_today</span>
                     </div>
-                    <h3 class="my-booking-title">
+                    <h3 class="text-xl font-bold text-slate-800 m-0">
                         Mi Reserva
                     </h3>
                 </div>
-                <button id="my-booking-close-icon-btn" class="my-booking-close-icon-btn">
+                <button id="my-booking-close-icon-btn" class="text-slate-400 hover:text-slate-600 transition-colors p-0 flex items-center justify-center focus:outline-none">
                     <span class="material-icons-round">close</span>
                 </button>
             </div>
-            <div class="my-booking-body">
-                <div class="my-booking-info-box">
-                    <span class="material-icons-round text-primary info-icon">info</span>
-                    <p class="my-booking-info-text">
+            <div class="p-6 md:p-8">
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-start gap-3">
+                    <span class="material-icons-round text-primary mt-0.5 text-lg">info</span>
+                    <p class="text-sm md:text-base text-slate-700 leading-relaxed m-0">
                         Esta pista ya está reservada por ti para el <br/>
-                        <span id="my-booking-modal-time" class="my-booking-time-display">--:--</span>
+                        <span id="my-booking-modal-time" class="font-bold text-slate-900 block mt-1 text-lg">--:--</span>
                     </p>
                 </div>
-                <div class="my-booking-confirmation-text">
-                    <p class="my-booking-question">
+                <div class="text-center">
+                    <p class="text-lg font-medium text-slate-800 mb-1">
                         ¿Quieres cancelarla?
                     </p>
-                    <p class="my-booking-subtext">
+                    <p class="text-sm text-slate-500 m-0">
                         Esta acción liberará la pista para otros usuarios.
                     </p>
                 </div>
             </div>
-            <div class="my-booking-footer">
-                <button id="my-booking-close-btn" class="btn-my-booking-keep">
+            <div class="px-6 py-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button id="my-booking-close-btn" class="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-300 bg-transparent text-slate-700 font-medium text-sm transition-all hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400">
                     No, mantener
                 </button>
-                <button id="my-booking-cancel-btn" class="btn-my-booking-cancel">
-                    <span class="material-icons-round text-sm mr-2">cancel</span>
+                <button id="my-booking-cancel-btn" class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-red-600 text-white font-medium text-sm border-none flex items-center justify-center gap-2 shadow-lg shadow-red-500/30 transition-all hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                    <span class="material-icons-round text-sm">cancel</span>
                     Sí, cancelar
                 </button>
             </div>
@@ -280,35 +309,34 @@
     </div>
 
     <!-- New Modal for Already on Waitlist -->
-    <div id="already-on-waitlist-modal-overlay" class="hidden">
-        <div id="already-on-waitlist-modal" class="already-listed-card">
-            <button id="already-listed-close-icon-btn" class="modal-close-icon-btn">
-                <span class="material-icons-round" style="font-size: 24px;">close</span>
+    <div id="already-on-waitlist-modal-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-surface-light p-6 text-left shadow-2xl transition-all border border-slate-100">
+            <button id="already-listed-close-icon-btn" class="absolute top-4 right-4 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+                <span class="sr-only">Cerrar</span>
+                <span class="material-icons-round text-2xl">close</span>
             </button>
-            <div class="already-listed-content">
-                <div class="already-listed-header">
-                    <div class="already-listed-icon-wrapper">
-                        <span class="material-icons-round text-3xl text-primary" style="font-size: 30px;">playlist_add_check</span>
-                    </div>
-                    <div class="already-listed-text-group">
-                        <h3 class="already-listed-title" id="already-listed-modal-title">
-                            Ya estás en la lista
-                        </h3>
-                        <div class="mt-3">
-                            <p class="already-listed-description">
-                                Actualmente tienes un turno reservado en la lista de espera para este horario. <br class="hidden sm:block"/>
-                                ¿Deseas cancelar tu solicitud y ser eliminado de la lista?
-                            </p>
-                        </div>
+            <div class="flex flex-col items-center sm:items-start">
+                <div class="mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-blue-50 sm:mx-0">
+                    <span class="material-icons-round text-3xl text-primary">playlist_add_check</span>
+                </div>
+                <div class="mt-5 text-center sm:mt-4 sm:text-left w-full">
+                    <h3 class="text-xl font-semibold leading-6 text-slate-900" id="already-listed-modal-title">
+                        Ya estás en la lista
+                    </h3>
+                    <div class="mt-3">
+                        <p class="text-sm text-slate-500 leading-relaxed">
+                            Actualmente tienes un turno reservado en la lista de espera para este horario. <br class="hidden sm:block"/>
+                            ¿Deseas cancelar tu solicitud y ser eliminado de la lista?
+                        </p>
                     </div>
                 </div>
             </div>
-            <div class="already-listed-actions">
-                <button id="withdraw-waitlist-btn" class="already-listed-btn-danger">
-                    <span class="material-icons-round text-lg mr-2" style="font-size: 18px; margin-right: 8px;">delete_outline</span>
+            <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button id="withdraw-waitlist-btn" class="inline-flex w-full justify-center items-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:text-red-600 hover:border-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto transition-all" type="button">
+                    <span class="material-icons-round text-lg mr-2">delete_outline</span>
                     Sí, eliminar
                 </button>
-                <button id="stay-on-waitlist-btn" class="already-listed-btn-primary">
+                <button id="stay-on-waitlist-btn" class="inline-flex w-full justify-center items-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto transition-all" type="button">
                     No, mantener
                 </button>
             </div>
