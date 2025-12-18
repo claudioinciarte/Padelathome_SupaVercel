@@ -127,6 +127,7 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
             if (daySlot.maxParticipants) button.dataset.maxParticipants = daySlot.maxParticipants;
             if (daySlot.durationMinutes) button.dataset.duration = daySlot.durationMinutes;
             if (daySlot.participationType) button.dataset.participationType = daySlot.participationType;
+            if (daySlot.waitlistCount) button.dataset.waitlistcount = daySlot.waitlistCount;
 
 
             switch (status) {
@@ -419,7 +420,8 @@ export function init(container, onSlotClick) {
                     participationType: dataset.participationType,
                     participants: dataset.participants,
                     maxParticipants: dataset.maxParticipants,
-                    duration: dataset.duration
+                    duration: dataset.duration,
+                    waitlistCount: dataset.waitlistcount
                 };
                 if (slotData.status && slotData.status !== 'past') {
                     onSlotClick(slotData);

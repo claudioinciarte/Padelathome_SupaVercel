@@ -79,13 +79,16 @@ const getWeekSchedule = async (req, res) => {
     );
     const myParticipantBookingIds = myParticipantBookingsResult.rows.map(r => r.booking_id);
 
-    const [blockedResult, participantsResult, settingsResult] = await Promise.all([
+    const [blockedResult, participantsResult, settingsResult, waitlistResult] = await Promise.all([
       pool.query("SELECT start_time, end_time, reason FROM blocked_periods WHERE court_id = $1 AND start_time >= $2 AND end_time <= $3", [courtId, weekStart, weekEnd]),
       pool.query("SELECT booking_id, COUNT(user_id) as participant_count FROM match_participants WHERE booking_id = ANY($1::bigint[]) GROUP BY booking_id", [bookingIds]),
-      pool.query("SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('operating_open_time', 'operating_close_time')")
+      pool.query("SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('operating_open_time', 'operating_close_time')"),
+      pool.query("SELECT slot_start_time, COUNT(user_id) as count FROM waiting_list_entries WHERE court_id = $1 AND slot_start_time >= $2 AND slot_start_time <= $3 AND status = 'waiting' GROUP BY slot_start_time", [courtId, weekStart, weekEnd])
     ]);
     
     const participantCounts = participantsResult.rows.reduce((acc, row) => { acc[row.booking_id] = parseInt(row.participant_count, 10); return acc; }, {});
+    const waitlistCounts = waitlistResult.rows.reduce((acc, row) => { acc[new Date(row.slot_start_time).toISOString()] = parseInt(row.count, 10); return acc; }, {});
+
     const openTime = settingsResult.rows.find(s => s.setting_key === 'operating_open_time')?.setting_value || '08:00';
     const closeTime = settingsResult.rows.find(s => s.setting_key === 'operating_close_time')?.setting_value || '22:00';
     
@@ -104,6 +107,9 @@ const getWeekSchedule = async (req, res) => {
         
         const conflictingBooking = bookingsResult.rows.find(b => slotTime >= new Date(b.start_time) && slotTime < new Date(b.end_time));
         const conflictingBlock = blockedResult.rows.find(b => slotTime >= new Date(b.start_time) && slotTime < new Date(b.end_time));
+
+        // Inject waitlist count for any slot (useful if it's booked)
+        slotInfo.waitlistCount = waitlistCounts[slotInfo.startTime] || 0;
 
         if (conflictingBlock) {
           slotInfo.status = 'blocked';

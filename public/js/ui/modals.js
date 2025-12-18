@@ -13,6 +13,7 @@ const waitlistModalOverlay = document.getElementById('waitlist-modal-overlay');
 const waitlistJoinBtn = document.getElementById('waitlist-join-btn');
 const waitlistCancelBtn = document.getElementById('waitlist-cancel-btn');
 const waitlistCloseIconBtn = document.getElementById('waitlist-close-icon-btn');
+const waitlistCountText = document.getElementById('waitlist-count-text');
 
 // Already on Waitlist Modal Elements
 const alreadyOnWaitlistModalOverlay = document.getElementById('already-on-waitlist-modal-overlay');
@@ -194,7 +195,7 @@ export function showBookingModal(startTime, availableDurations) {
  * @param {number} data.duration - The duration of the slot in minutes.
  */
 export function showWaitlistModal(data) {
-    const { startTime, courtId, duration } = data;
+    const { startTime, courtId, duration, waitlistCount } = data;
     waitlistJoinBtn.dataset.courtid = courtId;
     waitlistJoinBtn.dataset.starttime = startTime;
     // Store duration so the handler can retrieve it
@@ -204,6 +205,14 @@ export function showWaitlistModal(data) {
         // Clear it if not provided to avoid using stale data
         delete waitlistJoinBtn.dataset.duration;
     }
+
+    // Update dynamic count
+    if (waitlistCountText) {
+        const count = waitlistCount || 0;
+        const peopleText = count === 1 ? 'persona' : 'personas';
+        waitlistCountText.textContent = `Hay ${count} ${peopleText} en lista de espera`;
+    }
+
     waitlistModalOverlay.classList.remove('hidden');
 }
 

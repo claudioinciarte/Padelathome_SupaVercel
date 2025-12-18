@@ -380,7 +380,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'waitlist':
                 case 'booked':
                 case 'open_match_full':
-                    Modals.showWaitlistModal({startTime, courtId: selectedCourtId, duration});
+                    // Pass waitlistCount from slotData
+                    Modals.showWaitlistModal({startTime, courtId: selectedCourtId, duration, waitlistCount: slotData.waitlistCount});
                     break;
             }
         });
