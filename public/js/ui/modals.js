@@ -114,27 +114,27 @@ export function initModals(handlers) {
     }
     
     if (handlers.onJoinMatch) {
-        joinMatchConfirmBtn.addEventListener('click', (event) => {
-            const { bookingId } = event.target.dataset;
+        joinMatchConfirmBtn.addEventListener('click', () => {
+            const { bookingId } = joinMatchConfirmBtn.dataset;
             handlers.onJoinMatch({ bookingId });
         });
     }
     
     if (handlers.onCancelBooking) {
-        myBookingCancelBtn.addEventListener('click', (event) => {
-            const { bookingId } = event.target.dataset;
-            handlers.onCancelBooking(bookingId); // Corrected here
+        myBookingCancelBtn.addEventListener('click', () => {
+            const { bookingId } = myBookingCancelBtn.dataset;
+            handlers.onCancelBooking(bookingId);
         });
-        myMatchCancelMatchBtn.addEventListener('click', (event) => {
-            const { bookingId } = event.target.dataset;
-            handlers.onCancelBooking(bookingId); // Corrected here
+        myMatchCancelMatchBtn.addEventListener('click', () => {
+            const { bookingId } = myMatchCancelMatchBtn.dataset;
+            handlers.onCancelBooking(bookingId);
         });
     }
     
     if (handlers.onLeaveMatch) {
-        myMatchLeaveBtn.addEventListener('click', (event) => {
-            const { bookingId } = event.target.dataset;
-            handlers.onLeaveMatch(bookingId); // Corrected here
+        myMatchLeaveBtn.addEventListener('click', () => {
+            const { bookingId } = myMatchLeaveBtn.dataset;
+            handlers.onLeaveMatch(bookingId);
         });
     }
 }
