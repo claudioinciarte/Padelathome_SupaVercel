@@ -137,23 +137,8 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
                     break;
 
                 case 'booked':
-                    // Non-clickable visual for booked (or clickable for waitlist?)
-                    // User snippet: "booked" is a div with a block icon.
-                    // BUT: User logic requires clicking for waitlist.
-                    // So we make it a button but styled like the "block" div?
-                    // Actually, for "booked", the prompt snippet showed a "block" icon in a div.
-                    // However, we need it to be clickable for the waitlist modal.
-                    // Compromise: Style it like the blocked slot but make it a button?
-                    // OR: Use a specific style for "Booked (Waitlist available)"?
-                    // The snippet used:
-                    // <div class="h-8 w-full rounded bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center cursor-not-allowed">
-                    //    <span class="material-icons-outlined text-xs">block</span>
-                    // </div>
-
-                    // Let's make it a button that looks like that div, but has hover effect to indicate interactivity?
-                    button.classList.add('bg-slate-50', 'dark:bg-slate-800/50', 'text-slate-300', 'dark:text-slate-600', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
-                    button.innerHTML = '<span class="material-icons-outlined text-xs">block</span>';
-                    // If waitlist logic is active, it IS clickable.
+                    button.classList.add('bg-red-100', 'dark:bg-red-900/30', 'text-red-700', 'dark:text-red-300', 'hover:bg-red-200', 'dark:hover:bg-red-900/50');
+                    button.textContent = 'Ocupado';
                     td.appendChild(button);
                     break;
 
