@@ -4,170 +4,402 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Padel@Home - Panel de Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#2563eb",
+            "primary-dark": "#1d4ed8",
+            "background-light": "#f8fafc",
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
   <link rel="stylesheet" href="/style.css">
   <link rel="manifest" href="/manifest.json">
+  <style>
+    /* Logic for tabs visibility toggled by admin.js */
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    /* Logic for accordion arrow rotation */
+    .accordion-header.active .material-icons-round {
+      transform: rotate(180deg);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-<body>
-  <div class="container">
-    <header class="main-header">
-      <h1>Panel de Administración</h1>
-      <p>Bienvenido, <span id="admin-name"></span>. <button type="button" id="dashboard-link" onclick="location.href='/dashboard.html'">Ir al Dashboard</button> <button type="button" id="logout-button">Cerrar Sesión</button></p>
-    </header>
+<body class="bg-background-light font-sans text-slate-800 min-h-screen flex flex-col">
 
-    <main>
-      <div class="tabs-container">
-        <div class="tabs-nav">
-          <button class="tab-link active" data-tab="users">Usuarios</button>
-          <button class="tab-link" data-tab="infrastructure">Infraestructura</button>
-        </div>
+  <!-- Notification Container -->
+  <div id="notification-container"></div>
 
-        <div id="users" class="tab-content active">
-          <section class="card admin-card">
-            <div class="accordion-item">
-              <div class="accordion-header"><h3>Invitar Nuevo Usuario</h3><span class="accordion-icon"></span></div>
-              <div class="accordion-content">
-                <form id="invite-user-form">
-                  <div class="form-group"><label for="invite-name">Nombre:</label><input type="text" id="invite-name" required></div>
-                  <div class="form-group"><label for="invite-email">Email:</label><input type="email" id="invite-email" required></div>
-                  <div class="form-group"><label for="invite-building">Edificio:</label><select id="invite-building" required></select></div>
-                  <div class="form-group"><label for="invite-floor">Piso:</label><input type="text" id="invite-floor" required></div>
-                  <div class="form-group"><label for="invite-door">Puerta:</label><input type="text" id="invite-door" required></div>
-                  <button type="submit">Enviar Invitación</button>
-                </form>
-              </div>
-            </div>
-            <div class="accordion-item">
-              <div class="accordion-header"><h3>Usuarios Registrados</h3><span class="accordion-icon"></span></div>
-              <div class="accordion-content">
-                <div id="user-management">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Estado</th>
-                        <th>Rol</th>
-                        <th>Acciones</th>
-                        <th>Acciones Avanzadas</th>
-                      </tr>
-                    </thead>
-                    <tbody id="user-table-body">
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <div id="infrastructure" class="tab-content">
-          <section class="card admin-card">
-            <div class="accordion-item">
-              <div class="accordion-header"><h3>Gestión de Edificios</h3><span class="accordion-icon"></span></div>
-              <div class="accordion-content">
-                <div id="building-management">
-                  <h3 id="building-form-title">Añadir Nuevo Edificio</h3>
-                  <form id="building-form">
-                    <input type="hidden" id="building-id">
-                    <div class="form-group"><label for="building-address">Dirección / Nombre:</label><input type="text" id="building-address" required></div>
-                    <div class="form-group"><label for="building-description">Descripción:</label><textarea id="building-description" rows="2"></textarea></div>
-                    <div class="form-buttons">
-                      <button type="submit">Guardar Edificio</button>
-                      <button type="button" id="cancel-building-edit-btn" style="display: none;">Cancelar</button>
-                    </div>
-                  </form>
-                  <h3>Edificios Existentes</h3>
-                  <div id="buildings-list-container"></div>
-                </div>
-              </div>
-            </div>
-            <div class="accordion-item">
-              <div class="accordion-header"><h3>Gestión de Pistas</h3><span class="accordion-icon"></span></div>
-              <div class="accordion-content">
-                <div id="court-management">
-                  <h3 id="court-form-title">Crear Nueva Pista</h3>
-                  <form id="court-form">
-                    <input type="hidden" id="court-id">
-                    <div class="form-group"><label for="court-name">Nombre:</label><input type="text" id="court-name" required></div>
-                    <div class="form-group"><label for="court-description">Descripción:</label><textarea id="court-description" rows="2"></textarea></div>
-                    <div id="court-active-div" style="display: none;" class="form-group"><label for="court-is-active">Activa:</label><input type="checkbox" id="court-is-active"></div>
-                    <div class="form-buttons">
-                      <button type="submit">Guardar</button>
-                      <button type="button" id="cancel-edit-btn" style="display: none;">Cancelar</button>
-                    </div>
-                  </form>
-                  <h3>Pistas Existentes</h3>
-                  <div id="courts-list-container"></div>
-                </div>
-              </div>
-            </div>
-            <div class="accordion-item">
-              <div class="accordion-header"><h3>Gestión de Bloqueos</h3><span class="accordion-icon"></span></div>
-              <div class="accordion-content">
-                <div id="block-management">
-                  <h3>Crear Nuevo Bloqueo</h3>
-                  <form id="create-block-form">
-                    <div class="form-group"><label for="block-court-select">Pista:</label><select id="block-court-select" required></select></div>
-                    <div class="form-group"><label for="block-start-time">Inicio:</label><input type="datetime-local" id="block-start-time" required></div>
-                    <div class="form-group"><label for="block-end-time">Fin:</label><input type="datetime-local" id="block-end-time" required></div>
-                    <div class="form-group"><label for="block-reason">Motivo:</label><input type="text" id="block-reason"></div>
-                    <button type="submit">Crear Bloqueo</button>
-                  </form>
-                  <h3>Bloqueos Activos</h3>
-                  <div id="blocks-list-container"></div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-
-      <section class="card admin-card full-width-card">
-        <h2>Gestión de Ajustes Generales</h2>
-        <div id="settings-management">
-          <form id="settings-form">
-            <p>Aquí puedes cambiar los parámetros de funcionamiento de la aplicación.</p>
-            <div class="settings-grid">
-              <div class="form-group"><label for="setting-open-time">Hora de Apertura:</label><input type="time" id="setting-open-time"></div>
-              <div class="form-group"><label for="setting-close-time">Hora de Cierre:</label><input type="time" id="setting-close-time"></div>
-              <div class="form-group"><label for="setting-advance-days">Días de Antelación:</label><input type="number" id="setting-advance-days" min="1"></div>
-              <div class="form-group"><label for="setting-gap-optimization">Optimización de Huecos:</label><input type="checkbox" id="setting-gap-optimization"></div>
-              <div class="form-group"><label for="setting-limit-open-matches-enabled">Limitar Partidas Abiertas:</label><input type="checkbox" id="setting-limit-open-matches-enabled"></div>
-              <div class="form-group"><label for="setting-max-open-matches-per-user">Máx. Partidas Abiertas por Usuario:</label><input type="number" id="setting-max-open-matches-per-user" min="0"></div>
-            </div>
-            <button type="submit">Guardar todos los Ajustes</button>
-          </form>
-        </div>
-      </section>
-
-      <section class="card admin-card full-width-card">
-        <h2>Estadísticas del Sistema</h2>
-        <div id="stats-overview">
-          <div class="stats-grid">
-            <div class="stat-item">
-              <h3>Reservas Totales (últimos 30 días)</h3>
-              <p id="total-bookings">--</p>
-            </div>
-            <div class="stat-item">
-              <h3>Usuarios Más Activos (últimos 30 días)</h3>
-              <ul id="most-active-users">
-                <li>Cargando...</li>
-              </ul>
-            </div>
-            <div class="stat-item">
-              <h3>Horas Pico de Reserva (últimos 30 días)</h3>
-              <ul id="peak-hours">
-                <li>Cargando...</li>
-              </ul>
-            </div>
+  <!-- Header -->
+  <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center gap-2">
+            <span class="material-icons-round text-primary text-3xl">admin_panel_settings</span>
+            <span class="font-bold text-xl tracking-tight text-slate-900">Panel de Administración</span>
           </div>
         </div>
-      </section>
-    </main>
-  </div>
-  
+        <div class="flex items-center gap-4">
+          <p class="text-sm text-slate-500 hidden sm:block">
+            Bienvenido, <span id="admin-name" class="font-semibold text-slate-900">Admin</span>
+          </p>
+          <div class="flex items-center gap-2">
+            <button id="dashboard-link" class="inline-flex items-center px-3 py-1.5 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors" type="button">
+              <span class="material-icons-round text-lg mr-1">dashboard</span>
+              Dashboard
+            </button>
+            <button id="logout-button" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" type="button">
+              <span class="material-icons-round text-lg mr-1">logout</span>
+              Salir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-container">
+      <div class="tabs-nav border-b border-slate-200 mb-6 flex space-x-8 overflow-x-auto">
+        <button class="tab-link active whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors border-primary text-primary focus:outline-none" data-tab="users">
+          Usuarios
+        </button>
+        <button class="tab-link whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 focus:outline-none" data-tab="infrastructure">
+          Infraestructura
+        </button>
+      </div>
+
+      <!-- Users Tab -->
+      <div id="users" class="tab-content active">
+        <section class="space-y-6">
+
+          <!-- Accordion: Invite User -->
+          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
+              <div class="flex items-center gap-3">
+                <span class="material-icons-round text-primary">person_add</span>
+                <h3 class="text-lg font-medium text-slate-900 m-0">Invitar Nuevo Usuario</h3>
+              </div>
+              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
+            </div>
+            <div class="accordion-content p-6 border-t border-slate-200" style="display: none;">
+              <form id="invite-user-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+                <div class="form-group col-span-1">
+                  <label for="invite-name" class="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+                  <input type="text" id="invite-name" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                </div>
+                <div class="form-group col-span-1">
+                  <label for="invite-email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                  <input type="email" id="invite-email" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                </div>
+                <div class="form-group col-span-1">
+                  <label for="invite-building" class="block text-sm font-medium text-slate-700 mb-1">Edificio</label>
+                  <select id="invite-building" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-4 col-span-1">
+                  <div class="form-group">
+                    <label for="invite-floor" class="block text-sm font-medium text-slate-700 mb-1">Piso</label>
+                    <input type="text" id="invite-floor" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                  </div>
+                  <div class="form-group">
+                    <label for="invite-door" class="block text-sm font-medium text-slate-700 mb-1">Puerta</label>
+                    <input type="text" id="invite-door" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                  </div>
+                </div>
+                <div class="col-span-1 md:col-span-2 flex justify-end">
+                  <button type="submit" class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    <span class="material-icons-round text-lg mr-2">send</span>
+                    Enviar Invitación
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Accordion: Registered Users -->
+          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
+              <div class="flex items-center gap-3">
+                <span class="material-icons-round text-primary">group</span>
+                <h3 class="text-lg font-medium text-slate-900 m-0">Usuarios Registrados</h3>
+              </div>
+              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
+            </div>
+            <div class="accordion-content p-0 border-t border-slate-200" style="display: none;">
+              <div id="user-management" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                  <thead class="bg-slate-50">
+                    <tr>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nombre</th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Estado</th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Rol</th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Acciones</th>
+                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Avanzadas</th>
+                    </tr>
+                  </thead>
+                  <tbody id="user-table-body" class="bg-white divide-y divide-slate-200">
+                    <!-- Rows will be populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Infrastructure Tab -->
+      <div id="infrastructure" class="tab-content">
+        <section class="space-y-6">
+
+          <!-- Accordion: Buildings -->
+          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
+              <div class="flex items-center gap-3">
+                <span class="material-icons-round text-primary">apartment</span>
+                <h3 class="text-lg font-medium text-slate-900 m-0">Gestión de Edificios</h3>
+              </div>
+              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
+            </div>
+            <div class="accordion-content p-6 border-t border-slate-200" style="display: none;">
+              <div id="building-management">
+                <h3 id="building-form-title" class="text-base font-semibold text-slate-900 mb-4">Añadir Nuevo Edificio</h3>
+                <form id="building-form" class="space-y-4 max-w-2xl mb-8 border-b border-slate-100 pb-8">
+                  <input type="hidden" id="building-id">
+                  <div class="form-group">
+                    <label for="building-address" class="block text-sm font-medium text-slate-700 mb-1">Dirección / Nombre</label>
+                    <input type="text" id="building-address" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                  </div>
+                  <div class="form-group">
+                    <label for="building-description" class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+                    <textarea id="building-description" rows="2" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></textarea>
+                  </div>
+                  <div class="form-buttons flex gap-3">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                      Guardar Edificio
+                    </button>
+                    <button type="button" id="cancel-building-edit-btn" style="display: none;" class="inline-flex justify-center py-2 px-4 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+                <h3 class="text-base font-semibold text-slate-900 mb-4">Edificios Existentes</h3>
+                <div id="buildings-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion: Courts -->
+          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
+              <div class="flex items-center gap-3">
+                <span class="material-icons-round text-primary">sports_tennis</span>
+                <h3 class="text-lg font-medium text-slate-900 m-0">Gestión de Pistas</h3>
+              </div>
+              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
+            </div>
+            <div class="accordion-content p-6 border-t border-slate-200" style="display: none;">
+              <div id="court-management">
+                <h3 id="court-form-title" class="text-base font-semibold text-slate-900 mb-4">Crear Nueva Pista</h3>
+                <form id="court-form" class="space-y-4 max-w-2xl mb-8 border-b border-slate-100 pb-8">
+                  <input type="hidden" id="court-id">
+                  <div class="form-group">
+                    <label for="court-name" class="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+                    <input type="text" id="court-name" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                  </div>
+                  <div class="form-group">
+                    <label for="court-description" class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+                    <textarea id="court-description" rows="2" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></textarea>
+                  </div>
+                  <div id="court-active-div" style="display: none;" class="form-group flex items-center gap-2">
+                    <input type="checkbox" id="court-is-active" class="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded">
+                    <label for="court-is-active" class="block text-sm font-medium text-slate-700">Activa</label>
+                  </div>
+                  <div class="form-buttons flex gap-3">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                      Guardar
+                    </button>
+                    <button type="button" id="cancel-edit-btn" style="display: none;" class="inline-flex justify-center py-2 px-4 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+                <h3 class="text-base font-semibold text-slate-900 mb-4">Pistas Existentes</h3>
+                <div id="courts-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion: Blocks -->
+          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
+              <div class="flex items-center gap-3">
+                <span class="material-icons-round text-primary">block</span>
+                <h3 class="text-lg font-medium text-slate-900 m-0">Gestión de Bloqueos</h3>
+              </div>
+              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
+            </div>
+            <div class="accordion-content p-6 border-t border-slate-200" style="display: none;">
+              <div id="block-management">
+                <h3 class="text-base font-semibold text-slate-900 mb-4">Crear Nuevo Bloqueo</h3>
+                <form id="create-block-form" class="space-y-4 max-w-2xl mb-8 border-b border-slate-100 pb-8">
+                  <div class="form-group">
+                    <label for="block-court-select" class="block text-sm font-medium text-slate-700 mb-1">Pista</label>
+                    <select id="block-court-select" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></select>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                      <label for="block-start-time" class="block text-sm font-medium text-slate-700 mb-1">Inicio</label>
+                      <input type="datetime-local" id="block-start-time" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                    </div>
+                    <div class="form-group">
+                      <label for="block-end-time" class="block text-sm font-medium text-slate-700 mb-1">Fin</label>
+                      <input type="datetime-local" id="block-end-time" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="block-reason" class="block text-sm font-medium text-slate-700 mb-1">Motivo</label>
+                    <input type="text" id="block-reason" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                  </div>
+                  <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Crear Bloqueo
+                  </button>
+                </form>
+                <h3 class="text-base font-semibold text-slate-900 mb-4">Bloqueos Activos</h3>
+                <div id="blocks-list-container" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- General Settings -->
+    <section class="mt-8 bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-200">
+        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <span class="material-icons-round text-primary">settings</span>
+          Gestión de Ajustes Generales
+        </h2>
+      </div>
+      <div id="settings-management" class="p-6">
+        <form id="settings-form" class="space-y-6">
+          <p class="text-sm text-slate-500">Aquí puedes cambiar los parámetros de funcionamiento de la aplicación.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="form-group">
+              <label for="setting-open-time" class="block text-sm font-medium text-slate-700 mb-1">Hora de Apertura</label>
+              <input type="time" id="setting-open-time" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+            </div>
+            <div class="form-group">
+              <label for="setting-close-time" class="block text-sm font-medium text-slate-700 mb-1">Hora de Cierre</label>
+              <input type="time" id="setting-close-time" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+            </div>
+            <div class="form-group">
+              <label for="setting-advance-days" class="block text-sm font-medium text-slate-700 mb-1">Días de Antelación</label>
+              <input type="number" id="setting-advance-days" min="1" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+            </div>
+            <div class="form-group flex items-start gap-3">
+              <div class="flex items-center h-5">
+                <input type="checkbox" id="setting-gap-optimization" class="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded">
+              </div>
+              <label for="setting-gap-optimization" class="text-sm font-medium text-slate-700">Optimización de Huecos</label>
+            </div>
+            <div class="form-group flex items-start gap-3">
+              <div class="flex items-center h-5">
+                <input type="checkbox" id="setting-limit-open-matches-enabled" class="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded">
+              </div>
+              <label for="setting-limit-open-matches-enabled" class="text-sm font-medium text-slate-700">Limitar Partidas Abiertas</label>
+            </div>
+            <div class="form-group">
+              <label for="setting-max-open-matches-per-user" class="block text-sm font-medium text-slate-700 mb-1">Máx. Partidas Abiertas</label>
+              <input type="number" id="setting-max-open-matches-per-user" min="0" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+            </div>
+          </div>
+          <div class="pt-4 border-t border-slate-200">
+            <button type="submit" class="inline-flex justify-center items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-colors">
+              <span class="material-icons-round text-lg mr-2">save</span>
+              Guardar todos los Ajustes
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="mt-8 bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-200">
+        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <span class="material-icons-round text-primary">bar_chart</span>
+          Estadísticas del Sistema
+        </h2>
+      </div>
+      <div id="stats-overview" class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="stat-item bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Reservas Totales (30 días)</h3>
+            <p id="total-bookings" class="text-3xl font-bold text-slate-900">--</p>
+          </div>
+          <div class="stat-item bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Usuarios Más Activos</h3>
+            <ul id="most-active-users" class="text-sm text-slate-700 space-y-1 list-disc list-inside">
+              <li>Cargando...</li>
+            </ul>
+          </div>
+          <div class="stat-item bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Horas Pico</h3>
+            <ul id="peak-hours" class="text-sm text-slate-700 space-y-1 list-disc list-inside">
+              <li>Cargando...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
   <script type="module" src="admin.js"></script>
   <script src="main.js"></script>
+
+  <script>
+    // Simple script to handle tab styling update since admin.js only handles logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabLinks = document.querySelectorAll('.tab-link');
+      tabLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          tabLinks.forEach(l => {
+             l.classList.remove('border-primary', 'text-primary');
+             l.classList.add('border-transparent', 'text-slate-500');
+          });
+          link.classList.remove('border-transparent', 'text-slate-500');
+          link.classList.add('border-primary', 'text-primary');
+        });
+      });
+    });
+  </script>
 </body>
 </html>
