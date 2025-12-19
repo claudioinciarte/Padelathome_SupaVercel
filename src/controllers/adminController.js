@@ -169,10 +169,15 @@ const updateUserRole = async (req, res) => {
 const createCourt = async (req, res) => {
   const { name, buildingId, description, is_active } = req.body;
   if (!name || !buildingId) return res.status(400).json({ message: 'Nombre y edificio son requeridos.' });
+
+  // Safe integer parsing
+  const bId = parseInt(buildingId);
+  if (isNaN(bId)) return res.status(400).json({ message: 'ID de edificio inválido.' });
+
   try {
     const { rows } = await pool.query(
       "INSERT INTO courts (name, building_id, description, is_active) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, parseInt(buildingId), description, is_active !== undefined ? is_active : true]
+      [name, bId, description, is_active !== undefined ? is_active : true]
     );
     res.status(201).json(rows[0]);
   } catch (error) {
@@ -195,9 +200,14 @@ const updateCourt = async (req, res) => {
   try {
     const { courtId } = req.params;
     const { name, buildingId, description, is_active } = req.body;
+
+    // Safe integer parsing
+    const bId = parseInt(buildingId);
+    if (isNaN(bId)) return res.status(400).json({ message: 'ID de edificio inválido.' });
+
     const { rows } = await pool.query(
       "UPDATE courts SET name = $1, building_id = $2, description = $3, is_active = $4, updated_at = NOW() WHERE id = $5 RETURNING *",
-      [name, parseInt(buildingId), description, is_active, courtId]
+      [name, bId, description, is_active, courtId]
     );
     if (rows.length === 0) return res.status(404).json({ message: 'Pista no encontrada.' });
     res.json(rows[0]);

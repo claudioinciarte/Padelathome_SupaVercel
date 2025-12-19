@@ -106,15 +106,18 @@ async function loadUsers(query = '') {
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${user.role}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-center space-x-2">
-                    <button data-userid="${user.id}" data-action="toggle-status" data-current-status="${user.account_status}" class="user-action-btn text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs transition-colors border border-gray-200 dark:border-gray-600">
-                        ${isActive ? 'Desactivar' : 'Activar'}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-center flex justify-center gap-1">
+                    <button data-userid="${user.id}" data-action="toggle-status" data-current-status="${user.account_status}" class="user-action-btn flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 transition-colors" title="${isActive ? 'Desactivar' : 'Activar'}">
+                        <span class="material-symbols-outlined text-lg">${isActive ? 'block' : 'check_circle'}</span>
                     </button>
-                    <button data-userid="${user.id}" data-action="toggle-role" data-current-role="${user.role}" class="user-action-btn text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary-light font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs transition-colors border border-gray-200 dark:border-gray-600">
-                        ${user.role === 'admin' ? 'Hacer User' : 'Hacer Admin'}
+                    <button data-userid="${user.id}" data-action="toggle-role" data-current-role="${user.role}" class="user-action-btn flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 transition-colors" title="${user.role === 'admin' ? 'Hacer Usuario' : 'Hacer Admin'}">
+                        <span class="material-symbols-outlined text-lg">${user.role === 'admin' ? 'person' : 'shield_person'}</span>
                     </button>
-                    <button data-userid="${user.id}" data-action="delete" class="user-action-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 px-3 py-1.5 rounded-md text-xs transition-colors border border-red-200 dark:border-red-800">
-                        Eliminar
+                    <button data-userid="${user.id}" data-action="reset-password" class="user-action-btn flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 transition-colors" title="Restablecer Contraseña">
+                        <span class="material-symbols-outlined text-lg">lock_reset</span>
+                    </button>
+                    <button data-userid="${user.id}" data-action="delete" class="user-action-btn flex items-center justify-center w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition-colors" title="Eliminar">
+                        <span class="material-symbols-outlined text-lg">delete</span>
                     </button>
                 </td>
             `;
@@ -172,6 +175,11 @@ async function handleUserAction(e) {
              });
              showNotification('Rol actualizado', 'success');
              loadUsers();
+        } else if (action === 'reset-password') {
+            if (confirm('¿Enviar correo de restablecimiento de contraseña?')) {
+                await fetchApi(`/admin/users/${userId}/reset-password`, { method: 'POST' });
+                showNotification('Correo enviado', 'success');
+            }
         } else if (action === 'delete') {
             if (confirm('¿Estás seguro de eliminar este usuario?')) {
                 await fetchApi(`/admin/users/${userId}`, { method: 'DELETE' });
