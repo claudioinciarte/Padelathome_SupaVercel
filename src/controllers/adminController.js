@@ -61,14 +61,18 @@ const updateUserStatus = async (req, res) => {
 };
 
 const inviteUser = async (req, res) => {
-  const { name, email, building_id, floor, door, phone_number } = req.body;
-  if (!name || !email || !building_id) return res.status(400).json({ message: 'Nombre, email y edificio son requeridos.' });
+  const { name, email, buildingId, building_id, floor, door, phone_number } = req.body;
+  const buildingIdToUse = buildingId || building_id;
+
+  if (!name || !email || !buildingIdToUse) return res.status(400).json({ message: 'Nombre, email y edificio son requeridos.' });
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const tempPassword = crypto.randomBytes(20).toString('hex');
     const password_hash = await bcrypt.hash(tempPassword, 10);
-    const newUserResult = await client.query("INSERT INTO users (name, email, password_hash, building_id, floor, door, phone_number, account_status) VALUES ($1, $2, $3, $4, $5, $6, $7, 'active') RETURNING id, name, email", [name, email, password_hash, parseInt(building_id), floor, door, phone_number]);
+    // Allow phone_number to be null
+    const phoneNumber = phone_number || null;
+    const newUserResult = await client.query("INSERT INTO users (name, email, password_hash, building_id, floor, door, phone_number, account_status) VALUES ($1, $2, $3, $4, $5, $6, $7, 'active') RETURNING id, name, email", [name, email, password_hash, parseInt(buildingIdToUse), floor, door, phoneNumber]);
     const newUser = newUserResult.rows[0];
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -145,6 +149,60 @@ const updateUserRole = async (req, res) => {
     res.json({ message: `Rol del usuario actualizado a '${role}'.`, user: result.rows[0] });
   } catch (error) {
     console.error('Error al actualizar el rol del usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
+// --- Funciones de Gestión de Pistas ---
+const createCourt = async (req, res) => {
+  const { name, buildingId, description, is_active } = req.body;
+  if (!name || !buildingId) return res.status(400).json({ message: 'Nombre y edificio son requeridos.' });
+  try {
+    const { rows } = await pool.query(
+      "INSERT INTO courts (name, building_id, description, is_active) VALUES ($1, $2, $3, $4) RETURNING *",
+      [name, parseInt(buildingId), description, is_active !== undefined ? is_active : true]
+    );
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Error al crear la pista:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
+const getAllCourts = async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM courts ORDER BY name ASC");
+    res.json(rows);
+  } catch (error) {
+    console.error('Error al obtener las pistas:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
+const updateCourt = async (req, res) => {
+  try {
+    const { courtId } = req.params;
+    const { name, buildingId, description, is_active } = req.body;
+    const { rows } = await pool.query(
+      "UPDATE courts SET name = $1, building_id = $2, description = $3, is_active = $4, updated_at = NOW() WHERE id = $5 RETURNING *",
+      [name, parseInt(buildingId), description, is_active, courtId]
+    );
+    if (rows.length === 0) return res.status(404).json({ message: 'Pista no encontrada.' });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Error al actualizar la pista:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
+const deleteCourt = async (req, res) => {
+  try {
+    const { courtId } = req.params;
+    const result = await pool.query("DELETE FROM courts WHERE id = $1", [courtId]);
+    if (result.rowCount === 0) return res.status(404).json({ message: 'Pista no encontrada.' });
+    res.json({ message: 'Pista eliminada exitosamente.' });
+  } catch (error) {
+    console.error('Error al eliminar la pista:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
@@ -291,19 +349,59 @@ const getDashboardStats = async (req, res) => {
        GROUP BY hour
        ORDER BY count DESC`
     );
-    
+
+    // 4. Reservas Activas Ahora
+    const activeBookingsResult = pool.query(
+      `SELECT COUNT(*) as count FROM bookings
+       WHERE status = 'confirmed'
+       AND start_time <= NOW() AND end_time >= NOW()`
+    );
+
+    // 5. Partidas Abiertas Activas (Futuras o en curso)
+    const activeOpenMatchesResult = pool.query(
+      `SELECT COUNT(*) as count FROM bookings
+       WHERE status = 'confirmed' AND is_open_match = TRUE
+       AND end_time > NOW()`
+    );
+
+    // 6. Pistas Disponibles
+    const totalCourtsResult = pool.query("SELECT COUNT(*) as count FROM courts WHERE is_active = TRUE");
+    const occupiedCourtsResult = pool.query(
+      `SELECT COUNT(DISTINCT court_id) as count FROM bookings
+       WHERE status = 'confirmed' AND start_time <= NOW() AND end_time >= NOW()`
+    );
+    const blockedCourtsResult = pool.query(
+      `SELECT COUNT(DISTINCT court_id) as count FROM blocked_periods
+       WHERE start_time <= NOW() AND end_time >= NOW()`
+    );
+
     // Ejecutamos todas las consultas en paralelo
-    const [totalBookings, topUsers, peakHours] = await Promise.all([
+    const [totalBookings, topUsers, peakHours, activeBookings, activeOpenMatches, totalCourts, occupiedCourts, blockedCourts] = await Promise.all([
       totalBookingsResult,
       topUsersResult,
-      peakHoursResult
+      peakHoursResult,
+      activeBookingsResult,
+      activeOpenMatchesResult,
+      totalCourtsResult,
+      occupiedCourtsResult,
+      blockedCourtsResult
     ]);
+
+    const totalActiveCourts = parseInt(totalCourts.rows[0].count) || 0;
+    const occupiedCount = parseInt(occupiedCourts.rows[0].count) || 0;
+    const blockedCount = parseInt(blockedCourts.rows[0].count) || 0;
+
+    const availableCourtsCount = Math.max(0, totalActiveCourts - (occupiedCount + blockedCount));
 
     // Formateamos la respuesta
     const stats = {
       totalBookings: totalBookings.rows[0].total_bookings || 0,
       topUsers: topUsers.rows,
       peakHours: peakHours.rows,
+      activeBookingsNow: activeBookings.rows[0].count || 0,
+      activeOpenMatches: activeOpenMatches.rows[0].count || 0,
+      availableCourts: availableCourtsCount,
+      totalCourts: totalActiveCourts
     };
 
     res.json(stats);
@@ -325,6 +423,10 @@ module.exports = {
   getAllBuildings,
   updateBuilding,
   deleteBuilding,
+  createCourt,
+  getAllCourts,
+  updateCourt,
+  deleteCourt,
   createBlockedPeriod,
   deleteBlockedPeriod,
   getBlockedPeriods,

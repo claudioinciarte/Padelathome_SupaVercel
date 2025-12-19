@@ -1,125 +1,191 @@
 import { fetchApi } from '../services/api.js';
 import { showNotification } from '../utils.js';
 
-const courtForm = document.getElementById('court-form');
-const courtFormTitle = document.getElementById('court-form-title');
-const courtIdInput = document.getElementById('court-id');
-const courtNameInput = document.getElementById('court-name');
-const courtDescriptionInput = document.getElementById('court-description');
-const courtIsActiveDiv = document.getElementById('court-active-div');
-const courtIsActiveCheckbox = document.getElementById('court-is-active');
-const cancelEditBtn = document.getElementById('cancel-edit-btn');
-const courtsListContainer = document.getElementById('courts-list-container');
-const blockCourtSelect = document.getElementById('block-court-select');
-
-let allCourtsData = [];
-
-function resetCourtForm() {
-    courtFormTitle.textContent = 'Crear Nueva Pista';
-    courtForm.reset();
-    courtIdInput.value = '';
-    courtIsActiveDiv.style.display = 'none';
-    cancelEditBtn.style.display = 'none';
+export function init() {
+    setupCourtForm();
+    loadCourts();
 }
 
-async function fetchAndRenderCourts() {
-    try {
-        const courts = await fetchApi('/courts');
-        allCourtsData = courts;
+function setupCourtForm() {
+    const form = document.getElementById('court-form');
+    if (!form) return;
 
-        if (blockCourtSelect) {
-            blockCourtSelect.innerHTML = '';
-            courts.forEach(court => {
-                if (court.is_active) {
-                    const option = document.createElement('option');
-                    option.value = court.id;
-                    option.textContent = court.name;
-                    blockCourtSelect.appendChild(option);
-                }
-            });
-        }
-
-        courtsListContainer.innerHTML = '';
-        const courtList = document.createElement('ul');
-        if (courts.length === 0) {
-            courtList.innerHTML = '<li>No hay pistas creadas en el sistema.</li>';
-        } else {
-            courts.forEach(court => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `<strong>${court.name}</strong> (ID: ${court.id}) - Estado: ${court.is_active ? '<strong class="success-text">Activa</strong>' : '<span class="error-text">Inactiva</span>'}<br><em>${court.description || 'Sin descripción.'}</em><br><button class="edit-court-btn" data-courtid="${court.id}">Editar</button><button class="delete-court-btn" data-courtid="${court.id}">Eliminar</button>`;
-                courtList.appendChild(listItem);
-            });
-        }
-        courtsListContainer.appendChild(courtList);
-    } catch (error) {
-        console.error('Error al obtener pistas:', error);
-        courtsListContainer.innerHTML = '<p class="error-text">Error al cargar la información de las pistas.</p>';
+    const cancelBtn = document.getElementById('cancel-edit-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', resetCourtForm);
     }
-}
 
-async function handleCourtFormSubmit(event) {
-    event.preventDefault();
-    const courtId = courtIdInput.value;
-    const isEditing = !!courtId;
-    const endpoint = isEditing ? `/courts/${courtId}` : `/courts`;
-    const method = isEditing ? 'PUT' : 'POST';
-    const body = {
-        name: courtNameInput.value,
-        description: courtDescriptionInput.value,
-    };
-    if (isEditing) {
-        body.is_active = courtIsActiveCheckbox.checked;
-    }
-    try {
-        await fetchApi(endpoint, { method, body: JSON.stringify(body) });
-        showNotification(`Pista ${isEditing ? 'actualizada' : 'creada'}.`, 'success');
-        resetCourtForm();
-        fetchAndRenderCourts();
-    } catch (error) {
-        showNotification(error.message, 'error');
-    }
-}
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('court-id').value;
+        const name = document.getElementById('court-name').value;
+        const buildingId = document.getElementById('court-building').value;
+        const description = document.getElementById('court-description').value;
+        const isActive = document.getElementById('court-is-active').checked;
 
-async function handleCourtAction(event) {
-    const target = event.target;
-    if (target.classList.contains('edit-court-btn')) {
-        const courtId = target.dataset.courtid;
-        const courtToEdit = allCourtsData.find(c => c.id == courtId);
-        if (courtToEdit) {
-            courtFormTitle.textContent = 'Editar Pista';
-            courtIdInput.value = courtToEdit.id;
-            courtNameInput.value = courtToEdit.name;
-            courtDescriptionInput.value = courtToEdit.description;
-            courtIsActiveDiv.style.display = 'block';
-            courtIsActiveCheckbox.checked = courtToEdit.is_active;
-            cancelEditBtn.style.display = 'inline-block';
-            const accordionContent = document.getElementById('court-management').parentElement;
-            accordionContent.style.display = 'block';
-            accordionContent.previousElementSibling.classList.add('active');
-            courtForm.scrollIntoView({ behavior: 'smooth' });
-        }
-    } else if (target.classList.contains('delete-court-btn')) {
-        const courtId = target.dataset.courtid;
-        if (!confirm(`¿Eliminar pista ID ${courtId}?`)) return;
+        // Note: The original court form didn't explicitly have "isActive" in the mockup for creation,
+        // but it is in the "Existing Courts" list. I added a hidden-by-default logic for it in creation if needed,
+        // or just use it for edits.
+
         try {
-            await fetchApi(`/courts/${courtId}`, { method: 'DELETE' });
-            showNotification('Pista eliminada.', 'success');
-            fetchAndRenderCourts();
+            if (id) {
+                // Update
+                // Note: Assuming PUT /admin/courts/:id exists
+                await fetchApi(`/admin/courts/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ name, buildingId, description, is_active: isActive })
+                });
+                showNotification('Pista actualizada', 'success');
+            } else {
+                // Create
+                await fetchApi('/admin/courts', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, buildingId, description })
+                });
+                showNotification('Pista creada', 'success');
+            }
+            resetCourtForm();
+            loadCourts();
         } catch (error) {
             showNotification(error.message, 'error');
         }
+    });
+}
+
+function resetCourtForm() {
+    const form = document.getElementById('court-form');
+    form.reset();
+    document.getElementById('court-id').value = '';
+    document.getElementById('court-form-title').innerHTML = `
+        <span class="material-symbols-outlined text-primary text-base">add_circle</span>
+        Crear Nueva Pista
+    `;
+    document.getElementById('court-active-div').style.display = 'none';
+    const cancelBtn = document.getElementById('cancel-edit-btn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
+export async function loadCourts() {
+    const container = document.getElementById('courts-list-container');
+    const buildingSelect = document.getElementById('court-building');
+    const blockCourtSelect = document.getElementById('block-court-select');
+
+    if (!container) return;
+
+    try {
+        // Load buildings first to populate select
+        const buildings = await fetchApi('/admin/buildings');
+        const buildingMap = {};
+
+        if (buildingSelect) {
+            buildingSelect.innerHTML = '<option value="">Seleccionar edificio...</option>';
+            buildings.forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b.id;
+                opt.textContent = b.name || b.address;
+                buildingSelect.appendChild(opt);
+                buildingMap[b.id] = b.name || b.address;
+            });
+        }
+
+        const courts = await fetchApi('/admin/courts');
+
+        // Populate block court select
+        if (blockCourtSelect) {
+            blockCourtSelect.innerHTML = '';
+            courts.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                blockCourtSelect.appendChild(opt);
+            });
+            // Option for all courts? Mockup says "Todas las Pistas"
+            // If backend supports blocking all courts with a special ID or logic
+            // For now let's just list individual courts.
+        }
+
+        container.innerHTML = '';
+
+        if (courts.length === 0) {
+            container.innerHTML = '<p class="text-sm text-gray-500">No hay pistas registradas.</p>';
+            return;
+        }
+
+        courts.forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-md transition-shadow';
+
+            const activeBadge = c.is_active
+                ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-800">Activa</span>'
+                : '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-800">Inactiva</span>';
+
+            const buildingName = buildingMap[c.building_id] ? `(${buildingMap[c.building_id]})` : '';
+
+            div.innerHTML = `
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h5 class="text-base font-semibold text-gray-900 dark:text-white">${c.name} ${buildingName}</h5>
+                        <span class="px-2 py-0.5 rounded text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">ID: ${c.id}</span>
+                        ${activeBadge}
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${c.description || 'Sin descripción'}</p>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button data-id="${c.id}" class="edit-court-btn flex-1 sm:flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+                        <span class="material-symbols-outlined text-base">edit</span>
+                        Editar
+                    </button>
+                    <button data-id="${c.id}" class="delete-court-btn flex-1 sm:flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
+                        <span class="material-symbols-outlined text-base">delete</span>
+                        Eliminar
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        document.querySelectorAll('.edit-court-btn').forEach(btn => {
+            btn.addEventListener('click', () => editCourt(btn.dataset.id, courts));
+        });
+        document.querySelectorAll('.delete-court-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteCourt(btn.dataset.id));
+        });
+
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = '<p class="text-sm text-red-500">Error al cargar pistas.</p>';
     }
 }
 
-export function init() {
-    if (!courtForm || !courtsListContainer) {
-        console.warn('Elementos del DOM para CourtManager no encontrados.');
-        return;
-    }
+function editCourt(id, courts) {
+    const court = courts.find(c => c.id == id);
+    if (!court) return;
 
-    fetchAndRenderCourts();
-    
-    courtForm.addEventListener('submit', handleCourtFormSubmit);
-    courtsListContainer.addEventListener('click', handleCourtAction);
-    cancelEditBtn.addEventListener('click', resetCourtForm);
+    document.getElementById('court-id').value = court.id;
+    document.getElementById('court-name').value = court.name;
+    document.getElementById('court-building').value = court.building_id || '';
+    document.getElementById('court-description').value = court.description || '';
+
+    // Show active checkbox for editing
+    const activeDiv = document.getElementById('court-active-div');
+    activeDiv.style.display = 'flex';
+    document.getElementById('court-is-active').checked = court.is_active;
+
+    document.getElementById('court-form-title').innerHTML = `
+        <span class="material-symbols-outlined text-primary text-base">edit</span>
+        Editar Pista #${court.id}
+    `;
+    document.getElementById('cancel-edit-btn').style.display = 'flex';
+    document.getElementById('court-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function deleteCourt(id) {
+    if (!confirm('¿Seguro que deseas eliminar esta pista?')) return;
+    try {
+        await fetchApi(`/admin/courts/${id}`, { method: 'DELETE' });
+        showNotification('Pista eliminada', 'success');
+        loadCourts();
+    } catch (error) {
+        showNotification(error.message, 'error');
+    }
 }

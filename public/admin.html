@@ -1,405 +1,541 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Padel@Home - Panel de Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-  <script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Panel de Administración - Reserva de Padel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/style.css">
+<script>
     tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#2563eb",
-            "primary-dark": "#1d4ed8",
-            "background-light": "#f8fafc",
-          },
-          fontFamily: {
-            sans: ["Inter", "sans-serif"],
-          },
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#3B82F6",
+                    "primary-dark": "#2563EB",
+                    "primary-light": "#EFF6FF",
+                    "background-light": "#F3F4F6",
+                    "background-dark": "#111827",
+                    "surface-light": "#FFFFFF",
+                    "surface-dark": "#1F2937",
+                    "text-light": "#374151",
+                    "text-dark": "#D1D5DB",
+                },
+                fontFamily: {
+                    display: ["Inter", "sans-serif"],
+                    body: ["Inter", "sans-serif"],
+                },
+                borderRadius: {
+                    DEFAULT: "0.5rem",
+                },
+            },
         },
-      },
     };
-  </script>
-  <link rel="stylesheet" href="/style.css">
-  <link rel="manifest" href="/manifest.json">
-  <style>
-    /* Logic for tabs visibility toggled by admin.js */
+</script>
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 20px;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #4b5563;
+    }
+    details > summary {
+        list-style: none;
+    }
+    details > summary::-webkit-details-marker {
+        display: none;
+    }
+    details[open] summary .expand-icon {
+        transform: rotate(180deg);
+    }
+    /* Tab logic styling */
     .tab-content {
-      display: none;
+        display: none;
     }
     .tab-content.active {
-      display: block;
-      animation: fadeIn 0.2s ease-in-out;
+        display: block;
+        animation: fadeIn 0.3s ease-in-out;
     }
-
-    /* Logic for accordion arrow rotation */
-    .accordion-header.active .material-icons-round {
-      transform: rotate(180deg);
-    }
-
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-  </style>
+    .conic-chart {
+        background: conic-gradient(
+            #3B82F6 0% 45%,
+            #10B981 45% 75%,
+            #F59E0B 75% 100%
+        );
+        border-radius: 50%;
+    }
+</style>
 </head>
-<body class="bg-background-light font-sans text-slate-800 min-h-screen flex flex-col">
-
-  <!-- Notification Container -->
-  <div id="notification-container"></div>
-
-  <!-- Header -->
-  <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
-        <div class="flex items-center">
-          <div class="flex-shrink-0 flex items-center gap-2">
-            <span class="material-icons-round text-primary text-3xl">admin_panel_settings</span>
-            <span class="font-bold text-xl tracking-tight text-slate-900">Panel de Administración</span>
-          </div>
-        </div>
-        <div class="flex items-center gap-4">
-          <p class="text-sm text-slate-500 hidden sm:block">
-            Bienvenido, <span id="admin-name" class="font-semibold text-slate-900">Admin</span>
-          </p>
-          <div class="flex items-center gap-2">
-            <button id="dashboard-link" class="inline-flex items-center px-3 py-1.5 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors" type="button">
-              <span class="material-icons-round text-lg mr-1">dashboard</span>
-              Dashboard
-            </button>
-            <button id="logout-button" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" type="button">
-              <span class="material-icons-round text-lg mr-1">logout</span>
-              Salir
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-    <!-- Tabs Navigation -->
-    <div class="tabs-container">
-      <div class="tabs-nav border-b border-slate-200 mb-6 flex space-x-8 overflow-x-auto">
-        <button class="tab-link active whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors border-primary text-primary focus:outline-none" data-tab="users">
-          Usuarios
-        </button>
-        <button class="tab-link whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 focus:outline-none" data-tab="infrastructure">
-          Infraestructura
-        </button>
-      </div>
-
-      <!-- Users Tab -->
-      <div id="users" class="tab-content active">
-        <section class="space-y-6">
-
-          <!-- Accordion: Invite User -->
-          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
-            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
-              <div class="flex items-center gap-3">
-                <span class="material-icons-round text-primary">person_add</span>
-                <h3 class="text-lg font-medium text-slate-900 m-0">Invitar Nuevo Usuario</h3>
-              </div>
-              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
-            </div>
-            <div class="accordion-content p-6 border-t border-slate-200" style="display: none;">
-              <form id="invite-user-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-                <div class="form-group col-span-1">
-                  <label for="invite-name" class="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
-                  <input type="text" id="invite-name" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+<body class="bg-background-light dark:bg-background-dark font-body text-text-light dark:text-text-dark min-h-screen transition-colors duration-300">
+    <div id="notification-container"></div>
+    <nav class="bg-surface-light dark:bg-surface-dark shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center h-auto md:h-20 py-4 md:py-0 gap-4">
+                <div class="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
+                    <h1 class="text-2xl font-bold text-primary">Panel de Administración</h1>
                 </div>
-                <div class="form-group col-span-1">
-                  <label for="invite-email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                  <input type="email" id="invite-email" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                </div>
-                <div class="form-group col-span-1">
-                  <label for="invite-building" class="block text-sm font-medium text-slate-700 mb-1">Edificio</label>
-                  <select id="invite-building" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></select>
-                </div>
-                <div class="grid grid-cols-2 gap-4 col-span-1">
-                  <div class="form-group">
-                    <label for="invite-floor" class="block text-sm font-medium text-slate-700 mb-1">Piso</label>
-                    <input type="text" id="invite-floor" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                  </div>
-                  <div class="form-group">
-                    <label for="invite-door" class="block text-sm font-medium text-slate-700 mb-1">Puerta</label>
-                    <input type="text" id="invite-door" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                  </div>
-                </div>
-                <div class="col-span-1 md:col-span-2 flex justify-end">
-                  <button type="submit" class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                    <span class="material-icons-round text-lg mr-2">send</span>
-                    Enviar Invitación
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- Accordion: Registered Users -->
-          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
-            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
-              <div class="flex items-center gap-3">
-                <span class="material-icons-round text-primary">group</span>
-                <h3 class="text-lg font-medium text-slate-900 m-0">Usuarios Registrados</h3>
-              </div>
-              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
-            </div>
-            <div class="accordion-content p-0 border-t border-slate-200" style="display: none;">
-              <div id="user-management" class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200">
-                  <thead class="bg-slate-50">
-                    <tr>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nombre</th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Estado</th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Rol</th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Acciones</th>
-                      <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Avanzadas</th>
-                    </tr>
-                  </thead>
-                  <tbody id="user-table-body" class="bg-white divide-y divide-slate-200">
-                    <!-- Rows will be populated by JS -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <!-- Infrastructure Tab -->
-      <div id="infrastructure" class="tab-content">
-        <section class="space-y-6">
-
-          <!-- Accordion: Buildings -->
-          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
-            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
-              <div class="flex items-center gap-3">
-                <span class="material-icons-round text-primary">apartment</span>
-                <h3 class="text-lg font-medium text-slate-900 m-0">Gestión de Edificios</h3>
-              </div>
-              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
-            </div>
-            <div class="accordion-content p-6 border-t border-slate-200" style="display: none;">
-              <div id="building-management">
-                <h3 id="building-form-title" class="text-base font-semibold text-slate-900 mb-4">Añadir Nuevo Edificio</h3>
-                <form id="building-form" class="space-y-4 max-w-2xl mb-8 border-b border-slate-100 pb-8">
-                  <input type="hidden" id="building-id">
-                  <div class="form-group">
-                    <label for="building-address" class="block text-sm font-medium text-slate-700 mb-1">Dirección / Nombre</label>
-                    <input type="text" id="building-address" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                  </div>
-                  <div class="form-group">
-                    <label for="building-description" class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-                    <textarea id="building-description" rows="2" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></textarea>
-                  </div>
-                  <div class="form-buttons flex gap-3">
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                      Guardar Edificio
-                    </button>
-                    <button type="button" id="cancel-building-edit-btn" style="display: none;" class="inline-flex justify-center py-2 px-4 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-                <h3 class="text-base font-semibold text-slate-900 mb-4">Edificios Existentes</h3>
-                <div id="buildings-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Accordion: Courts -->
-          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
-            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
-              <div class="flex items-center gap-3">
-                <span class="material-icons-round text-primary">sports_tennis</span>
-                <h3 class="text-lg font-medium text-slate-900 m-0">Gestión de Pistas</h3>
-              </div>
-              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
-            </div>
-            <div class="accordion-content p-6 border-t border-slate-200" style="display: none;">
-              <div id="court-management">
-                <h3 id="court-form-title" class="text-base font-semibold text-slate-900 mb-4">Crear Nueva Pista</h3>
-                <form id="court-form" class="space-y-4 max-w-2xl mb-8 border-b border-slate-100 pb-8">
-                  <input type="hidden" id="court-id">
-                  <div class="form-group">
-                    <label for="court-name" class="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
-                    <input type="text" id="court-name" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                  </div>
-                  <div class="form-group">
-                    <label for="court-description" class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-                    <textarea id="court-description" rows="2" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></textarea>
-                  </div>
-                  <div id="court-active-div" style="display: none;" class="form-group flex items-center gap-2">
-                    <input type="checkbox" id="court-is-active" class="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded">
-                    <label for="court-is-active" class="block text-sm font-medium text-slate-700">Activa</label>
-                  </div>
-                  <div class="form-buttons flex gap-3">
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                      Guardar
-                    </button>
-                    <button type="button" id="cancel-edit-btn" style="display: none;" class="inline-flex justify-center py-2 px-4 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-                <h3 class="text-base font-semibold text-slate-900 mb-4">Pistas Existentes</h3>
-                <div id="courts-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Accordion: Blocks -->
-          <div class="accordion-item bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
-            <div class="accordion-header px-6 py-4 bg-slate-50 hover:bg-slate-100 cursor-pointer flex justify-between items-center transition-colors select-none">
-              <div class="flex items-center gap-3">
-                <span class="material-icons-round text-primary">block</span>
-                <h3 class="text-lg font-medium text-slate-900 m-0">Gestión de Bloqueos</h3>
-              </div>
-              <span class="material-icons-round text-slate-400 transition-transform duration-200">expand_more</span>
-            </div>
-            <div class="accordion-content p-6 border-t border-slate-200" style="display: none;">
-              <div id="block-management">
-                <h3 class="text-base font-semibold text-slate-900 mb-4">Crear Nuevo Bloqueo</h3>
-                <form id="create-block-form" class="space-y-4 max-w-2xl mb-8 border-b border-slate-100 pb-8">
-                  <div class="form-group">
-                    <label for="block-court-select" class="block text-sm font-medium text-slate-700 mb-1">Pista</label>
-                    <select id="block-court-select" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></select>
-                  </div>
-                  <div class="grid grid-cols-2 gap-4">
-                    <div class="form-group">
-                      <label for="block-start-time" class="block text-sm font-medium text-slate-700 mb-1">Inicio</label>
-                      <input type="datetime-local" id="block-start-time" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
+                <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                    <span class="hidden lg:block text-sm text-gray-500 dark:text-gray-400">Bienvenido, <span id="admin-name">Admin</span>.</span>
+                    <div class="flex gap-2 w-full md:w-auto justify-center">
+                        <button id="dashboard-link" class="flex-1 md:flex-none px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">dashboard</span>
+                            Ir al Dashboard
+                        </button>
+                        <button id="logout-button" class="flex-1 md:flex-none px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">logout</span>
+                            Cerrar Sesión
+                        </button>
                     </div>
-                    <div class="form-group">
-                      <label for="block-end-time" class="block text-sm font-medium text-slate-700 mb-1">Fin</label>
-                      <input type="datetime-local" id="block-end-time" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="block-reason" class="block text-sm font-medium text-slate-700 mb-1">Motivo</label>
-                    <input type="text" id="block-reason" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-                  </div>
-                  <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                    Crear Bloqueo
-                  </button>
-                </form>
-                <h3 class="text-base font-semibold text-slate-900 mb-4">Bloqueos Activos</h3>
-                <div id="blocks-list-container" class="space-y-2"></div>
-              </div>
+                </div>
             </div>
-          </div>
-        </section>
-      </div>
-    </div>
-
-    <!-- General Settings -->
-    <section class="mt-8 bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
-      <div class="px-6 py-5 border-b border-slate-200">
-        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-          <span class="material-icons-round text-primary">settings</span>
-          Gestión de Ajustes Generales
-        </h2>
-      </div>
-      <div id="settings-management" class="p-6">
-        <form id="settings-form" class="space-y-6">
-          <p class="text-sm text-slate-500">Aquí puedes cambiar los parámetros de funcionamiento de la aplicación.</p>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="form-group">
-              <label for="setting-open-time" class="block text-sm font-medium text-slate-700 mb-1">Hora de Apertura</label>
-              <input type="time" id="setting-open-time" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-            </div>
-            <div class="form-group">
-              <label for="setting-close-time" class="block text-sm font-medium text-slate-700 mb-1">Hora de Cierre</label>
-              <input type="time" id="setting-close-time" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-            </div>
-            <div class="form-group">
-              <label for="setting-advance-days" class="block text-sm font-medium text-slate-700 mb-1">Días de Antelación</label>
-              <input type="number" id="setting-advance-days" min="1" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-            </div>
-            <div class="form-group flex items-start gap-3">
-              <div class="flex items-center h-5">
-                <input type="checkbox" id="setting-gap-optimization" class="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded">
-              </div>
-              <label for="setting-gap-optimization" class="text-sm font-medium text-slate-700">Optimización de Huecos</label>
-            </div>
-            <div class="form-group flex items-start gap-3">
-              <div class="flex items-center h-5">
-                <input type="checkbox" id="setting-limit-open-matches-enabled" class="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded">
-              </div>
-              <label for="setting-limit-open-matches-enabled" class="text-sm font-medium text-slate-700">Limitar Partidas Abiertas</label>
-            </div>
-            <div class="form-group">
-              <label for="setting-max-open-matches-per-user" class="block text-sm font-medium text-slate-700 mb-1">Máx. Partidas Abiertas</label>
-              <input type="number" id="setting-max-open-matches-per-user" min="0" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
-            </div>
-          </div>
-          <div class="pt-4 border-t border-slate-200">
-            <button type="submit" class="inline-flex justify-center items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-colors">
-              <span class="material-icons-round text-lg mr-2">save</span>
-              Guardar todos los Ajustes
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- Stats -->
-    <section class="mt-8 bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
-      <div class="px-6 py-5 border-b border-slate-200">
-        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-          <span class="material-icons-round text-primary">bar_chart</span>
-          Estadísticas del Sistema
-        </h2>
-      </div>
-      <div id="stats-overview" class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="stat-item bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Reservas Totales (30 días)</h3>
-            <p id="total-bookings" class="text-3xl font-bold text-slate-900">--</p>
-          </div>
-          <div class="stat-item bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Usuarios Más Activos</h3>
-            <ul id="most-active-users" class="text-sm text-slate-700 space-y-1 list-disc list-inside">
-              <li>Cargando...</li>
-            </ul>
-          </div>
-          <div class="stat-item bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Horas Pico</h3>
-            <ul id="peak-hours" class="text-sm text-slate-700 space-y-1 list-disc list-inside">
-              <li>Cargando...</li>
-            </ul>
-          </div>
         </div>
-      </div>
-    </section>
+    </nav>
 
-  </main>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav aria-label="Tabs" class="-mb-px flex space-x-8">
+                <button class="tab-link active border-primary text-primary whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-sm flex items-center gap-2 transition-colors" data-tab="users">
+                    <span class="material-symbols-outlined text-lg">people</span>
+                    Usuarios
+                </button>
+                <button class="tab-link border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors" data-tab="infrastructure">
+                    <span class="material-symbols-outlined text-lg">apartment</span>
+                    Infraestructura
+                </button>
+                <button class="tab-link border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors" data-tab="statistics">
+                    <span class="material-symbols-outlined text-lg">bar_chart</span>
+                    Estadísticas
+                </button>
+            </nav>
+        </div>
 
-  <script type="module" src="admin.js"></script>
-  <script src="main.js"></script>
+        <!-- USERS TAB -->
+        <div id="users" class="tab-content active space-y-4">
+            <details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
+                <summary class="flex items-center justify-between p-6 cursor-pointer select-none bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-primary">
+                            <span class="material-symbols-outlined text-2xl">person_add</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-primary">Invitar Nuevo Usuario</h3>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
+                </summary>
+                <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <form id="invite-user-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+                        <div class="col-span-1 md:col-span-2">
+                            <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Detalles del Invitado</h4>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre Completo</label>
+                            <input id="invite-name" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm h-10 px-3" placeholder="Ej. Juan Pérez" type="text" required/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Correo Electrónico</label>
+                            <input id="invite-email" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm h-10 px-3" placeholder="usuario@ejemplo.com" type="email" required/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Edificio</label>
+                            <select id="invite-building" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm h-10 px-3" required></select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piso</label>
+                                <input id="invite-floor" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm h-10 px-3" type="text" required/>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Puerta</label>
+                                <input id="invite-door" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm h-10 px-3" type="text" required/>
+                            </div>
+                        </div>
+                        <div class="col-span-1 md:col-span-2 flex justify-end">
+                            <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 h-10">
+                                <span class="material-symbols-outlined text-sm">send</span>
+                                Enviar Invitación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </details>
 
-  <script>
-    // Simple script to handle tab styling update since admin.js only handles logic
-    document.addEventListener('DOMContentLoaded', () => {
-      const tabLinks = document.querySelectorAll('.tab-link');
-      tabLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          tabLinks.forEach(l => {
-             l.classList.remove('border-primary', 'text-primary');
-             l.classList.add('border-transparent', 'text-slate-500');
-          });
-          link.classList.remove('border-transparent', 'text-slate-500');
-          link.classList.add('border-primary', 'text-primary');
-        });
-      });
-    });
-  </script>
+            <details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300" open="">
+                <summary class="flex items-center justify-between p-6 cursor-pointer select-none bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-primary">
+                            <span class="material-symbols-outlined text-2xl">group</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-primary">Usuarios Registrados</h3>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
+                </summary>
+                <div class="border-t border-gray-200 dark:border-gray-700">
+                    <div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Base de Datos</h4>
+                        <div class="relative w-full sm:w-64">
+                            <input id="user-search" class="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-primary focus:border-primary shadow-sm" placeholder="Buscar usuario..." type="text"/>
+                            <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-gray-400 text-sm">search</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Nombre</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Estado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Rol</th>
+                                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body" class="bg-surface-light dark:bg-surface-dark divide-y divide-gray-200 dark:divide-gray-700">
+                                <!-- Users populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- INFRASTRUCTURE TAB -->
+        <div id="infrastructure" class="tab-content space-y-4">
+            <!-- Buildings -->
+            <details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300" open="">
+                <summary class="flex items-center justify-between p-6 cursor-pointer select-none bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-primary">
+                            <span class="material-symbols-outlined text-2xl">domain</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-primary">Gestión de Edificios</h3>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
+                </summary>
+                <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h4 id="building-form-title" class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">add_circle</span>
+                            Añadir Nuevo Edificio
+                        </h4>
+                        <form id="building-form" class="grid grid-cols-1 gap-6">
+                            <input type="hidden" id="building-id">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección / Nombre del Edificio</label>
+                                <input id="building-address" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" placeholder="Ej. Torre Central - Av. Principal 123" type="text" required/>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                                <textarea id="building-description" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm px-3 py-2" placeholder="Descripción breve de las instalaciones..." rows="3"></textarea>
+                            </div>
+                            <div class="flex justify-start gap-2">
+                                <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                                    <span class="material-symbols-outlined text-sm">save</span>
+                                    Guardar Edificio
+                                </button>
+                                <button type="button" id="cancel-building-edit-btn" style="display:none;" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 pl-1">Edificios Existentes</h4>
+                        <div id="buildings-list-container" class="space-y-3">
+                            <!-- Buildings populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Courts -->
+            <details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
+                <summary class="flex items-center justify-between p-6 cursor-pointer select-none bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
+                            <span class="material-symbols-outlined text-2xl">sports_tennis</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-primary">Gestión de Pistas</h3>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
+                </summary>
+                <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h4 id="court-form-title" class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">add_circle</span>
+                            Crear Nueva Pista
+                        </h4>
+                        <form id="court-form" class="grid grid-cols-1 gap-6">
+                            <input type="hidden" id="court-id">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de la Pista</label>
+                                <input id="court-name" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" placeholder="Ej. Pista Central" type="text" required/>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Edificio Asociado (Solo informativo)</label>
+                                <select id="court-building" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3">
+                                    <option value="">Seleccionar edificio...</option>
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                                <textarea id="court-description" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm px-3 py-2" placeholder="Detalles técnicos (cristal, muro, luz)..." rows="3"></textarea>
+                            </div>
+                            <div id="court-active-div" style="display:none;" class="flex items-center gap-2">
+                                <input type="checkbox" id="court-is-active" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="court-is-active" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Activa</label>
+                            </div>
+                            <div class="flex justify-start gap-2">
+                                <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                                    <span class="material-symbols-outlined text-sm">save</span>
+                                    Guardar Pista
+                                </button>
+                                <button type="button" id="cancel-edit-btn" style="display:none;" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 pl-1">Pistas Existentes</h4>
+                        <div id="courts-list-container" class="space-y-3">
+                            <!-- Courts populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- Blocks -->
+            <details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
+                <summary class="flex items-center justify-between p-6 cursor-pointer select-none bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-red-50 dark:bg-red-900/30 rounded-lg text-red-600 dark:text-red-400">
+                            <span class="material-symbols-outlined text-2xl">block</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-primary">Gestión de Bloqueos</h3>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
+                </summary>
+                <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-base">add_circle</span>
+                            Crear Nuevo Bloqueo
+                        </h4>
+                        <form id="create-block-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pista a Bloquear</label>
+                                <select id="block-court-select" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" required></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha y Hora Inicio</label>
+                                <div class="relative rounded-lg shadow-sm">
+                                    <input id="block-start-time" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" type="datetime-local" required/>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha y Hora Fin</label>
+                                <div class="relative rounded-lg shadow-sm">
+                                    <input id="block-end-time" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" type="datetime-local" required/>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motivo del Bloqueo</label>
+                                <input id="block-reason" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" placeholder="Ej. Lluvia, Mantenimiento, Torneo..." type="text"/>
+                            </div>
+                            <div class="md:col-span-2 flex justify-start">
+                                <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                                    <span class="material-symbols-outlined text-sm">lock</span>
+                                    Aplicar Bloqueo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 pl-1">Bloqueos Activos</h4>
+                        <div id="blocks-list-container" class="space-y-3">
+                             <!-- Blocks populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- General Settings -->
+            <details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
+                <summary class="flex items-center justify-between p-6 cursor-pointer select-none bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900/30 rounded-lg text-slate-600 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-2xl">settings</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-primary">Ajustes Generales</h3>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
+                </summary>
+                <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <form id="settings-form" class="space-y-6 pt-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hora de Apertura</label>
+                                <input id="setting-open-time" type="time" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hora de Cierre</label>
+                                <input id="setting-close-time" type="time" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Días de Antelación</label>
+                                <input id="setting-advance-days" type="number" min="1" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3">
+                            </div>
+                            <div class="flex items-start gap-3 pt-2">
+                                <div class="flex items-center h-5">
+                                    <input id="setting-gap-optimization" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                </div>
+                                <label for="setting-gap-optimization" class="text-sm font-medium text-gray-700 dark:text-gray-300">Optimización de Huecos</label>
+                            </div>
+                            <div class="flex items-start gap-3 pt-2">
+                                <div class="flex items-center h-5">
+                                    <input id="setting-limit-open-matches-enabled" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                </div>
+                                <label for="setting-limit-open-matches-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">Limitar Creación Partidas Abiertas</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Máx. Partidas Abiertas / Usuario</label>
+                                <input id="setting-max-open-matches-per-user" type="number" min="0" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3">
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-start">
+                             <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                                <span class="material-symbols-outlined text-sm">save</span>
+                                Guardar Ajustes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </details>
+        </div>
+
+        <!-- STATISTICS TAB -->
+        <div id="statistics" class="tab-content">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        Estadísticas del Sistema
+                    </h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Visión general del rendimiento, uso de pistas y actividad financiera.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select class="block w-full md:w-auto border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary text-sm py-2 px-3">
+                        <option>Últimos 30 días</option>
+                    </select>
+                    <button class="p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+                        <span class="material-symbols-outlined text-xl">download</span>
+                    </button>
+                </div>
+            </div>
+
+            <section>
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">En Tiempo Real</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between relative overflow-hidden group">
+                        <div class="relative z-10">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Reservas Activas Ahora</p>
+                            <div class="flex items-baseline gap-2 mt-2">
+                                <span id="stat-active-now" class="text-4xl font-bold text-gray-900 dark:text-white">--</span>
+                                <span class="flex h-3 w-3 relative">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Pistas ocupadas actualmente</p>
+                        </div>
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-primary group-hover:scale-110 transition-transform duration-300">
+                            <span class="material-symbols-outlined text-3xl">sports_tennis</span>
+                        </div>
+                    </div>
+                    <div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between group">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Partidas Abiertas Activas</p>
+                            <div class="mt-2">
+                                <span id="stat-active-open-matches" class="text-4xl font-bold text-gray-900 dark:text-white">--</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Esperando jugadores / En curso</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-300">
+                            <span class="material-symbols-outlined text-3xl">group_add</span>
+                        </div>
+                    </div>
+                    <div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between group">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pistas Disponibles</p>
+                            <div class="mt-2">
+                                <span id="stat-available-courts" class="text-4xl font-bold text-gray-900 dark:text-white">--</span>
+                                <span class="text-sm text-gray-400 font-normal">/ <span id="stat-total-courts">--</span></span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform duration-300">
+                            <span class="material-symbols-outlined text-3xl">event_available</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-8">
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Resumen de Actividad</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col items-center text-center hover:shadow-md transition-shadow relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                            <span class="material-symbols-outlined text-8xl text-primary">calendar_month</span>
+                        </div>
+                        <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm mb-2 uppercase tracking-wide z-10">Reservas (30 días)</h4>
+                        <div id="stat-total-bookings-30d" class="mt-2 text-6xl font-bold text-primary z-10">--</div>
+                    </div>
+                    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wide">Usuarios Más Activos</h4>
+                        </div>
+                        <div id="stat-top-users-list" class="space-y-4">
+                            <!-- Populated by JS -->
+                            <p class="text-sm text-gray-500">Cargando...</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+                        <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm mb-6 uppercase tracking-wide text-center">Horas Pico (30 días)</h4>
+                        <div id="stat-peak-hours-list" class="space-y-4">
+                            <!-- Populated by JS -->
+                            <p class="text-sm text-gray-500 text-center">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer class="mt-12 py-6 text-center text-sm text-gray-400 dark:text-gray-500 border-t border-gray-200 dark:border-gray-800">
+            © 2023 Sistema de Reserva de Padel. Todos los derechos reservados.
+        </footer>
+    </main>
+
+    <button class="fixed bottom-6 right-6 p-3 bg-primary hover:bg-primary-dark text-white rounded-full shadow-lg transition-colors z-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" onclick="document.documentElement.classList.toggle('dark')">
+        <span class="material-symbols-outlined block dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+    </button>
+
+    <script type="module" src="admin.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>

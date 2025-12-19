@@ -9,6 +9,10 @@ const {
   getAllBuildings,
   updateBuilding,
   deleteBuilding,
+  createCourt,
+  getAllCourts,
+  updateCourt,
+  deleteCourt,
   createBlockedPeriod,
   deleteBlockedPeriod,
   getBlockedPeriods,
@@ -33,6 +37,12 @@ router.post('/buildings', protect, isAdmin, createBuilding);
 router.get('/buildings', protect, isAdmin, getAllBuildings);
 router.put('/buildings/:buildingId', protect, isAdmin, updateBuilding);
 router.delete('/buildings/:buildingId', protect, isAdmin, deleteBuilding);
+
+// Rutas de Gestión de Pistas (CRUD)
+router.post('/courts', protect, isAdmin, createCourt);
+router.get('/courts', protect, isAdmin, getAllCourts);
+router.put('/courts/:courtId', protect, isAdmin, updateCourt);
+router.delete('/courts/:courtId', protect, isAdmin, deleteCourt);
 
 // Rutas de Gestión de Bloqueos
 router.get('/blocked-periods', protect, isAdmin, getBlockedPeriods);
