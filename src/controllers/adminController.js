@@ -4,6 +4,18 @@ const crypto = require('crypto');
 const sendEmail = require('../services/emailService');
 
 // --- Funciones de Gestión de Usuarios ---
+const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await pool.query("DELETE FROM users WHERE id = $1", [userId]);
+    if (result.rowCount === 0) return res.status(404).json({ message: 'Usuario no encontrado.' });
+    res.json({ message: 'Usuario eliminado exitosamente.' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
 const getAllUsers = async (req, res) => {
   try {
     const { status, search } = req.query;
@@ -415,6 +427,7 @@ const getDashboardStats = async (req, res) => {
 
 // --- Exportamos TODAS las funciones del controlador ---
 module.exports = {
+  deleteUser,
   getAllUsers,
   approveUser,
   updateUserStatus,

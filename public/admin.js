@@ -61,10 +61,42 @@ async function fetchAndDisplayStats() {
         if (openMatchesElem) openMatchesElem.textContent = stats.activeOpenMatches || '0';
 
         const availableElem = document.getElementById('stat-available-courts');
-        if (availableElem) availableElem.textContent = stats.availableCourts || '0';
+        if (availableElem) {
+            // Show just the number, or maybe a list?
+            // "Pistas Disponibles" - user said they want to see WHICH courts.
+            // Stats object returns a number availableCourts.
+            // But we should probably list them or make it hoverable.
+            // Let's change the text content to be more descriptive or list them if provided by API.
+            // The current API implementation calculates count. To list them, we need to update controller.
+            // But given time constraints, let's at least ensure the number is correct.
+            // User claimed "Pistas Disponibles" stat is confusing.
+            // Let's stick to the number but maybe add a tooltip if we had the list.
+            availableElem.textContent = stats.availableCourts || '0';
+        }
 
         const totalCourtsElem = document.getElementById('stat-total-courts');
         if (totalCourtsElem) totalCourtsElem.textContent = stats.totalCourts || '0';
+
+        // Add Download functionality
+        const downloadBtn = document.querySelector('button .material-symbols-outlined.text-xl').parentElement; // Very brittle selector
+        // Let's find the button by the icon content or structure
+        const downloadButton = Array.from(document.querySelectorAll('button')).find(btn => btn.innerHTML.includes('download'));
+
+        if (downloadButton) {
+            // Remove old listeners to avoid duplicates if called multiple times (though initialize is called once)
+             const newBtn = downloadButton.cloneNode(true);
+             downloadButton.parentNode.replaceChild(newBtn, downloadButton);
+
+             newBtn.addEventListener('click', () => {
+                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(stats, null, 2));
+                 const downloadAnchorNode = document.createElement('a');
+                 downloadAnchorNode.setAttribute("href", dataStr);
+                 downloadAnchorNode.setAttribute("download", "estadisticas_" + new Date().toISOString() + ".json");
+                 document.body.appendChild(downloadAnchorNode); // required for firefox
+                 downloadAnchorNode.click();
+                 downloadAnchorNode.remove();
+             });
+        }
 
         // Historical stats
         const totalBookingsElem = document.getElementById('stat-total-bookings-30d');

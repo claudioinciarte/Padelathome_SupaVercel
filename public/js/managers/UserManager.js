@@ -86,6 +86,13 @@ async function loadUsers(query = '') {
             // Random color logic or fixed based on char code
             const colorClass = 'bg-blue-100 dark:bg-blue-900 text-primary';
 
+            // Use account_status instead of is_active
+            const isActive = user.account_status === 'active';
+            const statusLabel = isActive ? 'Activo' : 'Inactivo';
+            const statusClass = isActive
+                ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-800'
+                : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-800';
+
             tr.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">#${user.id}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
@@ -94,17 +101,17 @@ async function loadUsers(query = '') {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${user.email}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-2.5 py-0.5 inline-flex text-xs font-medium rounded-full ${user.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-800' : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-800'}">
-                        ${user.is_active ? 'Activo' : 'Inactivo'}
+                    <span class="px-2.5 py-0.5 inline-flex text-xs font-medium rounded-full ${statusClass}">
+                        ${statusLabel}
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${user.role}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-center space-x-2">
-                    <button data-userid="${user.id}" data-action="toggle-status" class="user-action-btn text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs transition-colors border border-gray-200 dark:border-gray-600">
-                        ${user.is_active ? 'Desactivar' : 'Activar'}
+                    <button data-userid="${user.id}" data-action="toggle-status" data-current-status="${user.account_status}" class="user-action-btn text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs transition-colors border border-gray-200 dark:border-gray-600">
+                        ${isActive ? 'Desactivar' : 'Activar'}
                     </button>
-                    <button data-userid="${user.id}" data-action="edit-role" class="user-action-btn text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary-light font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs transition-colors border border-gray-200 dark:border-gray-600">
-                        Cambiar Rol
+                    <button data-userid="${user.id}" data-action="toggle-role" data-current-role="${user.role}" class="user-action-btn text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary-light font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-md text-xs transition-colors border border-gray-200 dark:border-gray-600">
+                        ${user.role === 'admin' ? 'Hacer User' : 'Hacer Admin'}
                     </button>
                     <button data-userid="${user.id}" data-action="delete" class="user-action-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 px-3 py-1.5 rounded-md text-xs transition-colors border border-red-200 dark:border-red-800">
                         Eliminar
@@ -145,27 +152,26 @@ async function handleUserAction(e) {
 
     try {
         if (action === 'toggle-status') {
-             // Assuming endpoint exists or we implement logic
-             // Ideally PATCH /admin/users/:id/status
-             const newStatus = btn.textContent.trim() === 'Activar'; // If button says Activar, we are activating
+             const currentStatus = btn.dataset.currentStatus;
+             // If currently active, set to inactive. If inactive or pending, set to active.
+             const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
              await fetchApi(`/admin/users/${userId}/status`, {
-                 method: 'PATCH',
-                 body: JSON.stringify({ is_active: newStatus })
+                 method: 'PUT', // Changed to PUT matching routes
+                 body: JSON.stringify({ status: newStatus })
              });
              showNotification('Estado actualizado', 'success');
              loadUsers();
-        } else if (action === 'edit-role') {
-             const newRole = prompt("Nuevo rol (admin/user):"); // Simple interaction for now
-             if (newRole && ['admin', 'user'].includes(newRole.toLowerCase())) {
-                 await fetchApi(`/admin/users/${userId}/role`, {
-                     method: 'PATCH',
-                     body: JSON.stringify({ role: newRole.toLowerCase() })
-                 });
-                 showNotification('Rol actualizado', 'success');
-                 loadUsers();
-             } else if (newRole) {
-                 alert('Rol inválido. Use "admin" o "user".');
-             }
+        } else if (action === 'toggle-role') {
+             const currentRole = btn.dataset.currentRole;
+             const newRole = currentRole === 'admin' ? 'user' : 'admin';
+
+             await fetchApi(`/admin/users/${userId}/role`, {
+                 method: 'PUT', // Changed to PUT matching routes
+                 body: JSON.stringify({ role: newRole })
+             });
+             showNotification('Rol actualizado', 'success');
+             loadUsers();
         } else if (action === 'delete') {
             if (confirm('¿Estás seguro de eliminar este usuario?')) {
                 await fetchApi(`/admin/users/${userId}`, { method: 'DELETE' });
@@ -174,6 +180,7 @@ async function handleUserAction(e) {
             }
         }
     } catch (error) {
+        console.error(error);
         showNotification(error.message, 'error');
     }
 }

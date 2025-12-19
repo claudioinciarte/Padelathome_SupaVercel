@@ -19,7 +19,7 @@ function setupBuildingForm() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('building-id').value;
-        const name = document.getElementById('building-address').value; // Using this as name/address
+        const address = document.getElementById('building-address').value; // Using this as name/address
         const description = document.getElementById('building-description').value;
 
         try {
@@ -27,14 +27,14 @@ function setupBuildingForm() {
                 // Update
                 await fetchApi(`/admin/buildings/${id}`, {
                     method: 'PUT',
-                    body: JSON.stringify({ name, description })
+                    body: JSON.stringify({ address, description })
                 });
                 showNotification('Edificio actualizado', 'success');
             } else {
                 // Create
                 await fetchApi('/admin/buildings', {
                     method: 'POST',
-                    body: JSON.stringify({ name, description })
+                    body: JSON.stringify({ address, description })
                 });
                 showNotification('Edificio creado', 'success');
             }

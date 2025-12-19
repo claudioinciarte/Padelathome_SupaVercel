@@ -28,7 +28,8 @@ const { protect, isAdmin } = require('../middleware/authMiddleware');
 router.get('/users', protect, isAdmin, getAllUsers);
 router.post('/users/invite', protect, isAdmin, inviteUser);
 router.put('/users/:userId/approve', protect, isAdmin, approveUser);
-router.put('/users/:userId/status', protect, isAdmin, updateUserStatus);
+router.put('/users/:userId/status', protect, isAdmin, updateUserStatus); // Consider PATCH
+router.delete('/users/:userId', protect, isAdmin, require('../controllers/adminController').deleteUser);
 router.post('/users/:userId/reset-password', protect, isAdmin, resetUserPassword);
 router.put('/users/:userId/role', protect, isAdmin, updateUserRole);
 
