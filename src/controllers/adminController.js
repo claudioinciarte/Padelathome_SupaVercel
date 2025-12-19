@@ -201,31 +201,65 @@ const updateCourt = async (req, res) => {
     const { courtId } = req.params;
     const { name, buildingId, description, is_active } = req.body;
 
+    if (!name) return res.status(400).json({ message: 'El nombre de la pista es requerido.' });
+
     // Safe integer parsing
     const bId = parseInt(buildingId);
     if (isNaN(bId)) return res.status(400).json({ message: 'ID de edificio inválido.' });
 
+    // If is_active is missing (undefined), retrieve current value or default?
+    // Postgres will fail if passed undefined to param unless handled.
+    // However, the query binds undefined to NULL, and if column is NOT NULL, it fails.
+    // Better to default or fetch existing if we wanted partial updates, but PUT usually implies full update or handled payload.
+    // Let's ensure is_active is boolean or default true if we assume activation.
+    // But better to check what's sent. CourtManager sends `is_active`.
+    const activeState = is_active !== undefined ? is_active : true;
+
     const { rows } = await pool.query(
       "UPDATE courts SET name = $1, building_id = $2, description = $3, is_active = $4, updated_at = NOW() WHERE id = $5 RETURNING *",
-      [name, bId, description, is_active, courtId]
+      [name, bId, description, activeState, courtId]
     );
     if (rows.length === 0) return res.status(404).json({ message: 'Pista no encontrada.' });
     res.json(rows[0]);
   } catch (error) {
     console.error('Error al actualizar la pista:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'Error interno del servidor: ' + error.message });
   }
 };
 
 const deleteCourt = async (req, res) => {
   try {
     const { courtId } = req.params;
-    const result = await pool.query("DELETE FROM courts WHERE id = $1", [courtId]);
-    if (result.rowCount === 0) return res.status(404).json({ message: 'Pista no encontrada.' });
-    res.json({ message: 'Pista eliminada exitosamente.' });
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Delete related blocked periods first
+        await client.query("DELETE FROM blocked_periods WHERE court_id = $1", [courtId]);
+
+        // Delete related waiting list entries
+        await client.query("DELETE FROM waiting_list_entries WHERE court_id = $1", [courtId]);
+
+        // Delete related bookings
+        await client.query("DELETE FROM bookings WHERE court_id = $1", [courtId]);
+
+        // Delete the court
+        const result = await client.query("DELETE FROM courts WHERE id = $1", [courtId]);
+
+        await client.query('COMMIT');
+
+        if (result.rowCount === 0) return res.status(404).json({ message: 'Pista no encontrada.' });
+        res.json({ message: 'Pista eliminada exitosamente.' });
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+    } finally {
+        client.release();
+    }
   } catch (error) {
     console.error('Error al eliminar la pista:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'Error interno del servidor: ' + error.message });
   }
 };
 
