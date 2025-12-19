@@ -1,21 +1,71 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Padel@Home - Confirmar Reserva</title>
-  <link rel="stylesheet" href="/style.css">
-  <link rel="manifest" href="/manifest.json">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Confirmación - Padel@Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link rel="manifest" href="/manifest.json">
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563EB", // Royal blue
+              secondary: "#0F172A", // Dark slate
+              "background-light": "#F8FAFC", // Slate 50
+              "background-dark": "#0F172A", // Slate 900
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#1E293B",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              body: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              xl: "1rem",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+</style>
 </head>
-<body>
-  <div class="auth-container">
-    <div class="card auth-card">
-      <h1 id="status-title">Confirmando tu Reserva...</h1>
-      <p id="status-message">Por favor, espera un momento mientras procesamos tu solicitud.</p>
-      <a href="/login.html" id="login-link" style="display: none;">Ir a Iniciar Sesión</a>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col justify-center items-center p-4 transition-colors duration-300 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 dark:bg-primary/10 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-[100px]"></div>
+</div>
+
+<div class="bg-surface-light dark:bg-surface-dark shadow-2xl rounded-xl w-full max-w-md p-8 sm:p-10 relative z-10 border border-slate-100 dark:border-slate-700 text-center">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 text-primary mb-6 animate-pulse">
+        <span class="material-icons-round text-3xl">hourglass_empty</span>
     </div>
-  </div>
-  <script src="confirm-booking.js"></script>
-  <script src="main.js"></script>
+
+    <h1 id="status-title" class="text-2xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
+        Confirmando tu Reserva...
+    </h1>
+
+    <p id="status-message" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">
+        Por favor, espera un momento mientras procesamos tu solicitud. Esto no debería tomar mucho tiempo.
+    </p>
+
+    <a id="login-link" href="/login.html" class="inline-flex items-center justify-center w-full py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200" style="display: none;">
+        Ir a Iniciar Sesión
+    </a>
+</div>
+
+<footer class="mt-8 text-center text-slate-400 dark:text-slate-600 text-xs z-10">
+    © 2024 Padel@Home. Gestión de Reservas.
+</footer>
+
+<script src="confirm-booking.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
