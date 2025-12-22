@@ -55,7 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Elementos del DOM ---
     const welcomeMessageDesktop = document.getElementById('welcome-message-desktop');
     const welcomeMessageMobile = document.getElementById('welcome-message-mobile');
-    const myBookingContainer = document.getElementById('my-booking'); // The inner content div
+    const myBookingContainerDesktop = document.getElementById('my-booking-desktop');
+    const myBookingContainerMobile = document.getElementById('my-booking-mobile');
     const calendarContainer = document.getElementById('weekly-calendar-container');
     const dailySlotsContainer = document.getElementById('daily-slots-container');
     const prevWeekBtn = document.getElementById('prev-week-btn');
@@ -219,20 +220,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const bookings = await fetchApi('/bookings/me');
             userActiveBookings = bookings ? (Array.isArray(bookings) ? bookings : [bookings]) : [];
 
-            // Logic to toggle Empty State vs Booking Card
-            if (userActiveBookings.length === 0) {
-                myBookingContainer.innerHTML = EMPTY_BOOKING_STATE;
-                // Add classes for styling if they were removed (the render function might wipe them)
-                myBookingContainer.className = "flex flex-col items-center justify-center py-8 bg-slate-50 dark:bg-slate-800/50 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700";
-            } else {
-                // BookingCard.render will replace innerHTML with the card
-                BookingCard.render(myBookingContainer, userActiveBookings);
-                // Remove the "center/dashed" styling which is for empty state only
-                myBookingContainer.className = "mt-4"; // Simple margin for the active card
+            // Render function for desktop (legacy style)
+            if (myBookingContainerDesktop) {
+                if (userActiveBookings.length === 0) {
+                    myBookingContainerDesktop.innerHTML = EMPTY_BOOKING_STATE;
+                    myBookingContainerDesktop.className = "flex flex-col items-center justify-center py-8 bg-slate-50 dark:bg-slate-800/50 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700";
+                } else {
+                    BookingCard.render(myBookingContainerDesktop, userActiveBookings);
+                    myBookingContainerDesktop.className = "mt-4";
+                }
             }
+
+            // Render function for mobile (new simple text style)
+            if (myBookingContainerMobile) {
+                if (userActiveBookings.length === 0) {
+                    myBookingContainerMobile.innerHTML = `
+                        <p class="text-slate-500 dark:text-slate-400 text-sm text-center">
+                            No tienes ninguna reserva activa.
+                        </p>`;
+                    myBookingContainerMobile.className = "flex flex-col items-center justify-center";
+                } else {
+                    BookingCard.render(myBookingContainerMobile, userActiveBookings);
+                    myBookingContainerMobile.className = "mt-4";
+                }
+            }
+
         } catch (e) {
             console.error(e);
-            myBookingContainer.innerHTML = '<p class="text-red-500 font-medium">Error al cargar reservas.</p>';
+            const errorHtml = '<p class="text-red-500 font-medium text-center">Error al cargar reservas.</p>';
+            if(myBookingContainerDesktop) myBookingContainerDesktop.innerHTML = errorHtml;
+            if(myBookingContainerMobile) myBookingContainerMobile.innerHTML = errorHtml;
         }
     };
 
@@ -358,10 +375,21 @@ document.addEventListener('DOMContentLoaded', () => {
         Modals.initModals(modalHandlers);
 
         // Init Components
-        BookingCard.init(myBookingContainer, {
-            onCancel: modalHandlers.onCancelBooking,
-            onLeave: modalHandlers.onLeaveMatch
-        });
+        // Initialize handlers for both containers if they exist (though BookingCard.init typically binds global delegations or specific container logic)
+        // Checking BookingCard.js structure is safer, but usually init just sets up internal listeners.
+        // If BookingCard.init attaches listeners to specific elements inside container, we need to call it for both.
+        if (myBookingContainerDesktop) {
+            BookingCard.init(myBookingContainerDesktop, {
+                onCancel: modalHandlers.onCancelBooking,
+                onLeave: modalHandlers.onLeaveMatch
+            });
+        }
+        if (myBookingContainerMobile) {
+            BookingCard.init(myBookingContainerMobile, {
+                onCancel: modalHandlers.onCancelBooking,
+                onLeave: modalHandlers.onLeaveMatch
+            });
+        }
 
         // The Calendar component might try to append to innerHTML, so we ensure the parent is clean
         // Note: Calendar.init in the old code took a root element.
