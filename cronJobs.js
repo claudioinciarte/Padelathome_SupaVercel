@@ -4,7 +4,7 @@ const sendEmail = require('./src/services/emailService');
 
 /**
  * Función que busca reservas de partidas abiertas (open match) activas
- * que están a punto de comenzar (en menos de 2 horas) y que no han alcanzado
+ * que están a punto de comenzar (en menos de X horas) y que no han alcanzado
  * el número mínimo de participantes (por defecto 4).
  * Si se cumple la condición, elimina la reserva y sus participantes.
  */
@@ -14,8 +14,22 @@ async function limpiarPartidasIncompletas() {
     try {
         client = await pool.connect();
 
-        // 1. Obtener reservas 'active' (confirmed), que sean open_match
-        // y que empiecen en el futuro cercano (próximas 2 horas).
+        // 0. Obtener configuración de horas desde instance_settings
+        // Por defecto: 2 horas
+        const settingsResult = await client.query(
+            "SELECT setting_value FROM instance_settings WHERE setting_key = 'open_match_auto_cancel_hours'"
+        );
+        let cancelHours = 2;
+        if (settingsResult.rows.length > 0) {
+            cancelHours = parseInt(settingsResult.rows[0].setting_value, 10);
+            if (isNaN(cancelHours) || cancelHours < 1) cancelHours = 2;
+        }
+
+        console.log(`Configuración de cancelación automática: ${cancelHours} horas antes.`);
+
+        // 1. Obtener reservas 'confirmed', que sean open_match
+        // y que empiecen en el futuro cercano (próximas X horas).
+        // Construimos el intervalo dinámicamente.
         // Usamos NOW() de Postgres para consistencia horaria.
         const queryBookings = `
             SELECT id, start_time, COALESCE(max_participants, 4) as target_players
@@ -23,7 +37,7 @@ async function limpiarPartidasIncompletas() {
             WHERE status = 'confirmed'
               AND is_open_match = TRUE
               AND start_time > NOW()
-              AND start_time < NOW() + INTERVAL '2 hours'
+              AND start_time < NOW() + INTERVAL '${cancelHours} hours'
         `;
 
         const resultBookings = await client.query(queryBookings);
@@ -37,8 +51,8 @@ async function limpiarPartidasIncompletas() {
             const resultCount = await client.query(queryCount, [booking.id]);
             const playerCount = parseInt(resultCount.rows[0].count, 10);
 
-            // 3. Aplicar regla: si faltan menos de 2 horas (ya filtrado en SQL)
-            // Y si tiene menos de X jugadores
+            // 3. Aplicar regla: si faltan menos de X horas (ya filtrado en SQL)
+            // Y si tiene menos de target_players jugadores
             if (playerCount < booking.target_players) {
                 console.log(`Eliminando reserva ID ${booking.id}: Tiene ${playerCount}/${booking.target_players} jugadores y comienza en ${booking.start_time}`);
 
@@ -65,7 +79,7 @@ async function limpiarPartidasIncompletas() {
                     console.log(`Reserva ID ${booking.id} eliminada correctamente.`);
 
                     // Enviar correos de notificación
-                    const formattedDate = new Date(booking.start_time).toLocaleString('es-ES', { timeZone: 'UTC' }); // Ajustar según zona horaria preferida
+                    const formattedDate = new Date(booking.start_time).toLocaleString('es-ES', { timeZone: 'UTC' });
 
                     for (const participant of participants) {
                         sendEmail({

@@ -365,7 +365,13 @@ const updateSettings = async (req, res) => {
     await client.query('BEGIN');
     for (const key in settingsToUpdate) {
       const value = settingsToUpdate[key];
-      await client.query("UPDATE instance_settings SET setting_value = $1, updated_at = NOW() WHERE setting_key = $2", [value, key]);
+      await client.query(
+        `INSERT INTO instance_settings (setting_key, setting_value, updated_at)
+         VALUES ($1, $2, NOW())
+         ON CONFLICT (setting_key)
+         DO UPDATE SET setting_value = EXCLUDED.setting_value, updated_at = NOW()`,
+        [key, value]
+      );
     }
     await client.query('COMMIT');
     res.json({ message: 'Ajustes actualizados exitosamente.' });

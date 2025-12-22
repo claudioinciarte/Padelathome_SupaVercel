@@ -181,6 +181,7 @@ async function fetchAndDisplaySettings() {
         const gapOptimizationCheckbox = document.getElementById('setting-gap-optimization');
         const limitOpenMatchesEnabledCheckbox = document.getElementById('setting-limit-open-matches-enabled');
         const maxOpenMatchesPerUserInput = document.getElementById('setting-max-open-matches-per-user');
+        const openMatchAutoCancelHoursInput = document.getElementById('setting-open-match-auto-cancel-hours');
 
         if (openTimeInput) openTimeInput.value = settings.operating_open_time || '08:00';
         if (closeTimeInput) closeTimeInput.value = settings.operating_close_time || '22:00';
@@ -191,6 +192,7 @@ async function fetchAndDisplaySettings() {
             maxOpenMatchesPerUserInput.value = settings.max_open_matches_per_user || '0';
             maxOpenMatchesPerUserInput.disabled = !limitOpenMatchesEnabledCheckbox.checked;
         }
+        if (openMatchAutoCancelHoursInput) openMatchAutoCancelHoursInput.value = settings.open_match_auto_cancel_hours || '2';
     } catch (error) {
         console.error('Error al obtener los ajustes:', error);
         showNotification('No se pudieron cargar los ajustes.', 'error');
@@ -299,7 +301,8 @@ function setupGlobalEventListeners() {
                 booking_advance_days: document.getElementById('setting-advance-days').value,
                 enable_booking_gap_optimization: document.getElementById('setting-gap-optimization').checked.toString(),
                 limit_open_matches_enabled: limitOpenMatchesEnabledCheckbox.checked.toString(),
-                max_open_matches_per_user: maxOpenMatchesPerUserInput.value
+                max_open_matches_per_user: maxOpenMatchesPerUserInput.value,
+                open_match_auto_cancel_hours: document.getElementById('setting-open-match-auto-cancel-hours').value
             };
             if (!confirm('¿Guardar nuevos ajustes?')) return;
             try {
