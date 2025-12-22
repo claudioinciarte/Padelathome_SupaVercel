@@ -53,19 +53,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let userWaitingListEntries = [];
 
     // --- Elementos del DOM ---
-    const welcomeMessage = document.getElementById('welcome-message');
+    const welcomeMessageDesktop = document.getElementById('welcome-message-desktop');
+    const welcomeMessageMobile = document.getElementById('welcome-message-mobile');
     const myBookingContainer = document.getElementById('my-booking'); // The inner content div
     const calendarContainer = document.getElementById('weekly-calendar-container');
     const dailySlotsContainer = document.getElementById('daily-slots-container');
     const prevWeekBtn = document.getElementById('prev-week-btn');
     const nextWeekBtn = document.getElementById('next-week-btn');
     const weekDatesTitle = document.getElementById('week-dates-title');
-    const logoutButton = document.getElementById('logout-button');
+    const logoutButtonDesktop = document.getElementById('logout-button-desktop');
+    const logoutButtonMobile = document.getElementById('logout-button-mobile');
     const adminPanelBtn = document.getElementById('admin-panel-btn');
+    const adminPanelBtnMobile = document.getElementById('admin-panel-btn-mobile');
     const courtSelectorContainer = document.querySelector('.court-selector-container');
     const courtSelectDropdown = document.getElementById('court-select');
     const profileBtn = document.getElementById('profile-btn');
+    const profileBtnMobile = document.getElementById('profile-btn-mobile');
     const faqBtn = document.getElementById('faq-button');
+    const faqBtnMobile = document.getElementById('faq-btn-mobile');
 
     // --- Handlers de Modales (Lógica de Negocio) ---
     const modalHandlers = {
@@ -200,8 +205,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchUserProfile = async () => {
         try {
             const user = await fetchApi('/users/me');
-            welcomeMessage.textContent = `Bienvenido, ${user.name}!`;
-            if (user.role === 'admin') adminPanelBtn.style.display = 'flex'; // Changed from inline-block to flex
+            if(welcomeMessageDesktop) welcomeMessageDesktop.textContent = `PadelReserva`; // Or user name if preferred on desktop
+            if(welcomeMessageMobile) welcomeMessageMobile.textContent = `${user.name}!`;
+            if (user.role === 'admin') {
+                 if(adminPanelBtn) adminPanelBtn.style.display = 'flex';
+                 if(adminPanelBtnMobile) adminPanelBtnMobile.style.display = 'flex';
+            }
         } catch (e) { console.error(e); }
     };
 
@@ -260,9 +269,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderMobileView = async () => {
         if (!dailySlotsContainer.querySelector('.date-strip-container')) {
              dailySlotsContainer.innerHTML = `
-                <div class="date-strip-container overflow-x-auto pb-4 mb-4"><div class="date-strip flex space-x-2"></div></div>
-                <div class="accordion-container space-y-3"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-primary">Disponibilidad Diaria</h2>
+                    <div class="flex gap-1">
+                         <button id="mobile-prev-day" class="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500">
+                            <span class="material-symbols-rounded">chevron_left</span>
+                         </button>
+                         <button id="mobile-next-day" class="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500">
+                            <span class="material-symbols-rounded">chevron_right</span>
+                         </button>
+                    </div>
+                </div>
+                <div class="date-strip-container overflow-x-auto hide-scrollbar pb-4"><div class="date-strip flex space-x-3"></div></div>
+                <div class="accordion-container space-y-3 mt-2"></div>
             `;
+
+            // Attach listeners to new arrows
+            document.getElementById('mobile-prev-day').addEventListener('click', () => {
+                 currentDisplayedDate.setDate(currentDisplayedDate.getDate() - 1);
+                 renderDateStrip();
+                 renderMobileView();
+            });
+             document.getElementById('mobile-next-day').addEventListener('click', () => {
+                 currentDisplayedDate.setDate(currentDisplayedDate.getDate() + 1);
+                 renderDateStrip();
+                 renderMobileView();
+            });
+
             renderDateStrip();
         }
 
@@ -281,24 +314,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Renderiza la tira de fechas (lógica simple local por ahora, styled with Tailwind)
     function renderDateStrip() {
         const strip = dailySlotsContainer.querySelector('.date-strip');
+        if(!strip) return;
         strip.innerHTML = '';
         let iterator = new Date(); iterator.setHours(0,0,0,0);
 
         for (let i = 0; i < 14; i++) {
             const div = document.createElement('div');
-            // Tailwind classes for date item
+            // Tailwind classes for date item matching design
             const isSelected = iterator.toDateString() === currentDisplayedDate.toDateString();
-            div.className = `date-item flex-shrink-0 w-14 h-16 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all border ${
-                isSelected
-                ? 'bg-primary text-white border-primary shadow-md'
-                : 'bg-white dark:bg-surface-dark text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-primary/50'
-            }`;
-            div.dataset.date = toISODateString(iterator);
 
-            div.innerHTML = `
-                <span class="text-xs font-medium uppercase">${iterator.toLocaleDateString('es-ES',{weekday:'short'}).replace('.','')}</span>
-                <span class="text-lg font-bold">${iterator.getDate()}</span>
-            `;
+            if (isSelected) {
+                div.className = "date-item flex-shrink-0 flex flex-col items-center justify-center w-16 h-20 bg-primary text-white rounded-2xl shadow-md transform scale-105 transition-transform cursor-pointer";
+                div.innerHTML = `
+                    <span class="text-xs font-semibold uppercase tracking-wider">${iterator.toLocaleDateString('es-ES',{weekday:'short'}).replace('.','')}</span>
+                    <span class="text-2xl font-bold">${iterator.getDate()}</span>
+                `;
+            } else {
+                div.className = "date-item flex-shrink-0 flex flex-col items-center justify-center w-16 h-20 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-600 dark:text-slate-400 cursor-pointer";
+                div.innerHTML = `
+                    <span class="text-xs font-medium uppercase tracking-wider">${iterator.toLocaleDateString('es-ES',{weekday:'short'}).replace('.','')}</span>
+                    <span class="text-xl font-bold text-slate-800 dark:text-slate-200">${iterator.getDate()}</span>
+                `;
+            }
+
+            div.dataset.date = toISODateString(iterator);
             strip.appendChild(div);
             iterator.setDate(iterator.getDate() + 1);
         }
@@ -409,10 +448,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { showNotification(e.message, 'error'); }
 
         // Event Listeners UI Generales
-        logoutButton.addEventListener('click', () => { localStorage.removeItem('authToken'); window.location.href = '/login.html'; });
-        if(adminPanelBtn) adminPanelBtn.addEventListener('click', () => window.location.href = '/admin.html');
-        if(profileBtn) profileBtn.addEventListener('click', () => window.location.href = '/profile.html');
-        if(faqBtn) faqBtn.addEventListener('click', () => window.location.href = '/faq.html');
+        const logoutHandler = () => { localStorage.removeItem('authToken'); window.location.href = '/login.html'; };
+        if(logoutButtonDesktop) logoutButtonDesktop.addEventListener('click', logoutHandler);
+        if(logoutButtonMobile) logoutButtonMobile.addEventListener('click', logoutHandler);
+
+        const goToAdmin = () => window.location.href = '/admin.html';
+        if(adminPanelBtn) adminPanelBtn.addEventListener('click', goToAdmin);
+        if(adminPanelBtnMobile) adminPanelBtnMobile.addEventListener('click', goToAdmin);
+
+        const goToProfile = () => window.location.href = '/profile.html';
+        if(profileBtn) profileBtn.addEventListener('click', goToProfile);
+        if(profileBtnMobile) profileBtnMobile.addEventListener('click', goToProfile);
+
+        const goToFaq = () => window.location.href = '/faq.html';
+        if(faqBtn) faqBtn.addEventListener('click', goToFaq);
+        if(faqBtnMobile) faqBtnMobile.addEventListener('click', goToFaq);
 
         prevWeekBtn.addEventListener('click', () => {
             currentDisplayedDate.setDate(currentDisplayedDate.getDate() - 7);

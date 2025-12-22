@@ -233,33 +233,97 @@ export function renderMobileDaily(container, slots) {
         }
 
         const div = document.createElement('div');
-        div.className = `accordion-item ${status === 'past' ? 'opacity-60' : ''}`;
+        div.className = `group relative bg-white dark:bg-card-dark rounded-xl flex flex-col shadow-sm border border-transparent hover:border-green-500 transition-all cursor-pointer overflow-hidden`;
 
-        // Status indicator color
-        let statusColorClass = 'bg-slate-100 text-slate-600';
-        let statusText = getMobileStatusText({ ...slot, status });
+        // Left Border Color and Pill Styles
+        let borderClass = 'bg-slate-300'; // Default gray
+        let pillClass = 'bg-slate-100 text-slate-500';
+        let pillText = 'Desconocido';
+        let showPill = true;
+        let isFinalized = false;
 
         switch(status) {
-            case 'available': statusColorClass = 'bg-green-100 text-green-700'; break;
-            case 'booked': statusColorClass = 'bg-red-100 text-red-700'; break;
-            case 'open_match_available': statusColorClass = 'bg-amber-100 text-amber-700'; break;
-            case 'my_private_booking': statusColorClass = 'bg-blue-100 text-blue-700'; break;
+            case 'available':
+                borderClass = 'bg-green-500';
+                pillClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                pillText = 'Disponible';
+                break;
+            case 'booked':
+                borderClass = 'bg-red-500'; // Or transparent if we follow the "Finalizado" look for booked? User said Ocupado is Red.
+                pillClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                pillText = 'Ocupado';
+                // Note: The design example had "Finalizado" without a color bar.
+                // But user requested "Ocupado is red". So we keep the bar.
+                break;
+            case 'open_match_available':
+                borderClass = 'bg-amber-500';
+                pillClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
+                pillText = `Partida Abierta (${slot.participants || 1}/${slot.maxParticipants || 4})`;
+                break;
+            case 'open_match_full':
+                borderClass = 'bg-amber-700';
+                pillClass = 'bg-amber-100 text-amber-800';
+                pillText = 'Partida Llena';
+                break;
+            case 'my_private_booking':
+                borderClass = 'bg-blue-500';
+                pillClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                pillText = 'Mi Reserva';
+                break;
+            case 'my_open_match':
+                borderClass = 'bg-blue-500';
+                pillClass = 'bg-blue-100 text-blue-800';
+                pillText = 'Inscrito';
+                break;
+            case 'past':
+                borderClass = 'hidden'; // No border for past
+                pillClass = 'text-gray-400 dark:text-gray-500'; // Just text
+                pillText = 'Finalizado';
+                isFinalized = true;
+                div.className = "bg-white dark:bg-card-dark rounded-xl p-4 flex flex-col opacity-60"; // Simpler container for past
+                break;
+            case 'blocked':
+            case 'maintenance':
+                borderClass = 'bg-slate-600';
+                pillClass = 'bg-slate-100 text-slate-600';
+                pillText = slot.reason || 'Mantenimiento';
+                break;
         }
 
-        div.innerHTML = `
-            <div class="accordion-header p-4 flex justify-between items-center bg-white dark:bg-surface-dark cursor-pointer" data-status="${status}" data-index="${index}">
-                <div class="flex items-center gap-3">
-                    <span class="font-bold text-slate-900 dark:text-white">${formatTime(slotTime)}</span>
-                    <span class="px-2 py-1 rounded text-xs font-medium ${statusColorClass}">${statusText}</span>
+        // --- HTML Structure ---
+        if (isFinalized) {
+             div.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <span class="text-lg font-bold text-gray-400 dark:text-gray-500">${formatTime(slotTime)}</span>
+                        <span class="text-sm font-medium ${pillClass}">${pillText}</span>
+                    </div>
+                    <span class="material-symbols-rounded text-gray-300">expand_more</span>
                 </div>
-                <span class="material-icons-outlined text-slate-400 transition-transform duration-200 chevron">expand_more</span>
-            </div>
-            <div class="slot-details hidden bg-slate-50 dark:bg-slate-800/50 p-4 border-t border-slate-100 dark:border-slate-700"></div>
-        `;
+            `;
+        } else {
+             div.innerHTML = `
+                <div class="accordion-header p-4 flex items-center justify-between relative" data-status="${status}" data-index="${index}">
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 ${borderClass}"></div>
+                    <div class="flex items-center gap-4 pl-2">
+                        <span class="text-lg font-bold text-gray-800 dark:text-white">${formatTime(slotTime)}</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${pillClass}">
+                            ${status === 'available' ? '<span class="w-2 h-2 rounded-full bg-green-500 mr-1"></span>' : ''}
+                            ${pillText}
+                        </span>
+                    </div>
+                    <span class="material-symbols-rounded text-gray-400 group-hover:text-green-500 chevron transition-transform duration-200">expand_more</span>
+                </div>
+                <div class="slot-details hidden bg-gray-50 dark:bg-slate-800/50 p-5 pl-6 border-t border-gray-100 dark:border-slate-700"></div>
+            `;
+        }
+
         accordionContainer.appendChild(div);
 
-        // Guardar referencia al slot para expandirlo
-        div.querySelector('.accordion-header')._slotData = slot;
+        // Guardar referencia al slot para expandirlo (only if not finalized)
+        if(!isFinalized) {
+            div.querySelector('.accordion-header')._slotData = slot;
+        }
     });
 }
 
@@ -300,19 +364,46 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
     switch (status) {
         case 'available':
             const durations = [60, 90];
-            const optionsHtml = durations.map(d => `<button class="px-3 py-1 border rounded hover:bg-slate-100 dark:hover:bg-slate-700 duration-btn" data-duration="${d}">${d} min</button>`).join('');
+            const optionsHtml = durations.map((d, i) => {
+                // Default first one selected logic for visual rendering
+                // We'll handle selection class toggling in JS, but here is the markup
+                const isPopular = d === 60;
+                return `
+                <button class="relative py-3 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors border duration-btn ${i === 0 ? 'bg-primary text-white shadow-md ring-2 ring-primary ring-offset-1 dark:ring-offset-card-dark selected' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent hover:border-gray-300'}" data-duration="${d}">
+                    <span class="material-symbols-rounded text-lg">schedule</span>
+                    ${d} min
+                    ${isPopular ? '<span class="absolute -top-2 -right-2 bg-white text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">Popular</span>' : ''}
+                </button>
+                `;
+            }).join('');
             
             content = `
-                <div class="flex flex-col gap-3">
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Elige duración:</p>
-                    <div class="flex gap-2 duration-options">${optionsHtml}</div>
-                    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                        <input type="checkbox" class="rounded border-slate-300 text-primary focus:ring-primary open-match-checkbox">
-                        Abrir partida (4 jugadores)
-                    </label>
-                    <div class="flex gap-2 mt-2">
-                         <button class="flex-1 py-2 bg-primary text-white rounded font-medium text-sm confirm-booking-btn">Confirmar</button>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">Elige duración:</label>
+                    <div class="grid grid-cols-2 gap-3 duration-options">
+                        ${optionsHtml}
                     </div>
+                </div>
+                <div class="mb-8">
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                        <div class="flex flex-col">
+                            <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">Abrir partida</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Permitir que otros se unan (4 jug.)</span>
+                        </div>
+                        <label class="flex items-center cursor-pointer relative">
+                            <input type="checkbox" class="sr-only peer open-match-checkbox">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="py-3 px-4 rounded-lg bg-white dark:bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cancel-action-btn">
+                        Cancelar
+                    </button>
+                    <button class="py-3 px-4 rounded-lg bg-primary hover:bg-primary_hover text-white shadow-lg shadow-blue-500/30 font-semibold text-sm transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 confirm-booking-btn">
+                        Confirmar
+                        <span class="material-symbols-rounded text-lg">check_circle</span>
+                    </button>
                 </div>
             `;
             break;
@@ -363,18 +454,26 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
     // Attach listeners
     if (status === 'available') {
          const confirmBtn = detailsContainer.querySelector('.confirm-booking-btn');
+         const cancelBtn = detailsContainer.querySelector('.cancel-action-btn');
          const durationBtns = detailsContainer.querySelector('.duration-options');
 
-         // Select first duration by default
-         const firstDuration = durationBtns.querySelector('.duration-btn');
-         if(firstDuration) firstDuration.classList.add('bg-blue-50', 'border-primary', 'text-primary', 'selected');
-
          durationBtns.addEventListener('click', (e) => {
-             if(e.target.classList.contains('duration-btn')) {
-                 detailsContainer.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('bg-blue-50', 'border-primary', 'text-primary', 'selected'));
-                 e.target.classList.add('bg-blue-50', 'border-primary', 'text-primary', 'selected');
+             const btn = e.target.closest('.duration-btn');
+             if(btn) {
+                 // Reset all
+                 detailsContainer.querySelectorAll('.duration-btn').forEach(b => {
+                     b.classList.remove('bg-primary', 'text-white', 'shadow-md', 'ring-2', 'ring-primary', 'ring-offset-1', 'dark:ring-offset-card-dark', 'selected');
+                     b.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-200', 'dark:hover:bg-gray-600', 'border-transparent', 'hover:border-gray-300');
+                 });
+                 // Set active
+                 btn.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-200', 'dark:hover:bg-gray-600', 'border-transparent', 'hover:border-gray-300');
+                 btn.classList.add('bg-primary', 'text-white', 'shadow-md', 'ring-2', 'ring-primary', 'ring-offset-1', 'dark:ring-offset-card-dark', 'selected');
              }
          });
+
+         if(cancelBtn) {
+             cancelBtn.addEventListener('click', closeAccordion);
+         }
 
          confirmBtn.addEventListener('click', () => {
              const selectedBtn = detailsContainer.querySelector('.duration-btn.selected');

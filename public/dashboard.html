@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/style.css">
 <script>
@@ -47,19 +48,20 @@
     </script>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-200">
-<header class="bg-surface-light dark:bg-surface-dark shadow-sm sticky top-0 z-20 transition-colors duration-200">
+<!-- Desktop Header (Hidden on Mobile) -->
+<header class="hidden lg:block bg-surface-light dark:bg-surface-dark shadow-sm sticky top-0 z-20 transition-colors duration-200">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 <div class="flex justify-between items-center h-16">
 <div class="flex items-center">
 <span class="material-icons-outlined text-primary text-3xl mr-2">sports_tennis</span>
-<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white" id="welcome-message">PadelReserva</h1>
+<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white" id="welcome-message-desktop">PadelReserva</h1>
 </div>
-<div class="hidden md:flex items-center space-x-4">
+<div class="flex items-center space-x-4">
 <div class="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-300">
 <span class="material-icons-outlined">account_circle</span>
 <span class="font-medium">Jose Agustin Inciarte Melean</span>
 </div>
-<button id="logout-button" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
+<button id="logout-button-desktop" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
 <span class="material-icons-outlined text-sm mr-2">logout</span>
                         Cerrar Sesión
                     </button>
@@ -67,8 +69,37 @@
 </div>
 </div>
 </header>
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 space-y-6 lg:space-y-8 min-h-screen pb-24">
+
+<!-- Mobile Header Section -->
+<header class="lg:hidden mb-6">
+<h1 class="text-2xl font-bold text-primary leading-tight mb-6">
+    Bienvenido, <br/>
+    <span class="text-slate-800 dark:text-white" id="welcome-message-mobile">Jose Agustin Inciarte Melean!</span>
+</h1>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<button id="admin-panel-btn-mobile" style="display: none;" class="flex items-center justify-center gap-2 py-3 px-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-rounded text-primary text-xl">admin_panel_settings</span>
+<span class="text-sm font-medium">Admin</span>
+</button>
+<button id="profile-btn-mobile" class="flex items-center justify-center gap-2 py-3 px-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-rounded text-primary text-xl">person</span>
+<span class="text-sm font-medium">Mi Perfil</span>
+</button>
+<button id="faq-btn-mobile" class="flex items-center justify-center gap-2 py-3 px-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-rounded text-primary text-xl">help</span>
+<span class="text-sm font-medium">FAQ</span>
+</button>
+<button id="logout-button-mobile" class="flex items-center justify-center gap-2 py-3 px-4 bg-slate-600 text-white rounded-xl shadow-sm hover:bg-slate-700 transition-colors">
+<span class="material-symbols-rounded text-xl">logout</span>
+<span class="text-sm font-medium">Salir</span>
+</button>
+</div>
+</header>
+
+<!-- Desktop Title & Actions (Hidden on Mobile) -->
+<div class="hidden lg:flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
 <div>
 <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Panel de Control</h2>
 <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestiona tus reservas y perfil fácilmente.</p>
@@ -88,19 +119,18 @@
                 </button>
 </div>
 </div>
+
+<!-- My Booking Section (Responsive) -->
 <div id="my-booking-container" class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors duration-200">
-<div class="flex items-center justify-between mb-4">
-<h3 class="text-lg font-semibold text-primary flex items-center">
-<span class="material-icons-outlined mr-2">calendar_today</span>
-                    Mi Próxima Reserva
-                </h3>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-rounded text-primary">calendar_clock</span>
+<h2 class="text-lg font-bold text-primary">Mi Próxima Reserva</h2>
 </div>
-<div id="my-booking" class="flex flex-col items-center justify-center py-8 bg-slate-50 dark:bg-slate-800/50 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700">
-<div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-3">
-<span class="material-icons-outlined text-primary text-2xl">event_busy</span>
-</div>
-<p class="text-slate-600 dark:text-slate-400 font-medium">No tienes ninguna reserva activa.</p>
-<p class="text-slate-400 dark:text-slate-500 text-sm mt-1">Selecciona una fecha en el calendario para reservar.</p>
+<div id="my-booking" class="flex flex-col items-center justify-center">
+<!-- Initial Empty State -->
+<p class="text-slate-500 dark:text-slate-400 text-sm text-center">
+    No tienes ninguna reserva activa.
+</p>
 </div>
 </div>
 <div class="court-selector-container bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors duration-200">
