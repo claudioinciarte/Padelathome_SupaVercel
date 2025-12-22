@@ -6,6 +6,7 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http'); // Import http module
 const socketIo = require('socket.io'); // Import socket.io
+const { initCronJobs } = require('./cronJobs'); // Import cron jobs
 
 // Imports de nuestros módulos de rutas (comentados para depuración)
 const authRoutes = require('./src/api/authRoutes');
@@ -60,6 +61,7 @@ io.on('connection', (socket) => {
 // Esta es la línea que mantiene el proceso vivo y escuchando peticiones
 server.listen(PORT, () => { // Change app.listen to server.listen
     console.log(`Servidor corriendo y escuchando en el puerto ${PORT}`);
+    initCronJobs(); // Initialize cron jobs
 });
 
 module.exports = { io }; // Export io instance
