@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const pool = require('./src/config/database');
+const sendEmail = require('./src/services/emailService');
 
 /**
  * Función que busca reservas de partidas abiertas (open match) activas
@@ -42,6 +43,16 @@ async function limpiarPartidasIncompletas() {
                 console.log(`Eliminando reserva ID ${booking.id}: Tiene ${playerCount}/${booking.target_players} jugadores y comienza en ${booking.start_time}`);
 
                 try {
+                    // Obtener emails de los participantes antes de eliminar
+                    const queryParticipants = `
+                        SELECT u.email, u.name
+                        FROM match_participants mp
+                        JOIN users u ON mp.user_id = u.id
+                        WHERE mp.booking_id = $1
+                    `;
+                    const participantsResult = await client.query(queryParticipants, [booking.id]);
+                    const participants = participantsResult.rows;
+
                     await client.query('BEGIN');
 
                     // Eliminar primero participantes para evitar error de FK (si no hay CASCADE configurado)
@@ -52,6 +63,24 @@ async function limpiarPartidasIncompletas() {
 
                     await client.query('COMMIT');
                     console.log(`Reserva ID ${booking.id} eliminada correctamente.`);
+
+                    // Enviar correos de notificación
+                    const formattedDate = new Date(booking.start_time).toLocaleString('es-ES', { timeZone: 'UTC' }); // Ajustar según zona horaria preferida
+
+                    for (const participant of participants) {
+                        sendEmail({
+                            to: participant.email,
+                            subject: 'Cancelación de Partida Abierta - Padel@Home',
+                            html: `
+                                <h3>Hola ${participant.name},</h3>
+                                <p>Te informamos que la partida abierta programada para el <strong>${formattedDate}</strong> ha sido cancelada.</p>
+                                <p>El motivo es que no se alcanzó el número mínimo de jugadores requeridos (${booking.target_players}) para realizar el encuentro.</p>
+                                <p>Disculpa las molestias y esperamos verte pronto en otra partida.</p>
+                                <p>Atentamente,<br>El equipo de Padel@Home</p>
+                            `
+                        });
+                    }
+
                 } catch (err) {
                     await client.query('ROLLBACK');
                     console.error(`Error al eliminar reserva ID ${booking.id}:`, err);
