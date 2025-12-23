@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchUserProfile = async () => {
         try {
             const user = await fetchApi('/users/me');
-            if(welcomeMessageDesktop) welcomeMessageDesktop.textContent = `PadelReserva`; // Or user name if preferred on desktop
+            if(welcomeMessageDesktop) welcomeMessageDesktop.textContent = `Padel@Home`; // Or user name if preferred on desktop
             if(welcomeMessageMobile) welcomeMessageMobile.textContent = `${user.name}!`;
             if (user.role === 'admin') {
                  if(adminPanelBtn) adminPanelBtn.style.display = 'flex';
