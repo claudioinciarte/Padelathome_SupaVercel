@@ -233,9 +233,62 @@ const getMatchParticipants = async (req, res) => {
   }
 };
 
+const getMatchDetails = async (req, res) => {
+    const { bookingId } = req.params;
+
+    try {
+        // 1. Obtener información de la reserva y de la pista
+        const bookingQuery = await pool.query(
+            `SELECT b.*, c.name as court_name
+             FROM bookings b
+             JOIN courts c ON b.court_id = c.id
+             WHERE b.id = $1`,
+            [bookingId]
+        );
+
+        if (bookingQuery.rows.length === 0) {
+            return res.status(404).json({ message: 'Partida no encontrada' });
+        }
+
+        const match = bookingQuery.rows[0];
+
+        // 2. Obtener la lista de jugadores (Line-up)
+        // Eliminado u.floor, u.door ya que no existen en este schema
+        const playersQuery = await pool.query(
+            `SELECT u.id, u.name, u.role
+             FROM match_participants mp
+             JOIN users u ON mp.user_id = u.id
+             WHERE mp.booking_id = $1
+             ORDER BY mp.joined_at ASC`,
+            [bookingId]
+        );
+
+        // 3. Obtener el histórico de mensajes
+        const messagesQuery = await pool.query(
+            `SELECT m.*, u.name as user_name
+             FROM match_messages m
+             JOIN users u ON m.user_id = u.id
+             WHERE m.booking_id = $1
+             ORDER BY m.created_at ASC`,
+            [bookingId]
+        );
+
+        res.json({
+            matchInfo: match,
+            players: playersQuery.rows,
+            messages: messagesQuery.rows
+        });
+
+    } catch (error) {
+        console.error('Error al obtener detalles de la partida:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
 module.exports = {
   getOpenMatches,
   joinOpenMatch,
   leaveOpenMatch,
   getMatchParticipants,
+  getMatchDetails,
 };
