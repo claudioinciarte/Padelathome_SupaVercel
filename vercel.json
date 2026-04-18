@@ -1,0 +1,1 @@
+{\n  \"rewrites\": [\n    {\"source\": \"/api/(.*)\", \"destination\": \"/api\"},\n    {\"source\": \"/(.*)\", \"destination\": \"/public/$1\"}\n  ],\n  \"env\": {\n    \"NODE_ENV\": \"production\"\n  }\n}
