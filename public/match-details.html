@@ -62,8 +62,7 @@
         <nav class="hidden md:flex items-center space-x-8">
             <a class="text-slate-500 hover:text-primary transition-colors font-medium" href="/dashboard.html">Inicio</a>
             <a class="text-primary border-b-2 border-primary pb-1 font-bold" href="/dashboard.html">Mis Partidas</a>
-            <a class="text-slate-500 hover:text-primary transition-colors font-medium" href="#">Comunidad</a>
-            <a class="text-slate-500 hover:text-primary transition-colors font-medium" href="#">Perfil</a>
+            <a class="text-slate-500 hover:text-primary transition-colors font-medium" href="/profile.html">Perfil</a>
         </nav>
 
         <!-- Right Icons -->
@@ -73,7 +72,7 @@
             </button>
             <!-- Desktop Profile Icon -->
             <div class="hidden md:block w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
-                <div class="w-full h-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">U</div>
+                <div id="user-avatar-text" class="w-full h-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">U</div>
             </div>
         </div>
     </div>
@@ -88,7 +87,7 @@
             <!-- Hero Section / Match Summary -->
             <section class="bg-surface-container-lowest md:p-1 md:border border-outline-variant/10 md:rounded-xl md:shadow-sm overflow-hidden">
                 <div class="relative h-48 md:h-64 rounded-3xl md:rounded-lg overflow-hidden mb-4 md:mb-6 shadow-lg md:shadow-none">
-                    <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Padel Court" class="w-full h-full object-cover"/>
+                    <img src="/images/match-hero.png" alt="Padel Court" class="w-full h-full object-cover"/>
 
                     <div class="absolute top-4 left-4 md:inset-0 md:bg-gradient-to-t md:from-black/60 md:to-transparent md:flex md:flex-end md:items-end md:p-6 md:top-auto md:left-auto">
                         <span id="match-status-badge" class="bg-secondary text-white px-4 py-1.5 md:px-3 md:py-1 rounded-full font-bold text-xs tracking-widest uppercase flex items-center gap-2 backdrop-blur-sm shadow-md md:shadow-none">
@@ -221,11 +220,8 @@
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sports_tennis</span>
         <span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Partidas</span>
     </a>
-    <a href="#" class="flex flex-col items-center justify-center text-slate-400 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-150">
-        <span class="material-symbols-outlined">groups</span>
-        <span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Comunidad</span>
-    </a>
-    <a href="#" class="flex flex-col items-center justify-center text-slate-400 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-150">
+
+    <a href="/profile.html" class="flex flex-col items-center justify-center text-slate-400 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-150">
         <span class="material-symbols-outlined">person</span>
         <span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Perfil</span>
     </a>

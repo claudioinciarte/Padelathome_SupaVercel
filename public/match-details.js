@@ -26,6 +26,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         matchData = await fetchApi(`/matches/${bookingId}/details`);
 
         renderMatch(matchData, currentUser.id);
+
+        // Top right avatar update
+        if (currentUser && currentUser.name) {
+            const names = currentUser.name.split(' ');
+            const initials = names.length > 1
+                ? names[0][0].toUpperCase() + names[names.length - 1][0].toUpperCase()
+                : names[0].substring(0, 2).toUpperCase();
+            const avatarSpan = document.getElementById('user-avatar-text');
+            if (avatarSpan) {
+                avatarSpan.textContent = initials;
+            }
+        }
+
         joinChat(bookingId, currentUser);
         setupActions(bookingId);
     } catch (err) {
