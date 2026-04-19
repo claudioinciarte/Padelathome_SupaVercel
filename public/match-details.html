@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles de la Partida - Padel@Home</title>
+    <!-- Tailwind CSS (CDN for consistency with the rest of the app) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563EB",
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+    <!-- Notification Container -->
+    <div id="notification-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <div class="container mx-auto px-4 py-6 max-w-6xl match-details-container">
+        <header class="main-header flex items-center mb-6">
+            <button onclick="window.location.href='/dashboard.html'" class="btn-back p-2 mr-4 rounded-full hover:bg-slate-200 transition-colors bg-white shadow-sm border border-slate-200">
+                <span class="material-icons-round text-slate-600">arrow_back</span>
+            </button>
+            <h1 id="match-title" class="text-2xl font-bold text-slate-800">Cargando partida...</h1>
+        </header>
+
+        <main class="match-grid">
+            <section class="players-section">
+                <div class="section-header flex items-center gap-2 mb-4">
+                    <span class="material-icons-round text-primary">groups</span>
+                    <h2 class="text-xl font-semibold">Lista de Jugadores</h2>
+                </div>
+                <div id="players-list" class="players-cards-container">
+                    <!-- Players will be rendered here -->
+                </div>
+            </section>
+
+            <section class="chat-section">
+                <div class="section-header flex items-center gap-2 mb-4 px-4 pt-4">
+                    <span class="material-icons-round text-primary">chat</span>
+                    <h2 class="text-xl font-semibold">Chat de la Partida</h2>
+                </div>
+                <div id="chat-messages" class="chat-window">
+                    <!-- Chat messages will be rendered here -->
+                </div>
+                <form id="chat-form" class="chat-input-area border-t border-slate-200">
+                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off">
+                    <button type="submit" class="text-primary hover:bg-blue-50 p-2 rounded-full transition-colors flex items-center justify-center ml-2">
+                        <span class="material-icons-round">send</span>
+                    </button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals are loaded dynamically if needed by utils.js, but primarily relying on simple alerts or dedicated logic here -->
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/js/utils.js"></script>
+    <script type="module" src="match-details.js"></script>
+</body>
+</html>
