@@ -1,4 +1,4 @@
-import api from './js/services/api.js';
+import { fetchApi } from './js/services/api.js';
 import { showNotification } from './js/utils.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -17,10 +17,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Cargar datos del usuario actual y de la partida
     try {
         // Fetch current user details
-        currentUser = await api.get('/users/me');
+        currentUser = await fetchApi('/users/me');
 
         // Fetch match details
-        const data = await api.get(`/matches/${bookingId}/details`);
+        const data = await fetchApi(`/matches/${bookingId}/details`);
 
         renderMatch(data, currentUser.id);
         joinChat(bookingId, currentUser);
@@ -37,24 +37,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderMatch(data, currentUserId) {
         document.getElementById('match-title').textContent = data.matchInfo.court_name;
 
-        // Renderizar jugadores (sin piso ni puerta, y usando iniciales o icono)
+        // Renderizar jugadores (usando avatar del dashboard)
         const list = document.getElementById('players-list');
-        list.innerHTML = data.players.map(p => {
-            // Get initials
-            const initials = p.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            // Assign a gradient class based on user id (1-5)
-            const gradientClass = `avatar-gradient-${(p.id % 5) + 1}`;
-            const roleBadge = p.role === 'admin' ? '<span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full mt-1">Admin</span>' : '';
 
-            return `
-            <div class="player-card">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl mb-3 ${gradientClass}">
-                    ${initials}
+        // El diseñador solicitó que los avatares se parezcan a los de open matches
+        // Re-usamos la estructura visual del diseño original, pero adaptada
+        let listHtml = '';
+        data.players.forEach((p, idx) => {
+            const isOwner = p.id === data.matchInfo.user_id; // Verificar si es el creador de la partida (dueño de la reserva)
+
+            // Get initials
+            const names = p.name.split(' ');
+            const initials = names.length > 1
+                ? names[0][0].toUpperCase() + names[names.length - 1][0].toUpperCase()
+                : names[0].substring(0, 2).toUpperCase();
+
+            // Ciclo a través de clases de gradiente definidas en style.css (1-5)
+            const gradientNum = (p.id % 5) + 1;
+            const gradientClass = `avatar-gradient-${gradientNum}`;
+
+            const isMe = p.id === currentUserId;
+
+            listHtml += `
+                <div class="flex items-center p-3 rounded-lg bg-slate-50 border border-slate-100 mb-2">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm ${gradientClass} flex-shrink-0">
+                        ${initials}
+                    </div>
+                    <div class="ml-3 flex flex-col min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-800 font-medium truncate ${isMe ? 'font-bold text-primary' : ''}">${p.name} ${isMe ? '(Tú)' : ''}</span>
+                            ${isOwner ? '<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200 uppercase tracking-wide">Organizador</span>' : ''}
+                        </div>
+                        <span class="text-xs text-slate-500 truncate">
+                            ${p.role === 'admin' ? 'Administrador' : 'Jugador'}
+                        </span>
+                    </div>
                 </div>
-                <span class="player-name">${p.name} ${p.id === currentUserId ? '(Tú)' : ''}</span>
-                ${roleBadge}
-            </div>
-        `}).join('');
+            `;
+        });
+
+        list.className = ""; // Remove the CSS grid styling from the container as we use a list now
+        list.innerHTML = listHtml;
 
         // Renderizar histórico de mensajes
         chatWindow.innerHTML = data.messages.map(m => {
