@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get('id');
     const token = localStorage.getItem('authToken');
-    const socket = io();
+    const socket = window.io ? window.io() : { emit: () => {}, on: () => {} }; // graceful fallback
 
     if (!bookingId || !token) {
         window.location.href = '/dashboard.html';
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     let currentUser = null;
+    let matchData = null;
 
     // Inicializar elementos del DOM
     const chatForm = document.getElementById('chat-form');
@@ -21,80 +22,159 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 1. Cargar datos del usuario actual y de la partida
     try {
-        // Fetch current user details
         currentUser = await fetchApi('/users/me');
+        matchData = await fetchApi(`/matches/${bookingId}/details`);
 
-        // Fetch match details
-        const data = await fetchApi(`/matches/${bookingId}/details`);
-
-        renderMatch(data, currentUser.id);
+        renderMatch(matchData, currentUser.id);
         joinChat(bookingId, currentUser);
+        setupActions(bookingId);
     } catch (err) {
         console.error("Error cargando detalles:", err);
         showNotification("Error cargando los detalles de la partida.", "error");
     }
 
+    function setupActions(id) {
+        const btnLeaveDesktop = document.getElementById('btn-leave-desktop');
+        const btnLeaveMobile = document.getElementById('btn-leave-mobile');
+
+        const handleLeave = async () => {
+            if(confirm("¿Estás seguro de que quieres retirarte de la partida?")) {
+                try {
+                    await fetchApi(`/bookings/${id}/leave`, { method: 'POST' });
+                    showNotification("Te has retirado de la partida.", "success");
+                    setTimeout(() => window.location.href = '/dashboard.html', 1500);
+                } catch(e) {
+                    showNotification("Error al retirarse de la partida.", "error");
+                }
+            }
+        };
+
+        if(btnLeaveDesktop) btnLeaveDesktop.addEventListener('click', handleLeave);
+        if(btnLeaveMobile) btnLeaveMobile.addEventListener('click', handleLeave);
+    }
+
     function renderMatch(data, currentUserId) {
-        document.getElementById('match-title').textContent = data.matchInfo.court_name;
+        const match = data.matchInfo;
 
-        // Renderizar jugadores (usando avatar del dashboard)
-        const list = document.getElementById('players-list');
+        // Match Headers Info
+        document.getElementById('match-court-name').textContent = match.court_name;
 
-        // El diseñador solicitó que los avatares se parezcan a los de open matches
-        // Re-usamos la estructura visual del diseño original, pero adaptada
-        let listHtml = '';
+        // Date and Time Parsing
+        const start = new Date(match.start_time);
+        const end = new Date(match.end_time);
+
+        const dateOptions = { day: 'numeric', month: 'long' };
+        const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+        const dateStr = start.toLocaleDateString('es-ES', dateOptions);
+        const timeStr = `${start.toLocaleTimeString('es-ES', timeOptions)} - ${end.toLocaleTimeString('es-ES', timeOptions)}`;
+
+        const durMinutes = Math.round((end - start) / 60000);
+
+        document.getElementById('match-date-desktop').textContent = dateStr;
+        document.getElementById('match-date-mobile').textContent = dateStr;
+        document.getElementById('match-time-desktop').textContent = timeStr;
+        document.getElementById('match-time-mobile').textContent = timeStr;
+        document.getElementById('match-duration').textContent = `${durMinutes} Minutos`;
+
+        const maxPlayers = 4; // Assuming 4 for padel
+        const currentPlayersCount = data.players.length;
+        document.getElementById('match-players-count').textContent = `${maxPlayers} Jugadores`;
+        document.getElementById('players-completion').textContent = `${currentPlayersCount}/${maxPlayers} Completado`;
+
+        // Render Players
+        const grid = document.getElementById('players-grid');
+        let gridHtml = '';
+
+        // 1. Confirmed Players
         data.players.forEach((p, idx) => {
-            const isOwner = p.id === data.matchInfo.user_id; // Verificar si es el creador de la partida (dueño de la reserva)
-
-            // Get initials
+            const isOwner = p.id === match.user_id;
             const names = p.name.split(' ');
             const initials = names.length > 1
                 ? names[0][0].toUpperCase() + names[names.length - 1][0].toUpperCase()
                 : names[0].substring(0, 2).toUpperCase();
 
-            // Ciclo a través de clases de gradiente definidas en style.css (1-5)
-            const gradientNum = (p.id % 5) + 1;
-            const gradientClass = `avatar-gradient-${gradientNum}`;
-
-            const isMe = p.id === currentUserId;
-
-            listHtml += `
-                <div class="flex items-center p-3 rounded-lg bg-slate-50 border border-slate-100 mb-2">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm ${gradientClass} flex-shrink-0">
-                        ${initials}
-                    </div>
-                    <div class="ml-3 flex flex-col min-w-0 flex-1">
-                        <div class="flex items-center gap-2">
-                            <span class="text-slate-800 font-medium truncate ${isMe ? 'font-bold text-primary' : ''}">${p.name} ${isMe ? '(Tú)' : ''}</span>
-                            ${isOwner ? '<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200 uppercase tracking-wide">Organizador</span>' : ''}
+            gridHtml += `
+                <div class="bg-surface-container-lowest p-4 rounded-3xl flex flex-col items-center text-center space-y-3 shadow-sm border border-outline-variant/10">
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-full border-2 border-primary flex items-center justify-center bg-primary/10 text-primary font-bold text-xl uppercase tracking-wider">
+                            ${initials}
                         </div>
-                        <span class="text-xs text-slate-500 truncate">
-                            ${p.role === 'admin' ? 'Administrador' : 'Jugador'}
-                        </span>
+                        <div class="absolute -bottom-1 -right-1 bg-secondary text-white rounded-full p-0.5 shadow-md">
+                            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="font-bold text-on-surface leading-tight">${p.name}</p>
+                        <p class="text-[10px] text-secondary font-bold uppercase tracking-wider">Confirmado</p>
                     </div>
                 </div>
             `;
         });
 
-        list.className = ""; // Remove the CSS grid styling from the container as we use a list now
-        list.innerHTML = listHtml;
+        // 2. Empty Slots
+        const emptySlots = maxPlayers - currentPlayersCount;
+        if(emptySlots > 0) {
+            // First empty slot is 'Join'
+            gridHtml += `
+                <div class="bg-surface-container-low border-2 border-dashed border-outline-variant/30 p-4 rounded-3xl flex flex-col items-center justify-center text-center space-y-2 group active:scale-95 transition-all cursor-pointer hover:bg-surface-container-high" onclick="window.location.href='/dashboard.html'">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined">add</span>
+                    </div>
+                    <p class="text-xs font-bold text-primary uppercase tracking-tight">Únete ahora</p>
+                </div>
+            `;
 
-        // Renderizar histórico de mensajes
-        chatWindow.innerHTML = data.messages.map(m => {
-            const isSent = m.user_id === currentUserId;
-            const msgClass = isSent ? 'sent' : 'received';
-            const time = new Date(m.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            // Remaining empty slots are 'Invite'
+            for(let i=1; i < emptySlots; i++) {
+                gridHtml += `
+                <div class="bg-surface-container-low border-2 border-dashed border-outline-variant/30 p-4 rounded-3xl flex flex-col items-center justify-center text-center space-y-2 group active:scale-95 transition-all cursor-pointer hover:bg-surface-container-high" onclick="alert('Funcionalidad de invitar en desarrollo')">
+                    <div class="w-12 h-12 rounded-full bg-outline-variant/10 flex items-center justify-center text-outline">
+                        <span class="material-symbols-outlined">person_add</span>
+                    </div>
+                    <p class="text-xs font-bold text-on-surface-variant uppercase tracking-tight">Invitar amigo</p>
+                </div>
+                `;
+            }
+        }
 
-            return `
-            <div class="msg ${msgClass}">
-                <span class="msg-user">${m.user_name}</span>
-                ${m.message}
-                <span class="msg-time">${time}</span>
-            </div>
-        `}).join('');
+        grid.innerHTML = gridHtml;
 
-        // Scroll to bottom
+        // Render Chat History
+        chatWindow.innerHTML = data.messages.map(m => createMessageHtml(m, currentUserId)).join('');
         chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function createMessageHtml(data, currentUserId) {
+        const isSent = data.user_id === currentUserId || data.userId === currentUserId; // handle both historic (user_id) and realtime (userId) properties
+        const time = new Date(data.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const userName = data.user_name || data.userName;
+
+        // Derive initials for avatar fallback if needed, or just use the name above the bubble as in the design
+        if (isSent) {
+            return `
+            <div class="flex items-start justify-end gap-3 w-full">
+                <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%]">
+                    <p class="text-sm leading-relaxed font-medium">${data.message}</p>
+                    <div class="flex items-center justify-end gap-1 mt-1">
+                        <p class="text-[10px] text-white/70">${time}</p>
+                        <span class="material-symbols-outlined text-[12px] text-white/90" style="font-variation-settings: 'FILL' 1;">done_all</span>
+                    </div>
+                </div>
+            </div>`;
+        } else {
+            return `
+            <div class="flex items-start gap-3 w-full">
+                <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    ${userName.substring(0,2).toUpperCase()}
+                </div>
+                <div class="bg-surface-container-lowest p-3 rounded-2xl rounded-tl-none shadow-sm border border-outline-variant/10 max-w-[85%]">
+                    <p class="text-[10px] font-bold text-primary uppercase mb-1">${userName}</p>
+                    <p class="text-sm text-on-surface leading-relaxed">${data.message}</p>
+                    <p class="text-[10px] text-outline text-right mt-1">${time}</p>
+                </div>
+            </div>`;
+        }
     }
 
     function joinChat(id, user) {
@@ -115,20 +195,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         socket.on('receiveMessage', (data) => {
-            const isSent = data.userId === user.id;
-            const msgClass = isSent ? 'sent' : 'received';
-            const time = new Date(data.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-
-            const div = document.createElement('div');
-            div.className = `msg ${msgClass}`;
-            div.innerHTML = `
-                <span class="msg-user">${data.userName}</span>
-                ${data.message}
-                <span class="msg-time">${time}</span>
-            `;
-            chatWindow.appendChild(div);
-
-            // Scroll to bottom
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = createMessageHtml(data, user.id);
+            // Append the child inside tempDiv to chatWindow
+            chatWindow.appendChild(tempDiv.firstElementChild);
             chatWindow.scrollTop = chatWindow.scrollHeight;
         });
     }

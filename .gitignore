@@ -9,3 +9,4 @@ npm-debug.log
 *.zip
 *.tar.gz
 *backup*
+server.log

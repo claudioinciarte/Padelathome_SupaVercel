@@ -202,3 +202,6 @@ CREATE TABLE match_participants (
 - **[2024-05-21] Database Schema Update:** Added `waiting_list_entries` table.
 - **[2024-05-21] UI Update:** Refactored `public/dashboard.html` and `public/admin.html` to use Tailwind CSS.
 - **[2024-05-22] Auth UI Update:** Refactored `login.html`, `register.html`, `reset-password.html`, and `confirm-booking.html` to match the new Tailwind CSS design system (Royal Blue theme, centered card layout). Fixed regression in `register.html` where `phone_number` field was missing.
+
+## Changelog
+- Replaced custom CSS in `public/match-details.html` and `public/match-details.js` with comprehensive Tailwind CSS styles according to design specifications. Combined responsive Desktop and Mobile designs into the unified match details template. Fixed DOM manipulation to target new structures for player cards and real-time chat bubbles.
