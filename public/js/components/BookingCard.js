@@ -41,10 +41,16 @@ export function render(container, bookings) {
                             Próxima
                         </span>
                     </div>
-                    <button class="action-btn w-full md:w-auto inline-flex justify-center items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors" data-action="${action}" data-id="${booking.id}">
-                       <span class="material-icons-round text-lg mr-1.5 pointer-events-none">cancel</span>
-                       ${btnText}
-                    </button>
+                    <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto mt-3 md:mt-0">
+                        <button class="action-btn w-full md:w-auto inline-flex justify-center items-center rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors" data-action="details" data-id="${booking.id}">
+                            <span class="material-icons-round text-lg mr-1.5 pointer-events-none">info</span>
+                            Detalles
+                        </button>
+                        <button class="action-btn w-full md:w-auto inline-flex justify-center items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors" data-action="${action}" data-id="${booking.id}">
+                           <span class="material-icons-round text-lg mr-1.5 pointer-events-none">cancel</span>
+                           ${btnText}
+                        </button>
+                    </div>
                 </div>
             `;
 
@@ -76,6 +82,8 @@ export function init(container, handlers) {
             handlers.onCancel(id);
         } else if (action === 'leave' && handlers.onLeave) {
             handlers.onLeave(id);
+        } else if (action === 'details') {
+            window.location.href = `/match-details.html?id=${id}`;
         }
     });
 }
