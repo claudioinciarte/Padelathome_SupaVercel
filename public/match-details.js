@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let currentUser = null;
 
+    // Inicializar elementos del DOM
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatWindow = document.getElementById('chat-messages');
+
     // 1. Cargar datos del usuario actual y de la partida
     try {
         // Fetch current user details
@@ -28,11 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Error cargando detalles:", err);
         showNotification("Error cargando los detalles de la partida.", "error");
     }
-
-    // 2. Lógica del Chat
-    const chatForm = document.getElementById('chat-form');
-    const chatInput = document.getElementById('chat-input');
-    const chatWindow = document.getElementById('chat-messages');
 
     function renderMatch(data, currentUserId) {
         document.getElementById('match-title').textContent = data.matchInfo.court_name;
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function joinChat(id, user) {
         socket.emit('joinMatchChat', id);
 
-        chatForm.onsubmit = (e) => {
+        chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const msg = chatInput.value.trim();
             if(!msg) return;
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 userName: user.name
             });
             chatInput.value = '';
-        };
+        });
 
         socket.on('receiveMessage', (data) => {
             const isSent = data.userId === user.id;
