@@ -1,5 +1,6 @@
 // Fichero: public/confirm-booking.js
-const API_BASE_URL = 'http://padelathome.wincicloud.win';
+// Mismo origen: funciona tanto en Vercel como en la Raspberry Pi
+const API_BASE_URL = '';
 
 const statusTitle = document.getElementById('status-title');
 const statusMessage = document.getElementById('status-message');

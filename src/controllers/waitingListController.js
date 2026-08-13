@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { io } = require('../../server'); // Import io instance
+const realtime = require('../services/realtime');
 
 const joinWaitingList = async (req, res) => {
   const userId = req.user.id;
@@ -34,7 +34,7 @@ const joinWaitingList = async (req, res) => {
     );
 
     res.status(201).json({ message: 'Te has apuntado a la lista de espera correctamente.', entry: rows[0] });
-    io.emit('waitlist:joined', { courtId: courtId, slotStartTime: slotStartTime, userId: userId }); // Emit WebSocket event
+    realtime.emit('waitlist:joined', { courtId: courtId, slotStartTime: slotStartTime, userId: userId }); // Emit WebSocket event
 
   } catch (error) {
     console.error('Error al unirse a la lista de espera:', error);
@@ -85,7 +85,7 @@ const confirmBookingFromWaitlist = async (req, res) => {
 
     await client.query('COMMIT');
     res.status(201).json({ message: '¡Reserva confirmada exitosamente!' });
-    io.emit('booking:created', newBooking); // Emit WebSocket event
+    realtime.emit('booking:created', newBooking); // Emit WebSocket event
 
   } catch (error) {
     await client.query('ROLLBACK');
@@ -141,7 +141,7 @@ const withdrawFromWaitingList = async (req, res) => {
     }
 
     res.status(200).json({ message: 'Has sido retirado de la lista de espera.' });
-    io.emit('waitlist:withdrawn', { courtId, slotStartTime, userId });
+    realtime.emit('waitlist:withdrawn', { courtId, slotStartTime, userId });
 
   } catch (error) {
     console.error('Error al retirarse de la lista de espera:', error);

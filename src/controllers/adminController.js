@@ -89,7 +89,7 @@ const inviteUser = async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, newUser.id, expires_at]);
-    const setPasswordUrl = `${process.env.APP_URL}/reset-password.html?token=${resetToken}`;
+    const setPasswordUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
     sendEmail({ to: newUser.email, subject: '¡Bienvenido a Padel@Home! Establece tu contraseña', html: `<h3>¡Hola, ${newUser.name}!</h3><p>Un administrador te ha creado una cuenta en Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer tu contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer mi contraseña</a>`});
     await client.query('COMMIT');
     res.status(201).json({ message: 'Usuario invitado exitosamente.', user: newUser });
@@ -121,7 +121,7 @@ const resetUserPassword = async (req, res) => {
 
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, user.id, expires_at]);
 
-    const setPasswordUrl = `${process.env.APP_URL}/reset-password.html?token=${resetToken}`;
+    const setPasswordUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
     sendEmail({
       to: user.email,
       subject: 'Restablecimiento de Contraseña para Padel@Home',

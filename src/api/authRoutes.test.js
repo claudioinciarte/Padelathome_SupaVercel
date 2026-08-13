@@ -32,7 +32,7 @@ describe('Auth Routes', () => {
         });
 
       expect(res.statusCode).toEqual(201);
-      expect(res.body).toHaveProperty('message', 'Registro exitoso. Tu cuenta está pendiente de aprobación por un administrador.');
+      expect(res.body).toHaveProperty('message', 'Registro exitoso. Tu cuenta está pendiente de aprobación.');
       expect(res.body).toHaveProperty('user');
       expect(res.body.user).toHaveProperty('id');
       expect(res.body.user).toHaveProperty('name', 'Test User');
@@ -135,7 +135,7 @@ describe('Auth Routes', () => {
         });
 
       expect(res.statusCode).toEqual(403);
-      expect(res.body).toHaveProperty('message', 'Tu cuenta aún no ha sido aprobada por un administrador.');
+      expect(res.body).toHaveProperty('message', 'Tu cuenta está inactiva o pendiente de aprobación.');
     });
 
     it('should return 403 if account is inactive during login', async () => {
@@ -151,7 +151,7 @@ describe('Auth Routes', () => {
         });
 
       expect(res.statusCode).toEqual(403);
-      expect(res.body).toHaveProperty('message', 'Tu cuenta está inactiva.');
+      expect(res.body).toHaveProperty('message', 'Tu cuenta está inactiva o pendiente de aprobación.');
     });
   });
 });

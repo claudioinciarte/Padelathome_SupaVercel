@@ -10,12 +10,12 @@ jest.mock('../middleware/authMiddleware', () => ({
     req.user = { id: 1 }; // Mock user
     next();
   },
-  admin: (req, res, next) => next(),
+  isAdmin: (req, res, next) => next(),
 }));
 
 jest.mock('../controllers/bookingController', () => ({
   createBooking: jest.fn(),
-  getMyBooking: jest.fn(),
+  getMyBookings: jest.fn(),
   cancelMyBooking: jest.fn(),
 }));
 
@@ -49,14 +49,14 @@ describe('Booking Routes', () => {
   });
 
   describe('GET /api/bookings/me', () => {
-    it('should call getMyBooking controller', async () => {
-      bookingController.getMyBooking.mockImplementation((req, res) => res.status(200).json({ id: 1 }));
+    it('should call getMyBookings controller', async () => {
+      bookingController.getMyBookings.mockImplementation((req, res) => res.status(200).json([{ id: 1 }]));
 
       await request(app)
         .get('/api/bookings/me')
         .expect(200);
 
-      expect(bookingController.getMyBooking).toHaveBeenCalledTimes(1);
+      expect(bookingController.getMyBookings).toHaveBeenCalledTimes(1);
     });
   });
 

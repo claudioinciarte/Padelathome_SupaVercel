@@ -1,11 +1,6 @@
 const pool = require('../config/database');
 const sendEmail = require('../services/emailService');
-
-let io;
-const getIo = () => {
-  if (!io) io = require('../../server').io;
-  return io;
-};
+const realtime = require('../services/realtime');
 
 const getOpenMatches = async (req, res) => {
   try {
@@ -71,7 +66,7 @@ const joinOpenMatch = async (req, res) => {
 
     await client.query('COMMIT');
     res.status(200).json({ message: 'Te has unido a la partida con éxito.' });
-    getIo().emit('match:updated', { bookingId: bookingId, currentParticipants: currentParticipants, maxParticipants: booking.max_participants }); // Emit WebSocket event
+    realtime.emit('match:updated', { bookingId: bookingId, currentParticipants: currentParticipants, maxParticipants: booking.max_participants }); // Emit WebSocket event
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error al unirse a la partida:', error);
@@ -178,11 +173,11 @@ const leaveOpenMatch = async (req, res) => {
     const updatedParticipantsResult = await client.query("SELECT COUNT(user_id) FROM match_participants WHERE booking_id = $1", [bookingId]);
     const currentParticipants = parseInt(updatedParticipantsResult.rows[0].count);
 
-    getIo().emit('match:updated', { bookingId: bookingId, currentParticipants: currentParticipants, maxParticipants: booking.max_participants });
+    realtime.emit('match:updated', { bookingId: bookingId, currentParticipants: currentParticipants, maxParticipants: booking.max_participants });
 
     // If the match was cancelled, also emit a booking:cancelled event
     if (booking.status === 'cancelled_by_admin') { // Check the status AFTER the update
-        getIo().emit('booking:cancelled', { bookingId: bookingId, courtId: booking.court_id, startTime: booking.start_time });
+        realtime.emit('booking:cancelled', { bookingId: bookingId, courtId: booking.court_id, startTime: booking.start_time });
     }
 
   } catch (error) {
@@ -285,10 +280,65 @@ const getMatchDetails = async (req, res) => {
     }
 };
 
+const sendMatchMessage = async (req, res) => {
+  const userId = req.user.id;
+  const { bookingId } = req.params;
+  const { message } = req.body;
+
+  if (!bookingId || isNaN(parseInt(bookingId))) {
+    return res.status(400).json({ message: 'El ID de la partida proporcionado no es válido.' });
+  }
+  if (!message || typeof message !== 'string' || message.trim().length === 0) {
+    return res.status(400).json({ message: 'El mensaje no puede estar vacío.' });
+  }
+
+  try {
+    // Verificar que la partida existe y que el usuario participa en ella
+    const bookingResult = await pool.query(
+      "SELECT id FROM bookings WHERE id = $1 AND status = 'confirmed'",
+      [bookingId]
+    );
+    if (bookingResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Partida no encontrada.' });
+    }
+
+    const participantResult = await pool.query(
+      "SELECT id FROM match_participants WHERE booking_id = $1 AND user_id = $2",
+      [bookingId, userId]
+    );
+    const isOrganizer = await pool.query(
+      "SELECT id FROM bookings WHERE id = $1 AND user_id = $2",
+      [bookingId, userId]
+    );
+    if (participantResult.rows.length === 0 && isOrganizer.rows.length === 0) {
+      return res.status(403).json({ message: 'No participas en esta partida.' });
+    }
+
+    const { rows } = await pool.query(
+      `INSERT INTO match_messages (booking_id, user_id, message)
+       VALUES ($1, $2, $3)
+       RETURNING id, booking_id, user_id, message, created_at`,
+      [bookingId, userId, message.trim()]
+    );
+
+    const savedMessage = rows[0];
+    const userResult = await pool.query("SELECT name FROM users WHERE id = $1", [userId]);
+    savedMessage.user_name = userResult.rows[0] ? userResult.rows[0].name : 'Usuario';
+
+    realtime.emitToMatch(bookingId, 'receiveMessage', savedMessage);
+
+    res.status(201).json(savedMessage);
+  } catch (error) {
+    console.error('Error al enviar mensaje de partida:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
 module.exports = {
   getOpenMatches,
   joinOpenMatch,
   leaveOpenMatch,
   getMatchParticipants,
   getMatchDetails,
+  sendMatchMessage,
 };

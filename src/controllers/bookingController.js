@@ -3,7 +3,7 @@ const { addMinutes } = require('date-fns');
 const sendEmail = require('../services/emailService');
 const ics = require('ics');
 const crypto = require('crypto'); // Necesario para la lista de espera
-const { io } = require('../../server'); // Import io instance
+const realtime = require('../services/realtime');
 
 /**
  * @description Crea una nueva reserva (privada o partida abierta)
@@ -114,8 +114,7 @@ const createBooking = async (req, res) => {
     }
 
     res.status(201).json(newBooking);
-    io.emit('booking:created', newBooking); // Emit WebSocket event
-
+    realtime.emit('booking:created', newBooking); // Emit WebSocket event
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error al crear la reserva:', error);
@@ -216,20 +215,20 @@ const cancelMyBooking = async (req, res) => {
       );
 
       // 5. Le enviamos el correo de notificación
-      const confirmationUrl = `${process.env.APP_URL}/confirm-booking.html?token=${confirmationToken}`;
+      const confirmationUrl = `${process.env.APP_URL || ''}/confirm-booking.html?token=${confirmationToken}`;
       sendEmail({
         to: luckyUser.user_email,
         subject: '¡Un hueco se ha liberado en Padel@Home!',
         html: `<h3>¡Hola, ${luckyUser.user_name}!</h3><p>Se ha liberado el horario por el que estabas esperando (${new Date(luckyUser.slot_start_time).toLocaleString('es-ES')}).</p><p>Tienes <strong>30 minutos</strong> para confirmar la reserva haciendo clic en el siguiente enlace. Después, tu turno expirará.</p><a href="${confirmationUrl}">Confirmar mi Reserva</a>`
       });
       console.log(`Notificación de lista de espera enviada al usuario ${luckyUser.user_id}`);
-      io.emit('waitlist:notificationSent', { userId: luckyUser.user_id, slotStartTime: luckyUser.slot_start_time }); // Emit WebSocket event
+      realtime.emit('waitlist:notificationSent', { userId: luckyUser.user_id, slotStartTime: luckyUser.slot_start_time }); // Emit WebSocket event
     }
     // --- FIN DE LÓGICA DE LISTA DE ESPERA ---
 
     await client.query('COMMIT');
     res.json({ message: 'Reserva cancelada exitosamente.' });
-    io.emit('booking:cancelled', { bookingId: bookingId, courtId: cancelledBooking.court_id, startTime: cancelledBooking.start_time });
+    realtime.emit('booking:cancelled', { bookingId: bookingId, courtId: cancelledBooking.court_id, startTime: cancelledBooking.start_time });
 
   } catch (error) {
     await client.query('ROLLBACK');

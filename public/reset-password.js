@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'https://padelathome.wincicloud.win';
+    const API_BASE_URL = '';
     const resetForm = document.getElementById('reset-password-form');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirm-password');

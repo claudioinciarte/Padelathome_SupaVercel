@@ -1,0 +1,35 @@
+name: Cron Jobs
+
+# Ejecuta las tareas programadas que en la Raspberry Pi hacía node-cron.
+# Vercel (plan Hobby/Pro) limita los crons, así que usamos GitHub Actions.
+# Requiere los siguientes secretos del repositorio:
+#   VERCEL_API_URL  -> URL base de la app en Vercel, p.ej. https://padelathome.vercel.app
+#   CRON_SECRET     -> mismo valor que la variable CRON_SECRET de Vercel
+
+on:
+  schedule:
+    # Cada 30 minutos (ambos jobs se ejecutan juntos)
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open matches cleanup
+        run: |
+          curl -sS -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.VERCEL_API_URL }}/api/cron/open-matches-cleanup" \
+            -o /tmp/open_matches_response.json
+          cat /tmp/open_matches_response.json
+
+      - name: Waiting list processing
+        run: |
+          curl -sS -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.VERCEL_API_URL }}/api/cron/waiting-list" \
+            -o /tmp/waiting_list_response.json
+          cat /tmp/waiting_list_response.json

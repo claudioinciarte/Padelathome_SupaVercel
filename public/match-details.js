@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let currentUser = null;
     let matchData = null;
+    let renderedMessageCount = 0;
 
     // Inicializar elementos del DOM
     const chatForm = document.getElementById('chat-form');
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const handleLeave = async () => {
             if(confirm("¿Estás seguro de que quieres retirarte de la partida?")) {
                 try {
-                    await fetchApi(`/bookings/${id}/leave`, { method: 'POST' });
+                    await fetchApi(`/matches/${id}/leave`, { method: 'DELETE' });
                     showNotification("Te has retirado de la partida.", "success");
                     setTimeout(() => window.location.href = '/dashboard.html', 1500);
                 } catch(e) {
@@ -156,6 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Render Chat History
         chatWindow.innerHTML = data.messages.map(m => createMessageHtml(m, currentUserId)).join('');
         chatWindow.scrollTop = chatWindow.scrollHeight;
+        renderedMessageCount = data.messages.length;
     }
 
     function createMessageHtml(data, currentUserId) {
@@ -191,28 +193,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function joinChat(id, user) {
-        socket.emit('joinMatchChat', id);
+        // En despliegues con Socket.IO (Raspberry Pi) usamos tiempo real.
+        // En Vercel serverless no hay WebSocket: el envío se hace por REST
+        // y la recepción mediante sondeo periódico (polling).
+        const hasRealtime = !!window.io;
+        if (hasRealtime) {
+            socket.emit('joinMatchChat', id);
+        }
 
-        chatForm.addEventListener('submit', (e) => {
+        chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const msg = chatInput.value.trim();
             if(!msg) return;
 
-            socket.emit('sendMessage', {
-                bookingId: id,
-                userId: user.id,
-                message: msg,
-                userName: user.name
-            });
-            chatInput.value = '';
+            try {
+                // Guardar siempre por REST: persiste en la BD y en modo
+                // Socket.IO se reemitirá al resto de usuarios de la sala.
+                const savedMessage = await fetchApi(`/matches/${id}/messages`, {
+                    method: 'POST',
+                    body: JSON.stringify({ message: msg })
+                });
+                if (savedMessage) {
+                    savedMessage.user_name = user.name;
+                    appendMessage(savedMessage, user.id);
+                }
+                chatInput.value = '';
+            } catch (err) {
+                console.error('Error enviando mensaje:', err);
+                showNotification('No se pudo enviar el mensaje.', 'error');
+            }
         });
 
-        socket.on('receiveMessage', (data) => {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = createMessageHtml(data, user.id);
-            // Append the child inside tempDiv to chatWindow
-            chatWindow.appendChild(tempDiv.firstElementChild);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        });
+        if (hasRealtime) {
+            socket.on('receiveMessage', (data) => {
+                appendMessage(data, user.id);
+            });
+        } else {
+            // Polling cada 5 segundos (fallback serverless)
+            setInterval(async () => {
+                try {
+                    const data = await fetchApi(`/matches/${id}/details`);
+                    if (data.messages.length !== renderedMessageCount) {
+                        chatWindow.innerHTML = data.messages.map(m => createMessageHtml(m, user.id)).join('');
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                        renderedMessageCount = data.messages.length;
+                    }
+                } catch (err) {
+                    // Silencioso: reintentará en el siguiente ciclo
+                }
+            }, 5000);
+        }
+    }
+
+    function appendMessage(data, currentUserId) {
+        const messageEl = createMessageHtml(data, currentUserId);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = messageEl;
+        chatWindow.appendChild(tempDiv.firstElementChild);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        renderedMessageCount++;
     }
 });

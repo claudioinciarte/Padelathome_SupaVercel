@@ -26,17 +26,20 @@ describe('Waiting List Routes', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /api/waiting-list', () => {
-    it('should get the waiting list for the logged-in user', async () => {
-      const waitingList = [
-        { id: 1, user_id: 1, court_id: 1, date: '2025-11-10' },
-      ];
-      pool.query.mockResolvedValue({ rows: waitingList });
+  describe('GET /api/waiting-list/me', () => {
+    it('should get the waiting list entries for the logged-in user with duration', async () => {
+      pool.query.mockResolvedValue({
+        rows: [
+          { court_id: 1, slot_start_time: '2025-11-11T10:00:00Z', slot_end_time: '2025-11-11T11:30:00Z' },
+        ],
+      });
 
-      const res = await request(app).get('/api/waiting-list');
+      const res = await request(app).get('/api/waiting-list/me');
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual(waitingList);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0]).toHaveProperty('court_id', 1);
+      expect(res.body[0]).toHaveProperty('duration', 90);
     });
   });
 
@@ -56,16 +59,31 @@ describe('Waiting List Routes', () => {
       expect(res.body).toHaveProperty('message', 'Te has apuntado a la lista de espera correctamente.');
       expect(res.body).toHaveProperty('entry', newWaitingListEntry);
     });
+
+    it('should return 400 if already on the waiting list for that slot', async () => {
+      pool.query
+        .mockResolvedValueOnce({ rows: [{ id: 1 }] }) // Mock booking exists
+        .mockResolvedValueOnce({ rows: [{ id: 5 }] }); // Mock already in waiting list
+
+      const res = await request(app)
+        .post('/api/waiting-list')
+        .send({ courtId: 1, slotStartTime: '2025-11-11T10:00:00Z', slotEndTime: '2025-11-11T11:00:00Z' });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('message', 'Ya estás en la lista de espera para este horario.');
+    });
   });
 
-  describe('DELETE /api/waiting-list/:id', () => {
+  describe('DELETE /api/waiting-list', () => {
     it('should remove the user from the waiting list', async () => {
       pool.query.mockResolvedValue({ rowCount: 1 });
 
-      const res = await request(app).delete('/api/waiting-list/1');
+      const res = await request(app)
+        .delete('/api/waiting-list')
+        .send({ courtId: 1, slotStartTime: '2025-11-11T10:00:00Z' });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty('message', 'Has sido eliminado de la lista de espera.');
+      expect(res.body).toHaveProperty('message', 'Has sido retirado de la lista de espera.');
     });
   });
 });

@@ -31,18 +31,22 @@ describe('Schedule Routes', () => {
       const bookings = [
         { id: 1, user_id: 2, start_time: '2025-11-10T10:00:00Z', end_time: '2025-11-10T11:00:00Z', is_open_match: false },
       ];
+      const myParticipantBookings = [];
       const blockedPeriods = [];
       const participants = [];
       const settings = [
         { setting_key: 'operating_open_time', setting_value: '08:00' },
         { setting_key: 'operating_close_time', setting_value: '22:00' },
       ];
+      const waitlist = [];
 
       pool.query
         .mockResolvedValueOnce({ rows: bookings })
+        .mockResolvedValueOnce({ rows: myParticipantBookings })
         .mockResolvedValueOnce({ rows: blockedPeriods })
         .mockResolvedValueOnce({ rows: participants })
-        .mockResolvedValueOnce({ rows: settings });
+        .mockResolvedValueOnce({ rows: settings })
+        .mockResolvedValueOnce({ rows: waitlist });
 
       const res = await request(app).get('/api/schedule/week?courtId=1&date=2025-11-10');
 
@@ -57,6 +61,7 @@ describe('Schedule Routes', () => {
         { id: 1, user_id: 2, start_time: '2025-11-10T11:00:00Z', end_time: '2025-11-10T12:00:00Z', is_open_match: true, max_participants: 4 },
         { id: 2, user_id: 3, start_time: '2025-11-10T14:00:00Z', end_time: '2025-11-10T15:00:00Z', is_open_match: true, max_participants: 2 },
       ];
+      const myParticipantBookings = [];
       const blockedPeriods = [];
       const participants = [
         { booking_id: 2, participant_count: '2' },
@@ -65,12 +70,15 @@ describe('Schedule Routes', () => {
         { setting_key: 'operating_open_time', setting_value: '08:00' },
         { setting_key: 'operating_close_time', setting_value: '22:00' },
       ];
+      const waitlist = [];
 
       pool.query
         .mockResolvedValueOnce({ rows: bookings })
+        .mockResolvedValueOnce({ rows: myParticipantBookings })
         .mockResolvedValueOnce({ rows: blockedPeriods })
         .mockResolvedValueOnce({ rows: participants })
-        .mockResolvedValueOnce({ rows: settings });
+        .mockResolvedValueOnce({ rows: settings })
+        .mockResolvedValueOnce({ rows: waitlist });
 
       const res = await request(app).get('/api/schedule/week?courtId=1&date=2025-11-10');
 
@@ -84,6 +92,7 @@ describe('Schedule Routes', () => {
 
     it('should correctly identify blocked periods', async () => {
       const bookings = [];
+      const myParticipantBookings = [];
       const blockedPeriods = [
         { start_time: '2025-11-10T12:00:00Z', end_time: '2025-11-10T13:00:00Z', reason: 'Maintenance' },
       ];
@@ -92,12 +101,15 @@ describe('Schedule Routes', () => {
         { setting_key: 'operating_open_time', setting_value: '08:00' },
         { setting_key: 'operating_close_time', setting_value: '22:00' },
       ];
+      const waitlist = [];
 
       pool.query
         .mockResolvedValueOnce({ rows: bookings })
+        .mockResolvedValueOnce({ rows: myParticipantBookings })
         .mockResolvedValueOnce({ rows: blockedPeriods })
         .mockResolvedValueOnce({ rows: participants })
-        .mockResolvedValueOnce({ rows: settings });
+        .mockResolvedValueOnce({ rows: settings })
+        .mockResolvedValueOnce({ rows: waitlist });
 
       const res = await request(app).get('/api/schedule/week?courtId=1&date=2025-11-10');
 

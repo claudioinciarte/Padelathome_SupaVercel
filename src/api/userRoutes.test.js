@@ -1,8 +1,9 @@
 const request = require('supertest');
 const express = require('express');
+const bcrypt = require('bcrypt');
 const userRoutes = require('./userRoutes');
 const pool = require('../config/database');
-const { protect, isAdmin } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
 // Mock the pool object
 jest.mock('../config/database', () => ({
@@ -13,10 +14,6 @@ jest.mock('../config/database', () => ({
 jest.mock('../middleware/authMiddleware', () => ({
   protect: (req, res, next) => {
     req.user = { id: 1 }; // Mock a logged-in user
-    next();
-  },
-  isAdmin: (req, res, next) => {
-    req.user.role = 'admin'; // Mock an admin user
     next();
   },
 }));
@@ -41,6 +38,15 @@ describe('User Routes', () => {
       expect(res.body).toHaveProperty('name', 'Test User');
       expect(res.body).toHaveProperty('email', 'test@example.com');
     });
+
+    it('should return 404 if user not found', async () => {
+      pool.query.mockResolvedValue({ rows: [] });
+
+      const res = await request(app).get('/api/users/me');
+
+      expect(res.statusCode).toEqual(404);
+      expect(res.body).toHaveProperty('message', 'Usuario no encontrado.');
+    });
   });
 
   describe('PUT /api/users/me', () => {
@@ -58,64 +64,54 @@ describe('User Routes', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual(updatedUser);
+      expect(res.body).toHaveProperty('message', 'Perfil actualizado con éxito.');
+      expect(res.body.user).toHaveProperty('name', 'Updated User');
+    });
+
+    it('should return 400 if name is missing', async () => {
+      const res = await request(app)
+        .put('/api/users/me')
+        .send({ floor: '1' });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('message', 'El nombre es requerido.');
     });
   });
 
-  describe('GET /api/users', () => {
-    it('should get all users for an admin', async () => {
-      const users = [
-        { id: 1, name: 'Test User 1', email: 'test1@example.com' },
-        { id: 2, name: 'Test User 2', email: 'test2@example.com' },
-      ];
-      pool.query.mockResolvedValue({ rows: users });
-
-      const res = await request(app).get('/api/users');
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual(users);
-    });
-  });
-
-  describe('GET /api/users/:id', () => {
-    it('should get a single user for an admin', async () => {
-      const user = { id: 1, name: 'Test User 1', email: 'test1@example.com' };
-      pool.query.mockResolvedValue({ rows: [user] });
-
-      const res = await request(app).get('/api/users/1');
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual(user);
-    });
-  });
-
-  describe('PUT /api/users/:id', () => {
-    it('should update a user for an admin', async () => {
-      const updatedUser = { id: 1, name: 'Updated User', email: 'updated@example.com', role: 'user', account_status: 'active' };
-      pool.query.mockResolvedValue({ rows: [updatedUser] });
+  describe('PUT /api/users/change-password', () => {
+    it('should change the password of the logged-in user', async () => {
+      const hashedPassword = await bcrypt.hash('oldpassword123', 10);
+      pool.query
+        .mockResolvedValueOnce({ rows: [{ password_hash: hashedPassword }] }) // Current hash
+        .mockResolvedValueOnce({ rows: [] }); // UPDATE
 
       const res = await request(app)
-        .put('/api/users/1')
-        .send({
-          name: 'Updated User',
-          email: 'updated@example.com',
-          role: 'user',
-          account_status: 'active',
-        });
+        .put('/api/users/change-password')
+        .send({ oldPassword: 'oldpassword123', newPassword: 'newpassword123' });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual(updatedUser);
+      expect(res.body).toHaveProperty('message', 'Contraseña actualizada con éxito.');
     });
-  });
 
-  describe('DELETE /api/users/:id', () => {
-    it('should delete a user for an admin', async () => {
-      pool.query.mockResolvedValue({ rowCount: 1 });
+    it('should return 401 if old password does not match', async () => {
+      const hashedPassword = await bcrypt.hash('correctpassword', 10);
+      pool.query.mockResolvedValue({ rows: [{ password_hash: hashedPassword }] });
 
-      const res = await request(app).delete('/api/users/1');
+      const res = await request(app)
+        .put('/api/users/change-password')
+        .send({ oldPassword: 'incorrectpassword', newPassword: 'newpassword123' });
 
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty('message', 'Usuario eliminado correctamente.');
+      expect(res.statusCode).toEqual(401);
+      expect(res.body).toHaveProperty('message', 'La contraseña antigua no es correcta.');
+    });
+
+    it('should return 400 if fields are missing', async () => {
+      const res = await request(app)
+        .put('/api/users/change-password')
+        .send({ oldPassword: 'onlyold' });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('message', 'La contraseña antigua y la nueva son requeridas.');
     });
   });
 });
