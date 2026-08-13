@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles de la Partida - Padel@Home</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css">
+
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563EB", // Ensuring consistency with global app brand
+              secondary: "#006e37",
+              surface: "#f8f9fa",
+              "on-surface": "#2d3335",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f1f4f5",
+              "surface-container-high": "#e5e9eb",
+              "on-surface-variant": "#5a6062",
+              "outline-variant": "#adb3b5",
+              error: "#a83836",
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              headline: ["Inter"],
+              body: ["Inter"],
+              label: ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; min-height: max(884px, 100dvh); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 2rem); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased pb-24 md:pb-8">
+
+<!-- Notification Container -->
+<div id="notification-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+
+<!-- TopAppBar Desktop & Mobile Combined Strategy -->
+<header class="bg-white/85 backdrop-blur-lg sticky top-0 z-50 shadow-sm md:border-b-0 border-b border-slate-200">
+    <div class="flex justify-between items-center w-full px-4 md:px-6 py-4 max-w-7xl mx-auto">
+        <div class="flex items-center gap-4">
+            <button onclick="window.location.href='/dashboard.html'" class="text-primary hover:bg-slate-100 transition-colors p-2 rounded-full active:scale-95 duration-200">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 class="font-['Inter'] font-bold tracking-tight text-lg text-primary">Detalles de la partida</h1>
+        </div>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex items-center space-x-8">
+            <a class="text-slate-500 hover:text-primary transition-colors font-medium" href="/dashboard.html">Inicio</a>
+            <a class="text-primary border-b-2 border-primary pb-1 font-bold" href="/dashboard.html">Mis Partidas</a>
+            <a class="text-slate-500 hover:text-primary transition-colors font-medium" href="/profile.html">Perfil</a>
+        </nav>
+
+        <!-- Right Icons -->
+        <div class="flex items-center gap-3">
+            <button class="text-primary md:text-slate-500 hover:bg-slate-100 transition-colors p-2 rounded-full active:scale-95 duration-200">
+                <span class="material-symbols-outlined">share</span>
+            </button>
+            <!-- Desktop Profile Icon -->
+            <div class="hidden md:block w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
+                <div id="user-avatar-text" class="w-full h-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">U</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+
+        <!-- Left Column: Details & Players -->
+        <div class="lg:col-span-8 space-y-6 md:space-y-8">
+
+            <!-- Hero Section / Match Summary -->
+            <section class="bg-surface-container-lowest md:p-1 md:border border-outline-variant/10 md:rounded-xl md:shadow-sm overflow-hidden">
+                <div class="relative h-48 md:h-64 rounded-3xl md:rounded-lg overflow-hidden mb-4 md:mb-6 shadow-lg md:shadow-none">
+                    <img src="/images/match-hero.png" alt="Padel Court" class="w-full h-full object-cover"/>
+
+                    <div class="absolute top-4 left-4 md:inset-0 md:bg-gradient-to-t md:from-black/60 md:to-transparent md:flex md:flex-end md:items-end md:p-6 md:top-auto md:left-auto">
+                        <span id="match-status-badge" class="bg-secondary text-white px-4 py-1.5 md:px-3 md:py-1 rounded-full font-bold text-xs tracking-widest uppercase flex items-center gap-2 backdrop-blur-sm shadow-md md:shadow-none">
+                            <span class="w-2 h-2 rounded-full bg-white animate-pulse md:hidden"></span>
+                            ABIERTA
+                        </span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent md:hidden"></div>
+                </div>
+
+                <div class="md:px-6 md:pb-6 space-y-4 md:space-y-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h2 id="match-court-name" class="text-3xl font-black italic tracking-tighter text-on-surface md:text-primary uppercase md:mb-1">Cargando...</h2>
+
+                            <div class="flex items-center gap-2 mt-1 text-on-surface-variant font-medium md:hidden">
+                                <span class="material-symbols-outlined text-primary text-sm">calendar_month</span>
+                                <span id="match-date-mobile">--</span>
+                                <span class="w-1 h-1 rounded-full bg-outline-variant mx-1"></span>
+                                <span class="material-symbols-outlined text-primary text-sm">schedule</span>
+                                <span id="match-time-mobile">--</span>
+                            </div>
+
+                            <p class="hidden md:flex items-center gap-2 text-on-surface-variant">
+                                <span class="material-symbols-outlined text-sm">location_on</span>
+                                Club Padel Premium
+                            </p>
+                        </div>
+                        <div class="hidden md:block text-right">
+                            <span id="match-time-desktop" class="block text-2xl font-bold text-on-surface">--:-- - --:--</span>
+                            <span id="match-date-desktop" class="text-sm font-medium text-on-surface-variant">-- de --</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 md:gap-4 md:pt-4">
+                        <span class="bg-surface-container-high md:bg-surface-container-low px-4 py-2 rounded-xl md:rounded-lg text-sm font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-sm md:text-base">timer</span> <span id="match-duration">90 Minutos</span>
+                        </span>
+                        <span class="bg-surface-container-high md:bg-surface-container-low px-4 py-2 rounded-xl md:rounded-lg text-sm font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-sm md:text-base">groups</span> <span id="match-players-count">4 Jugadores</span>
+                        </span>
+                        <span class="bg-primary/10 md:bg-surface-container-low text-primary md:text-on-surface px-4 py-2 rounded-xl md:rounded-lg text-sm font-bold md:font-semibold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-sm md:text-base">trending_up</span> Nivel Abierto
+                        </span>
+                    </div>
+
+                    <!-- Action Button Desktop -->
+                    <div class="hidden md:block pt-2 border-t border-outline-variant/30 mt-4">
+                        <button id="btn-leave-desktop" class="flex items-center gap-2 px-4 py-2 text-error font-bold text-sm border-2 border-error/20 hover:bg-error/5 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-lg">logout</span>
+                            Retirarse de la partida
+                        </button>
+                    </div>
+                     <!-- Action Button Mobile -->
+                     <button id="btn-leave-mobile" class="w-full md:hidden mt-4 bg-surface-container-lowest border-2 border-error/20 text-error font-bold py-4 rounded-full hover:bg-error/5 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">logout</span>
+                        Retirarse de la partida
+                    </button>
+                </div>
+            </section>
+
+            <!-- Players Grid -->
+            <section class="space-y-4 md:space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold tracking-tight text-on-surface">Jugadores Inscritos</h3>
+                    <span id="players-completion" class="text-sm font-bold md:font-medium text-primary bg-primary/10 md:bg-transparent px-3 py-1 rounded-lg md:p-0">--/-- Completado</span>
+                </div>
+
+                <div id="players-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Players will be rendered here dynamically -->
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Right Column: Chat Panel -->
+        <aside class="lg:col-span-4 lg:h-[calc(100vh-140px)] lg:sticky top-24 mt-4 lg:mt-0 space-y-4 lg:space-y-0">
+            <!-- Chat Title Mobile Only -->
+            <h3 class="lg:hidden text-xl font-bold tracking-tight text-on-surface flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-primary">forum</span>
+                Chat de la partida
+            </h3>
+
+            <div class="bg-surface-container-low lg:bg-surface-container-lowest h-[500px] lg:h-full rounded-3xl lg:rounded-2xl flex flex-col overflow-hidden lg:shadow-sm">
+
+                <!-- Chat Header Desktop -->
+                <div class="hidden lg:flex p-5 bg-white items-center justify-between border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-primary/10 rounded-xl">
+                            <span class="material-symbols-outlined text-primary">forum</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-on-surface leading-tight">Chat de la Partida</h3>
+                            <p class="text-[10px] text-secondary font-bold uppercase tracking-widest">En línea</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Area -->
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 lg:p-5 space-y-4 lg:space-y-6 no-scrollbar flex flex-col">
+                    <!-- Messages rendered dynamically -->
+                </div>
+
+                <!-- Chat Input -->
+                <div class="p-4 lg:p-5 bg-surface-container-low lg:bg-white rounded-b-3xl lg:rounded-b-none">
+                    <form id="chat-form" class="flex items-center gap-2 bg-surface-container-lowest lg:bg-surface-container-high rounded-full px-4 py-2 shadow-inner lg:shadow-none border border-outline-variant/10 lg:border-none">
+                        <button type="button" class="hidden lg:block text-on-surface-variant hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-xl">add_circle</span>
+                        </button>
+                        <input id="chat-input" type="text" autocomplete="off" class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-1 lg:py-0 text-on-surface placeholder:text-outline-variant" placeholder="Escribe un mensaje..."/>
+                        <button type="submit" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-90">
+                            <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">send</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </aside>
+
+    </div>
+</main>
+
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-2 pb-safe bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.04)] rounded-t-3xl border-none">
+    <a href="/dashboard.html" class="flex flex-col items-center justify-center text-slate-400 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-150">
+        <span class="material-symbols-outlined">home</span>
+        <span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Inicio</span>
+    </a>
+    <a href="/dashboard.html" class="flex flex-col items-center justify-center bg-primary/10 text-primary rounded-2xl px-4 py-2 transition-all active:scale-90 duration-150">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sports_tennis</span>
+        <span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Partidas</span>
+    </a>
+
+    <a href="/profile.html" class="flex flex-col items-center justify-center text-slate-400 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-150">
+        <span class="material-symbols-outlined">person</span>
+        <span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider mt-1">Perfil</span>
+    </a>
+</nav>
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="module" src="/js/utils.js"></script>
+<script type="module" src="match-details.js"></script>
+</body>
+</html>

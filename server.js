@@ -48,9 +48,43 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/waiting-list', waitingListRoutes);
 app.use('/api/matches', matchRoutes);
 
+// Import DB pool for saving chat messages
+const pool = require('./src/config/database');
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log('A user connected via WebSocket');
+
+    // El usuario se une a una "sala" específica de esa partida
+    socket.on('joinMatchChat', (bookingId) => {
+        socket.join(`match_${bookingId}`);
+        console.log(`Usuario unido al chat de la partida: ${bookingId}`);
+    });
+
+    // Escuchar cuando alguien envía un mensaje
+    socket.on('sendMessage', async (data) => {
+        const { bookingId, userId, message, userName } = data;
+
+        try {
+            // Guardar el mensaje en la base de datos
+            await pool.query(
+                `INSERT INTO match_messages (booking_id, user_id, message)
+                 VALUES ($1, $2, $3)`,
+                [bookingId, userId, message]
+            );
+
+            // Emitir el mensaje a todos los que estén en la "sala" de esa partida
+            io.to(`match_${bookingId}`).emit('receiveMessage', {
+                bookingId,
+                userId,
+                userName,
+                message,
+                created_at: new Date()
+            });
+        } catch (error) {
+            console.error('Error enviando mensaje por socket:', error);
+        }
+    });
 
     socket.on('disconnect', () => {
         console.log('User disconnected from WebSocket');
