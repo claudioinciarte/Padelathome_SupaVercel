@@ -1,9 +1,0 @@
-# Fichero: padel-cron (Versión Final)
-
-# Tarea 1: Ejecutar el script de la lista de espera (cada minuto)
-* * * * * node /usr/src/app/src/jobs/checkWaitingList.js >> /var/log/cron.log 2>&1
-
-# Tarea 2: Ejecutar el script de partidas abiertas (cada 15 minutos)
-*/15 * * * * node /usr/src/app/src/jobs/checkOpenMatches.js >> /var/log/cron.log 2>&1
-
-# Línea vacía final requerida
