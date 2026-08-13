@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalles de la Partida - Padel@Home</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="/tailwind.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="style.css">
 
     <script id="tailwind-config">
-      tailwind.config = {
+      if (window.tailwind) tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
@@ -227,7 +227,21 @@
     </a>
 </nav>
 
-<script src="/socket.io/socket.io.js"></script>
+<script>
+    // Carga Socket.IO solo si el servidor lo sirve (Raspberry Pi).
+    // En Vercel (serverless) no hay WebSocket: el chat usa REST + polling.
+    (function () {
+        if (location.hostname.indexOf('vercel.app') !== -1) return;
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/socket.io/socket.io.js', false);
+            xhr.send();
+            if (xhr.status === 200) {
+                eval(xhr.responseText);
+            }
+        } catch (e) { /* sin tiempo real */ }
+    })();
+</script>
 <script type="module" src="/js/utils.js"></script>
 <script type="module" src="match-details.js"></script>
 </body>

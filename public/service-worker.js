@@ -5,6 +5,7 @@ const urlsToCache = [
   '/login.html',
   '/dashboard.html',
   '/admin.html',
+  '/tailwind.css',
   '/style.css',
   '/main.js',
   '/login.js',
