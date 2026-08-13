@@ -1,4 +1,4 @@
-const CACHE_NAME = 'padelathome-cache-v1';
+const CACHE_NAME = 'padelathome-cache-v2';
 // Lista de archivos base para que la app cargue offline
 const urlsToCache = [
   '/',
@@ -12,36 +12,52 @@ const urlsToCache = [
   '/admin.js',
   '/images/icon-192x192.png',
   '/images/icon-512x512.png'
-  // Nota: Las imágenes de los iconos deben existir en /public/images/
 ];
 
-// Evento 'install': Guarda los archivos base en la caché
+// Evento 'install': guarda los archivos base en la caché.
+// Usamos Promise.allSettled para que un fallo de un recurso no bloquee la instalación.
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Cache abierta');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => Promise.allSettled(urlsToCache.map(url => cache.add(url))))
+  );
+  self.skipWaiting();
+});
+
+// Evento 'activate': limpia cachés antiguas y toma el control de las pestañas abiertas
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-// Evento 'fetch': Intercepta las peticiones de la aplicación
+// Evento 'fetch': SOLO interceptamos peticiones del MISMO ORIGEN y que no sean de la API.
+// Las peticiones cross-origin (CDN de Tailwind, fuentes, Supabase...) pasan directas
+// al navegador sin pasar por el service worker.
 self.addEventListener('fetch', event => {
-  // Ignora todas las peticiones a la API, esas siempre deben ir a la red
-  if (event.request.url.includes('/api/')) {
-    return;
-  }
+  const url = new URL(event.request.url);
 
-  // Estrategia "Cache First":
-  // Intenta servir el archivo desde la caché. Si no está, ve a la red.
+  // Ignora peticiones a la API (siempre red) y a otros orígenes (CDN, etc.)
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/api/')) return;
+  if (event.request.method !== 'GET') return;
+
+  // Estrategia "Network First" con fallback a caché:
+  // siempre intentamos la versión más reciente (evita UI desactualizada tras un deploy)
+  // y si no hay red, servimos lo cacheado (modo offline de la PWA).
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        if (response) {
-          return response; // Servir desde la caché
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => cache.put(event.request, copy))
+            .catch(() => {});
         }
-        return fetch(event.request); // Ir a la red
+        return response;
       })
+      .catch(() => caches.match(event.request))
   );
 });

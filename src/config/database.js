@@ -4,14 +4,16 @@ const { Pool } = require('pg');
 // Para Supabase se recomienda el "Session pooler" IPv4 (necesario en Vercel,
 // ya que el host directo db.* solo resuelve IPv6):
 //   postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
-// El pooler exige SSL (certificado autofirmado de Supabase).
+//
+// IMPORTANTE (serverless): el session pooler de Supabase limita a 15 clientes
+// simultáneos (EMAXCONNSESSION). Cada instancia de función de Vercel crea su
+// propio pool, así que usamos max=1 y timeouts cortos para no agotar el límite.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false },
-  // En serverless hay que limitar el número de conexiones y cerrarlas agresivamente
-  max: parseInt(process.env.DB_POOL_MAX || '5', 10),
-  idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT || '10000', 10),
-  connectionTimeoutMillis: parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT || '10000', 10),
+  max: parseInt(process.env.DB_POOL_MAX || '1', 10),
+  idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT || '5000', 10),
+  connectionTimeoutMillis: parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT || '8000', 10),
 });
 
 pool.on('connect', () => {
