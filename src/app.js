@@ -1,6 +1,13 @@
 // Carga las variables de entorno desde .env al principio de todo
 require('dotenv').config();
 
+// Forzar la zona horaria en entornos que no la configuran (Vercel corre en UTC
+// y la variable TZ no se puede fijar con `vercel env add`; el calendario y los
+// horarios de apertura dependen de la hora local de la comunidad).
+if (!process.env.TZ) {
+  process.env.TZ = 'Europe/Madrid';
+}
+
 // Imports de las librerías
 const express = require('express');
 const cors = require('cors');
