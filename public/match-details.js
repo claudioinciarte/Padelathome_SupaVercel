@@ -160,11 +160,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatWindow.scrollTop = chatWindow.scrollHeight;
         renderedMessageCount = data.messages.length;
         renderedMessageIds.clear();
-        data.messages.forEach(m => renderedMessageIds.add(m.id));
+        data.messages.forEach(m => renderedMessageIds.add(String(m.id)));
     }
 
     function createMessageHtml(data, currentUserId) {
-        const isSent = data.user_id === currentUserId || data.userId === currentUserId; // handle both historic (user_id) and realtime (userId) properties
+        // Normalizamos a string: la API devuelve los ids como string (pg) y
+        // Supabase Realtime como number (JSON), y la comparación debe ser estable.
+        const isSent = String(data.user_id ?? data.userId ?? '') === String(currentUserId);
         const time = new Date(data.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         const userName = data.user_name || data.userName;
 
@@ -239,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         chatWindow.scrollTop = chatWindow.scrollHeight;
                         renderedMessageCount = data.messages.length;
                         renderedMessageIds.clear();
-                        data.messages.forEach(m => renderedMessageIds.add(m.id));
+                        data.messages.forEach(m => renderedMessageIds.add(String(m.id)));
                     }
                 } catch (err) {
                     // Silencioso: reintentará en el siguiente ciclo
@@ -250,7 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         subscribeToMatchChat(id, (msg) => {
             realtimeActive = true;
             stopPolling();
-            msg.user_name = playerNames[msg.user_id] || 'Usuario';
+            msg.user_name = playerNames[String(msg.user_id)] || 'Usuario';
             appendMessage(msg, user.id);
         }, (status) => {
             if (status === 'SUBSCRIBED') {
@@ -263,8 +265,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function appendMessage(data, currentUserId) {
-        if (data.id && renderedMessageIds.has(data.id)) return; // Ya renderizado (POST-echo o duplicado)
-        if (data.id) renderedMessageIds.add(data.id);
+        // El id puede llegar como string (API) o number (Realtime): normalizamos.
+        const msgId = data.id != null ? String(data.id) : null;
+        if (msgId && renderedMessageIds.has(msgId)) return; // Ya renderizado (POST-echo o duplicado)
+        if (msgId) renderedMessageIds.add(msgId);
         if (renderedMessageIds.size > 500) renderedMessageIds.clear(); // Evita crecer sin límite
         const messageEl = createMessageHtml(data, currentUserId);
         const tempDiv = document.createElement('div');
