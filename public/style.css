@@ -801,6 +801,16 @@
     justify-content: center;
 }
 
+/* IMPORTANTE: estos botones definen display:flex aquí, así que el utility
+   .hidden de Tailwind (display:none, misma especificidad, cargado antes)
+   no puede ocultarlos. Con esta regla (mayor especificidad) el toggle
+   classList.toggle('hidden', ...) sí funciona. */
+.my-match-modal-button-close.hidden,
+.my-match-modal-button-leave.hidden,
+.my-match-modal-button-cancel-match.hidden {
+    display: none;
+}
+
 .my-match-modal-button-close {
     color: var(--pah-text-secondary);
     background-color: transparent;
