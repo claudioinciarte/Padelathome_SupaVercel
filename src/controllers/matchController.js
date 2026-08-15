@@ -209,14 +209,15 @@ const getMatchParticipants = async (req, res) => {
     }
     const ownerId = bookingResult.rows[0].user_id;
 
-    // Buscamos a todos los participantes y sus nombres
+    // Buscamos a todos los participantes y sus nombres (con indicador de dueño
+    // para que el modal pueda mostrar el badge "Organizador" y los permisos)
     const participantsResult = await pool.query(
-      `SELECT u.id, u.name
+      `SELECT u.id, u.name, (u.id = $2) as is_owner
        FROM match_participants mp
        JOIN users u ON mp.user_id = u.id
        WHERE mp.booking_id = $1
        ORDER BY mp.joined_at ASC`,
-      [bookingId]
+      [bookingId, ownerId]
     );
 
     // Añadimos al organizador si no está ya en la lista de participantes (puede que no esté en match_participants)
@@ -225,7 +226,7 @@ const getMatchParticipants = async (req, res) => {
     if (!isOrganizerInParticipants) {
       const organizerResult = await pool.query("SELECT id, name FROM users WHERE id = $1", [ownerId]);
       if (organizerResult.rows.length > 0) {
-        participants.unshift(organizerResult.rows[0]); // Añadir al principio
+        participants.unshift({ ...organizerResult.rows[0], is_owner: true }); // Añadir al principio
       }
     }
 

@@ -344,7 +344,9 @@ function getInitials(name) {
  * @param {boolean} participantsList[].is_owner - Whether the participant is the owner.
  */
 export function showMyMatchModal(matchData, participantsList) {
-    const { bookingId, startTime, isOwner } = matchData;
+    const { bookingId, startTime } = matchData;
+    // Normalizamos por si llega como string ('true'/'false') desde los dataset
+    const isOwner = matchData.isOwner === true || matchData.isOwner === 'true';
 
     // --- 1. Update Time Display ---
     const date = new Date(startTime);
@@ -358,8 +360,11 @@ export function showMyMatchModal(matchData, participantsList) {
     myMatchModalTime.innerHTML = `${formattedDate} <span class="date-separator" style="color: #9ca3af; margin: 0 0.25rem;">•</span> ${formattedTime}`;
 
     // --- 2. Update Buttons based on ownership ---
+    // "Cancelar Partida" SOLO para el dueño. "Abandonar Partida" para todos:
+    // si abandona el dueño, la propiedad pasa al siguiente participante
+    // (cadena de dueños implementada en el backend, leaveOpenMatch).
     myMatchCancelMatchBtn.classList.toggle('hidden', !isOwner);
-    myMatchLeaveBtn.classList.toggle('hidden', isOwner);
+    myMatchLeaveBtn.classList.toggle('hidden', false);
 
     // Assign bookingId to buttons for the handlers
     myMatchCancelMatchBtn.dataset.bookingId = bookingId;

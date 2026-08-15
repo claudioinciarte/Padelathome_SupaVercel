@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedCourtId = null;
     let userActiveBookings = [];
     let userWaitingListEntries = [];
+    let currentUserId = null;
 
     // --- Elementos del DOM ---
     const welcomeMessageDesktop = document.getElementById('welcome-message-desktop');
@@ -199,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchUserProfile = async () => {
         try {
             const user = await fetchApi('/users/me');
+            currentUserId = user.id;
             if(welcomeMessageDesktop) welcomeMessageDesktop.textContent = `Padel@Home`; // Or user name if preferred on desktop
             if(welcomeMessageMobile) welcomeMessageMobile.textContent = `${user.name}!`;
             if (user.role === 'admin') {
@@ -420,7 +422,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         modalHandlers.onLeaveMatch(bookingId);
                     } else {
                         fetchApi(`/matches/${bookingId}/participants`).then(({ participants: p }) => {
-                            Modals.showMyMatchModal({ bookingId, startTime, isOwner: participationType === 'owner' }, p);
+                            // El dueño se determina desde la respuesta del servidor
+                            // (is_owner), no desde el slot: más robusto.
+                            const myEntry = p.find(x => String(x.id) === String(currentUserId));
+                            Modals.showMyMatchModal({ bookingId, startTime, isOwner: !!(myEntry && myEntry.is_owner) }, p);
                         });
                     }
                     break;
