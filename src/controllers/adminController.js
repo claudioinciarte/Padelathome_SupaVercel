@@ -50,7 +50,7 @@ const approveUser = async (req, res) => {
     const result = await pool.query("UPDATE users SET account_status = 'active' WHERE id = $1 AND account_status = 'pending_approval' RETURNING *", [userId]);
     if (result.rows.length === 0) return res.status(404).json({ message: 'Usuario no encontrado o ya está activo.' });
     const approvedUser = result.rows[0];
-    sendEmail({ to: approvedUser.email, subject: '¡Tu cuenta en Padel@Home ha sido aprobada!', html: `<h3>¡Hola, ${approvedUser.name}!</h3><p>Tu cuenta ha sido aprobada. ¡Ya puedes iniciar sesión!</p>` });
+    await sendEmail({ to: approvedUser.email, subject: '¡Tu cuenta en Padel@Home ha sido aprobada!', html: `<h3>¡Hola, ${approvedUser.name}!</h3><p>Tu cuenta ha sido aprobada. ¡Ya puedes iniciar sesión!</p>` });
     res.json({ message: 'Usuario aprobado exitosamente.', user: { id: approvedUser.id, name: approvedUser.name, account_status: approvedUser.account_status }});
   } catch (error) {
     console.error('Error al aprobar usuario:', error);
@@ -90,8 +90,8 @@ const inviteUser = async (req, res) => {
     const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, newUser.id, expires_at]);
     const setPasswordUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
-    sendEmail({ to: newUser.email, subject: '¡Bienvenido a Padel@Home! Establece tu contraseña', html: `<h3>¡Hola, ${newUser.name}!</h3><p>Un administrador te ha creado una cuenta en Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer tu contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer mi contraseña</a>`});
     await client.query('COMMIT');
+    await sendEmail({ to: newUser.email, subject: '¡Bienvenido a Padel@Home! Establece tu contraseña', html: `<h3>¡Hola, ${newUser.name}!</h3><p>Un administrador te ha creado una cuenta en Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer tu contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer mi contraseña</a>`});
     res.status(201).json({ message: 'Usuario invitado exitosamente.', user: newUser });
   } catch (error) {
     await client.query('ROLLBACK');
@@ -109,7 +109,7 @@ const resetUserPassword = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    const userResult = await pool.query("SELECT id, name, email FROM users WHERE id = $1", [userId]);
+    const userResult = await client.query("SELECT id, name, email FROM users WHERE id = $1", [userId]);
     if (userResult.rows.length === 0) {
       await client.query('ROLLBACK');
       return res.status(404).json({ message: 'Usuario no encontrado.' });
@@ -121,14 +121,15 @@ const resetUserPassword = async (req, res) => {
 
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, user.id, expires_at]);
 
+    await client.query('COMMIT');
+
     const setPasswordUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
-    sendEmail({
+    await sendEmail({
       to: user.email,
       subject: 'Restablecimiento de Contraseña para Padel@Home',
       html: `<h3>¡Hola, ${user.name}!</h3><p>Se ha solicitado un restablecimiento de contraseña para tu cuenta de Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer una nueva contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer nueva contraseña</a><p>Si no solicitaste este cambio, por favor ignora este correo.</p>`
     });
 
-    await client.query('COMMIT');
     res.status(200).json({ message: 'Enlace de restablecimiento de contraseña enviado al correo del usuario.' });
 
   } catch (error) {

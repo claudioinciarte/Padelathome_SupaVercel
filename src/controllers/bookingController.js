@@ -105,7 +105,7 @@ const createBooking = async (req, res) => {
     
     const { error, value } = ics.createEvent(event);
     if (!error) {
-        sendEmail({
+        await sendEmail({
             to: user.email,
             subject: `Confirmación de Reserva en Padel@Home para el ${bookingStartTime.toLocaleDateString('es-ES')}`,
             html: `<h3>¡Hola, ${user.name}!</h3><p>Tu reserva ha sido confirmada. Adjuntamos un evento de calendario.</p>`,
@@ -202,10 +202,12 @@ const cancelMyBooking = async (req, res) => {
     );
 
     // 3. Si encontramos a alguien...
+    let luckyUser = null;
+    let confirmationToken = null;
     if (waitingListResult.rows.length > 0) {
-      const luckyUser = waitingListResult.rows[0];
+      luckyUser = waitingListResult.rows[0];
       
-      const confirmationToken = crypto.randomBytes(32).toString('hex');
+      confirmationToken = crypto.randomBytes(32).toString('hex');
       const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutos
 
       // 4. Actualizamos su estado a 'notified' y guardamos el token
@@ -213,10 +215,15 @@ const cancelMyBooking = async (req, res) => {
         "UPDATE waiting_list_entries SET status = 'notified', confirmation_token = $1, notification_expires_at = $2, notification_sent_at = NOW() WHERE id = $3",
         [confirmationToken, expires_at, luckyUser.id]
       );
+    }
+    // --- FIN DE LÓGICA DE LISTA DE ESPERA ---
 
-      // 5. Le enviamos el correo de notificación
+    await client.query('COMMIT');
+
+    // 5. Le enviamos el correo de notificación (después del COMMIT)
+    if (luckyUser) {
       const confirmationUrl = `${process.env.APP_URL || ''}/confirm-booking.html?token=${confirmationToken}`;
-      sendEmail({
+      await sendEmail({
         to: luckyUser.user_email,
         subject: '¡Un hueco se ha liberado en Padel@Home!',
         html: `<h3>¡Hola, ${luckyUser.user_name}!</h3><p>Se ha liberado el horario por el que estabas esperando (${new Date(luckyUser.slot_start_time).toLocaleString('es-ES')}).</p><p>Tienes <strong>30 minutos</strong> para confirmar la reserva haciendo clic en el siguiente enlace. Después, tu turno expirará.</p><a href="${confirmationUrl}">Confirmar mi Reserva</a>`
@@ -224,9 +231,7 @@ const cancelMyBooking = async (req, res) => {
       console.log(`Notificación de lista de espera enviada al usuario ${luckyUser.user_id}`);
       realtime.emit('waitlist:notificationSent', { userId: luckyUser.user_id, slotStartTime: luckyUser.slot_start_time }); // Emit WebSocket event
     }
-    // --- FIN DE LÓGICA DE LISTA DE ESPERA ---
 
-    await client.query('COMMIT');
     res.json({ message: 'Reserva cancelada exitosamente.' });
     realtime.emit('booking:cancelled', { bookingId: bookingId, courtId: cancelledBooking.court_id, startTime: cancelledBooking.start_time });
 
