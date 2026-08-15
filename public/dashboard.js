@@ -4,6 +4,7 @@ import * as Modals from './js/ui/modals.js';
 import * as Calendar from './js/components/Calendar.js';
 import * as BookingCard from './js/components/BookingCard.js';
 import * as CourtSelector from './js/components/CourtSelector.js';
+import { subscribeToCalendarChanges } from './js/services/supabase.js';
 
 // --- Utilidades Locales ---
 const debounce = (func, delay) => {
@@ -29,16 +30,8 @@ const EMPTY_BOOKING_STATE = `
     <p class="text-slate-400 dark:text-slate-500 text-sm mt-1">Selecciona una fecha en el calendario para reservar.</p>
 `;
 
-// Inicializar WebSocket safely
-let socket;
-try {
-    socket = io();
-    socket.on('connect', () => console.log('Connected to WebSocket'));
-} catch(e) {
-    console.warn("Socket.io not available");
-    // Mock for verification environment if needed, or just null checks later
-    socket = { on: () => {} };
-}
+// En Vercel no hay Socket.IO: el tiempo real llega por Supabase Realtime
+// (replicación de Postgres), suscrito en init() con subscribeToCalendarChanges.
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!authToken) {
@@ -503,10 +496,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('resize', debounce(updateCalendarView, 250));
 
-        // Websocket update
-        socket.on('booking:created', refreshData);
-        socket.on('booking:cancelled', refreshData);
-        socket.on('match:updated', refreshData);
+        // Tiempo real con Supabase Realtime: cualquier cambio en reservas,
+        // participantes, bloqueos o lista de espera refresca el dashboard.
+        subscribeToCalendarChanges(debounce(() => refreshData(), 400));
     };
 
     init();

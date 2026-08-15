@@ -1,11 +1,11 @@
 import { fetchApi } from './js/services/api.js';
 import { showNotification } from './js/utils.js';
+import { subscribeToMatchChat } from './js/services/supabase.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get('id');
     const token = localStorage.getItem('authToken');
-    const socket = window.io ? window.io() : { emit: () => {}, on: () => {} }; // graceful fallback
 
     if (!bookingId || !token) {
         window.location.href = '/dashboard.html';
@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentUser = null;
     let matchData = null;
     let renderedMessageCount = 0;
+    const renderedMessageIds = new Set(); // Deduplicación POST-echo vs Realtime
 
     // Inicializar elementos del DOM
     const chatForm = document.getElementById('chat-form');
@@ -158,6 +159,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatWindow.innerHTML = data.messages.map(m => createMessageHtml(m, currentUserId)).join('');
         chatWindow.scrollTop = chatWindow.scrollHeight;
         renderedMessageCount = data.messages.length;
+        renderedMessageIds.clear();
+        data.messages.forEach(m => renderedMessageIds.add(m.id));
     }
 
     function createMessageHtml(data, currentUserId) {
@@ -193,13 +196,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function joinChat(id, user) {
-        // En despliegues con Socket.IO (Raspberry Pi) usamos tiempo real.
-        // En Vercel serverless no hay WebSocket: el envío se hace por REST
-        // y la recepción mediante sondeo periódico (polling).
-        const hasRealtime = !!window.io;
-        if (hasRealtime) {
-            socket.emit('joinMatchChat', id);
-        }
+        // Envío siempre por REST (persiste en la BD).
+        // Recepción en tiempo real con Supabase Realtime (replicación de
+        // Postgres); si el canal no conecta, cae a sondeo periódico.
+        const playerNames = {};
+        (matchData.players || []).forEach(p => { playerNames[p.id] = p.name; });
 
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -207,8 +208,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(!msg) return;
 
             try {
-                // Guardar siempre por REST: persiste en la BD y en modo
-                // Socket.IO se reemitirá al resto de usuarios de la sala.
                 const savedMessage = await fetchApi(`/matches/${id}/messages`, {
                     method: 'POST',
                     body: JSON.stringify({ message: msg })
@@ -224,28 +223,49 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        if (hasRealtime) {
-            socket.on('receiveMessage', (data) => {
-                appendMessage(data, user.id);
-            });
-        } else {
-            // Polling cada 5 segundos (fallback serverless)
-            setInterval(async () => {
+        let realtimeActive = false;
+        let pollingTimer = null;
+
+        const stopPolling = () => {
+            if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+        };
+        const startPolling = () => {
+            if (pollingTimer) return;
+            pollingTimer = setInterval(async () => {
                 try {
                     const data = await fetchApi(`/matches/${id}/details`);
                     if (data.messages.length !== renderedMessageCount) {
                         chatWindow.innerHTML = data.messages.map(m => createMessageHtml(m, user.id)).join('');
                         chatWindow.scrollTop = chatWindow.scrollHeight;
                         renderedMessageCount = data.messages.length;
+                        renderedMessageIds.clear();
+                        data.messages.forEach(m => renderedMessageIds.add(m.id));
                     }
                 } catch (err) {
                     // Silencioso: reintentará en el siguiente ciclo
                 }
             }, 5000);
-        }
+        };
+
+        subscribeToMatchChat(id, (msg) => {
+            realtimeActive = true;
+            stopPolling();
+            msg.user_name = playerNames[msg.user_id] || 'Usuario';
+            appendMessage(msg, user.id);
+        }, (status) => {
+            if (status === 'SUBSCRIBED') {
+                realtimeActive = true;
+                stopPolling();
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                if (!realtimeActive) startPolling();
+            }
+        });
     }
 
     function appendMessage(data, currentUserId) {
+        if (data.id && renderedMessageIds.has(data.id)) return; // Ya renderizado (POST-echo o duplicado)
+        if (data.id) renderedMessageIds.add(data.id);
+        if (renderedMessageIds.size > 500) renderedMessageIds.clear(); // Evita crecer sin límite
         const messageEl = createMessageHtml(data, currentUserId);
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = messageEl;
