@@ -64,7 +64,7 @@ const createBooking = async (req, res) => {
     // Regla 2: ¿El slot sigue disponible?
     const [bookingsResult, blockedResult] = await Promise.all([
         client.query("SELECT start_time, end_time FROM bookings WHERE court_id = $1 AND status = 'confirmed' AND start_time < $2 AND end_time > $3", [courtId, bookingEndTime, bookingStartTime]),
-        db.query("SELECT start_time, end_time FROM blocked_periods WHERE court_id = $1 AND start_time < $2 AND end_time > $3", [courtId, bookingEndTime, bookingStartTime])
+        client.query("SELECT start_time, end_time FROM blocked_periods WHERE court_id = $1 AND start_time < $2 AND end_time > $3", [courtId, bookingEndTime, bookingStartTime])
     ]);
 
     if (bookingsResult.rows.length > 0 || blockedResult.rows.length > 0) {
@@ -85,7 +85,7 @@ const createBooking = async (req, res) => {
 
     // 5. Obtenemos los datos para el email DENTRO de la transacción
     const userResult = await client.query("SELECT name, email FROM users WHERE id = $1", [userId]);
-    const courtResult = await db.query("SELECT name FROM courts WHERE id = $1", [courtId]);
+    const courtResult = await client.query("SELECT name FROM courts WHERE id = $1", [courtId]);
     
     await client.query('COMMIT');
 

@@ -8,13 +8,17 @@ const { Pool } = require('pg');
 // admite 15 clientes simultáneos (EMAXCONNSESSION en picos de concurrencia).
 //
 // IMPORTANTE (serverless): cada instancia de función de Vercel crea su propio
-// pool, así que usamos max=1, timeouts cortos y REINTENTOS automáticos con
-// backoff para absorber los picos (p.ej. el panel admin dispara ~12 peticiones
-// a la vez).
+// pool. NO usar max=1: el panel admin y el dashboard disparan muchas peticiones
+// en paralelo y, con un único cliente, las consultas se encolan y acaban en
+// "timeout exceeded when trying to connect" (de hecho, una transacción con
+// BEGIN + db.query interno espera a un segundo cliente que nunca llega). El
+// transaction pooler de Supabase multiplexa conexiones (25+ clientes OK), así
+// que max=5 (o DB_POOL_MAX) da margen sin agotar el límite de 60 del pooler.
+// Se mantienen los REINTENTOS automáticos con backoff para absorber picos.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false },
-  max: parseInt(process.env.DB_POOL_MAX || '1', 10),
+  max: parseInt(process.env.DB_POOL_MAX || '5', 10),
   idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT || '5000', 10),
   connectionTimeoutMillis: parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT || '8000', 10),
 });
