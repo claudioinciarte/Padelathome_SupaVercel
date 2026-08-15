@@ -1,6 +1,7 @@
 const pool = require('../config/database');
 const sendEmail = require('../services/emailService');
 const realtime = require('../services/realtime');
+const { sendPushToUsers } = require('../services/pushService');
 
 const getOpenMatches = async (req, res) => {
   try {
@@ -334,6 +335,27 @@ const sendMatchMessage = async (req, res) => {
     savedMessage.user_name = userResult.rows[0] ? userResult.rows[0].name : 'Usuario';
 
     realtime.emitToMatch(bookingId, 'receiveMessage', savedMessage);
+
+    // Notificación push al resto de participantes de la partida
+    try {
+      const participantsIdsResult = await pool.query(
+        `SELECT DISTINCT user_id FROM (
+           SELECT user_id FROM match_participants WHERE booking_id = $1
+           UNION ALL
+           SELECT user_id FROM bookings WHERE id = $1
+         ) t`,
+        [bookingId]
+      );
+      const participantIds = participantsIdsResult.rows.map(r => r.user_id);
+      await sendPushToUsers(participantIds, {
+        title: `${savedMessage.user_name} ha escrito en la partida`,
+        body: savedMessage.message.length > 140 ? `${savedMessage.message.slice(0, 140)}…` : savedMessage.message,
+        url: `/match-details.html?id=${bookingId}`,
+        icon: '/images/icon-192x192.png',
+      }, userId);
+    } catch (pushError) {
+      console.error('Error enviando push del chat:', pushError);
+    }
 
     res.status(201).json(savedMessage);
   } catch (error) {

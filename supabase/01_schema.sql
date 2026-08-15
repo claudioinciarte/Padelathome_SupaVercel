@@ -225,6 +225,25 @@ CREATE TABLE public.password_reset_tokens (
     expires_at timestamp with time zone NOT NULL
 );
 
+-- --- TABLA push_subscriptions (notificaciones Web Push por usuario) ---
+CREATE TABLE public.push_subscriptions (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    endpoint text NOT NULL,
+    p256dh text NOT NULL,
+    auth text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE SEQUENCE public.push_subscriptions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER SEQUENCE public.push_subscriptions_id_seq OWNED BY public.push_subscriptions.id;
+
 -- --- DEFAULTS de id ---
 ALTER TABLE ONLY public.blocked_periods ALTER COLUMN id SET DEFAULT nextval('public.blocked_periods_id_seq'::regclass);
 ALTER TABLE ONLY public.bookings ALTER COLUMN id SET DEFAULT nextval('public.bookings_id_seq'::regclass);
@@ -233,6 +252,7 @@ ALTER TABLE ONLY public.courts ALTER COLUMN id SET DEFAULT nextval('public.court
 ALTER TABLE ONLY public.match_participants ALTER COLUMN id SET DEFAULT nextval('public.match_participants_id_seq'::regclass);
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 ALTER TABLE ONLY public.waiting_list_entries ALTER COLUMN id SET DEFAULT nextval('public.waiting_list_entries_id_seq'::regclass);
+ALTER TABLE ONLY public.push_subscriptions ALTER COLUMN id SET DEFAULT nextval('public.push_subscriptions_id_seq'::regclass);
 
 -- --- PRIMARY KEYS ---
 ALTER TABLE ONLY public.blocked_periods ADD CONSTRAINT blocked_periods_pkey PRIMARY KEY (id);
@@ -246,6 +266,8 @@ ALTER TABLE ONLY public.match_messages ADD CONSTRAINT match_messages_pkey PRIMAR
 ALTER TABLE ONLY public.match_participants ADD CONSTRAINT match_participants_booking_id_user_id_key UNIQUE (booking_id, user_id);
 ALTER TABLE ONLY public.match_participants ADD CONSTRAINT match_participants_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.password_reset_tokens ADD CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (token);
+ALTER TABLE ONLY public.push_subscriptions ADD CONSTRAINT push_subscriptions_endpoint_key UNIQUE (endpoint);
+ALTER TABLE ONLY public.push_subscriptions ADD CONSTRAINT push_subscriptions_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.users ADD CONSTRAINT users_email_key UNIQUE (email);
 ALTER TABLE ONLY public.users ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.waiting_list_entries ADD CONSTRAINT waiting_list_entries_court_id_user_id_slot_start_time_key UNIQUE (court_id, user_id, slot_start_time);
@@ -292,6 +314,9 @@ ALTER TABLE ONLY public.match_participants
 
 ALTER TABLE ONLY public.password_reset_tokens
     ADD CONSTRAINT password_reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.push_subscriptions
+    ADD CONSTRAINT push_subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_building_id_fkey FOREIGN KEY (building_id) REFERENCES public.buildings(id) ON DELETE SET NULL;

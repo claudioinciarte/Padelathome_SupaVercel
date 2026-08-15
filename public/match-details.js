@@ -1,6 +1,13 @@
 import { fetchApi } from './js/services/api.js';
 import { showNotification } from './js/utils.js';
 import { subscribeToMatchChat } from './js/services/supabase.js';
+import { isPushSupported, getPushSubscription, subscribeToPush, unsubscribeFromPush } from './js/services/push.js';
+
+// El service worker puede no estar registrado aún si el usuario entró
+// directo a esta página (en dashboard.html se registra en main.js).
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -16,6 +23,73 @@ document.addEventListener('DOMContentLoaded', async () => {
     let matchData = null;
     let renderedMessageCount = 0;
     const renderedMessageIds = new Set(); // Deduplicación POST-echo vs Realtime
+
+    // --- Notificaciones (Web Push + Web Notifications) ---
+    let pushEnabled = localStorage.getItem('pushEnabled') === 'true';
+    const bellButton = document.getElementById('btn-notifications');
+    const bellIcon = document.getElementById('notifications-icon');
+
+    const updateBell = () => {
+      if (!bellButton) return;
+      if (!isPushSupported()) { bellButton.classList.add('hidden'); return; }
+      bellButton.classList.remove('hidden');
+      if (pushEnabled) {
+        bellIcon.textContent = 'notifications_active';
+        bellButton.classList.add('text-primary');
+      } else {
+        bellIcon.textContent = 'notifications_none';
+        bellButton.classList.remove('text-primary');
+      }
+    };
+
+    const setPushState = (enabled) => {
+      pushEnabled = enabled;
+      localStorage.setItem('pushEnabled', enabled ? 'true' : 'false');
+      updateBell();
+    };
+
+    const enableNotifications = async () => {
+      if (!isPushSupported()) {
+        showNotification('Las notificaciones no están soportadas en este navegador.', 'error');
+        return;
+      }
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          showNotification('Permiso de notificaciones denegado.', 'error');
+          setPushState(false);
+          return;
+        }
+        await subscribeToPush();
+        setPushState(true);
+        showNotification('Notificaciones activadas: recibirás los mensajes de tus partidas.', 'success');
+      } catch (e) {
+        console.error('Error activando notificaciones:', e);
+        showNotification('No se pudieron activar las notificaciones.', 'error');
+        setPushState(false);
+      }
+    };
+
+    const disableNotifications = async () => {
+      await unsubscribeFromPush();
+      setPushState(false);
+      showNotification('Notificaciones desactivadas.', 'info');
+    };
+
+    if (bellButton) {
+      bellButton.addEventListener('click', () => {
+        if (pushEnabled) disableNotifications();
+        else enableNotifications();
+      });
+    }
+
+    // Sincroniza el estado real de la suscripción al cargar la página
+    getPushSubscription().then(sub => {
+      const subscribed = !!sub;
+      if (pushEnabled && !subscribed) setPushState(false);
+      else if (!pushEnabled && subscribed) setPushState(true);
+      updateBell();
+    });
 
     // Inicializar elementos del DOM
     const chatForm = document.getElementById('chat-form');
@@ -254,6 +328,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             stopPolling();
             msg.user_name = playerNames[String(msg.user_id)] || 'Usuario';
             appendMessage(msg, user.id);
+
+            // Notificación del sistema si no es nuestro mensaje y la pestaña
+            // no está enfocada. Si el push está activo, el service worker ya
+            // muestra la notificación (sin duplicar cuando la pestaña está abierta).
+            if (String(msg.user_id) !== String(user.id) && document.hidden && !pushEnabled) {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try {
+                        const notification = new Notification(`${msg.user_name} dice:`, {
+                            body: msg.message.length > 140 ? `${msg.message.slice(0, 140)}…` : msg.message,
+                            icon: '/images/icon-192x192.png',
+                            tag: `match-chat-${id}`,
+                        });
+                        notification.onclick = () => { window.focus(); };
+                    } catch (e) { /* silencioso */ }
+                }
+            }
         }, (status) => {
             if (status === 'SUBSCRIBED') {
                 realtimeActive = true;
