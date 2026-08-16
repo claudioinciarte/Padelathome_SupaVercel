@@ -167,18 +167,17 @@ const updateUserRole = async (req, res) => {
 };
 
 // --- Funciones de Gestión de Pistas ---
+// NOTA: la tabla courts NO tiene columna building_id (las pistas son globales
+// de la comunidad, no por edificio). El formulario del admin lo marcaba como
+// "solo informativo"; se elimina por completo.
 const createCourt = async (req, res) => {
-  const { name, buildingId, description, is_active } = req.body;
-  if (!name || !buildingId) return res.status(400).json({ message: 'Nombre y edificio son requeridos.' });
-
-  // Safe integer parsing
-  const bId = parseInt(buildingId);
-  if (isNaN(bId)) return res.status(400).json({ message: 'ID de edificio inválido.' });
+  const { name, description, is_active } = req.body;
+  if (!name) return res.status(400).json({ message: 'El nombre de la pista es requerido.' });
 
   try {
     const { rows } = await pool.query(
-      "INSERT INTO courts (name, building_id, description, is_active) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, bId, description, is_active !== undefined ? is_active : true]
+      "INSERT INTO courts (name, description, is_active) VALUES ($1, $2, $3) RETURNING *",
+      [name, description, is_active !== undefined ? is_active : true]
     );
     res.status(201).json(rows[0]);
   } catch (error) {
@@ -200,13 +199,9 @@ const getAllCourts = async (req, res) => {
 const updateCourt = async (req, res) => {
   try {
     const { courtId } = req.params;
-    const { name, buildingId, description, is_active } = req.body;
+    const { name, description, is_active } = req.body;
 
     if (!name) return res.status(400).json({ message: 'El nombre de la pista es requerido.' });
-
-    // Safe integer parsing
-    const bId = parseInt(buildingId);
-    if (isNaN(bId)) return res.status(400).json({ message: 'ID de edificio inválido.' });
 
     // If is_active is missing (undefined), retrieve current value or default?
     // Postgres will fail if passed undefined to param unless handled.
@@ -217,8 +212,8 @@ const updateCourt = async (req, res) => {
     const activeState = is_active !== undefined ? is_active : true;
 
     const { rows } = await pool.query(
-      "UPDATE courts SET name = $1, building_id = $2, description = $3, is_active = $4, updated_at = NOW() WHERE id = $5 RETURNING *",
-      [name, bId, description, activeState, courtId]
+      "UPDATE courts SET name = $1, description = $2, is_active = $3, updated_at = NOW() WHERE id = $4 RETURNING *",
+      [name, description, activeState, courtId]
     );
     if (rows.length === 0) return res.status(404).json({ message: 'Pista no encontrada.' });
     res.json(rows[0]);
