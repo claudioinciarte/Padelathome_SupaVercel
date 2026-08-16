@@ -15,7 +15,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 // dashboard. El callback se invoca con { event, table, row }.
 export function subscribeToCalendarChanges(callback) {
   const channel = supabase.channel('dashboard-changes');
-  for (const table of ['bookings', 'match_participants', 'blocked_periods', 'waiting_list_entries']) {
+  for (const table of ['bookings', 'match_participants', 'blocked_periods', 'waiting_list_entries', 'courts']) {
     channel.on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
       callback({ event: payload.eventType, table, row: payload.new });
     });

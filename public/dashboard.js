@@ -458,20 +458,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Carga inicial
         await fetchUserProfile();
-        try {
-            const courts = await fetchApi('/courts');
-            if (courts.length > 0) {
-                CourtSelector.render(courtSelectDropdown, courts, courts[0].id);
-                selectedCourtId = courts[0].id;
-                // If there's only one court, we might hide the selector container
-                if (courts.length <= 1) {
-                    courtSelectorContainer.style.display = 'none';
+
+        // Carga (y recarga) las pistas activas en el selector. Si la pista
+        // seleccionada deja de estar activa, pasamos a la primera disponible.
+        const loadCourtsAndSelect = async () => {
+            try {
+                const courts = await fetchApi('/courts');
+                const activeCourts = courts.filter(c => c.is_active);
+                if (activeCourts.length === 0) {
+                    selectedCourtId = null;
+                    CourtSelector.render(courtSelectDropdown, [], null);
+                    if (courtSelectorContainer) courtSelectorContainer.style.display = 'none';
+                    updateCalendarView();
+                    return;
                 }
-                refreshData();
-            } else {
-                showNotification('No hay pistas disponibles', 'error');
+                const stillSelected = activeCourts.some(c => String(c.id) === String(selectedCourtId));
+                if (!stillSelected) selectedCourtId = activeCourts[0].id;
+                CourtSelector.render(courtSelectDropdown, activeCourts, selectedCourtId);
+                // If there's only one court, we might hide the selector container
+                if (courtSelectorContainer) {
+                    courtSelectorContainer.style.display = activeCourts.length <= 1 ? 'none' : '';
+                }
+                await refreshData();
+            } catch (e) {
+                console.error('Error cargando pistas:', e);
             }
-        } catch (e) { showNotification(e.message, 'error'); }
+        };
+
+        await loadCourtsAndSelect();
 
         // Event Listeners UI Generales
         const logoutHandler = () => { localStorage.removeItem('authToken'); window.location.href = '/login.html'; };
@@ -502,8 +516,15 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', debounce(updateCalendarView, 250));
 
         // Tiempo real con Supabase Realtime: cualquier cambio en reservas,
-        // participantes, bloqueos o lista de espera refresca el dashboard.
-        subscribeToCalendarChanges(debounce(() => refreshData(), 400));
+        // participantes, bloqueos o lista de espera refresca el dashboard;
+        // los cambios en pistas (activar/desactivar) recargan el selector.
+        subscribeToCalendarChanges(debounce((change) => {
+            if (change.table === 'courts') {
+                loadCourtsAndSelect();
+            } else {
+                refreshData();
+            }
+        }, 400));
     };
 
     init();
