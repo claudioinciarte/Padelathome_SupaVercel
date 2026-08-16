@@ -4,6 +4,9 @@ import * as UserManager from './js/managers/UserManager.js';
 import * as BuildingManager from './js/managers/BuildingManager.js';
 import * as CourtManager from './js/managers/CourtManager.js';
 
+// Valor actual del registro público (para poder cancelar cambios)
+let currentPublicRegistration = 'false';
+
 document.addEventListener('DOMContentLoaded', async () => {
     // --- 1. VERIFICACIÓN DE AUTENTICACIÓN Y ROL ---
     if (!authToken) {
@@ -173,8 +176,7 @@ async function fetchAndDisplayStats() {
 }
 
 async function fetchAndDisplaySettings() {
-    try {
-        const settings = await fetchApi('/admin/settings');
+    try {        const settings = await fetchApi('/admin/settings');
         const openTimeInput = document.getElementById('setting-open-time');
         const closeTimeInput = document.getElementById('setting-close-time');
         const advanceDaysInput = document.getElementById('setting-advance-days');
@@ -193,6 +195,11 @@ async function fetchAndDisplaySettings() {
             maxOpenMatchesPerUserInput.disabled = !limitOpenMatchesEnabledCheckbox.checked;
         }
         if (openMatchAutoCancelHoursInput) openMatchAutoCancelHoursInput.value = settings.open_match_auto_cancel_hours || '2';
+
+        // Registro público (sección propia en la pestaña Usuarios)
+        currentPublicRegistration = settings.allow_public_registration || 'false';
+        const publicRegCheckbox = document.getElementById('setting-public-registration');
+        if (publicRegCheckbox) publicRegCheckbox.checked = currentPublicRegistration === 'true';
     } catch (error) {
         console.error('Error al obtener los ajustes:', error);
         showNotification('No se pudieron cargar los ajustes.', 'error');
@@ -224,6 +231,7 @@ async function fetchAndDisplayBlockedPeriods() {
                     </div>
                     <div class="flex gap-2">
                         <button class="edit-block-btn flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                            data-blockid="${block.id}"
                             data-courtid="${block.court_id}"
                             data-start="${block.start_time.slice(0,16)}"
                             data-end="${block.end_time.slice(0,16)}"
@@ -320,26 +328,75 @@ function setupGlobalEventListeners() {
         });
     }
 
+    // Registro público: aceptar/cancelar
+    const publicRegCheckbox = document.getElementById('setting-public-registration');
+    const savePublicRegBtn = document.getElementById('save-public-registration-btn');
+    const cancelPublicRegBtn = document.getElementById('cancel-public-registration-btn');
+
+    if (savePublicRegBtn) {
+        savePublicRegBtn.addEventListener('click', async () => {
+            if (!confirm('¿Guardar el cambio en el registro público?')) return;
+            try {
+                await fetchApi('/admin/settings', {
+                    method: 'PUT',
+                    body: JSON.stringify({ allow_public_registration: publicRegCheckbox.checked.toString() })
+                });
+                currentPublicRegistration = publicRegCheckbox.checked.toString();
+                showNotification('Registro público actualizado.', 'success');
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        });
+    }
+
+    if (cancelPublicRegBtn) {
+        cancelPublicRegBtn.addEventListener('click', () => {
+            publicRegCheckbox.checked = currentPublicRegistration === 'true';
+            showNotification('Cambios descartados.', 'info');
+        });
+    }
+
     if (createBlockForm) {
         createBlockForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            const editId = document.getElementById('block-edit-id').value;
+            const payload = {
+                courtId: document.getElementById('block-court-select').value,
+                startTime: document.getElementById('block-start-time').value,
+                endTime: document.getElementById('block-end-time').value,
+                reason: document.getElementById('block-reason').value
+            };
             try {
-                await fetchApi('/admin/blocked-periods', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        courtId: document.getElementById('block-court-select').value,
-                        startTime: document.getElementById('block-start-time').value,
-                        endTime: document.getElementById('block-end-time').value,
-                        reason: document.getElementById('block-reason').value
-                    })
-                });
-                showNotification('Bloqueo creado.', 'success');
-                createBlockForm.reset();
+                if (editId) {
+                    await fetchApi(`/admin/blocked-periods/${editId}`, { method: 'PUT', body: JSON.stringify(payload) });
+                    showNotification('Bloqueo actualizado.', 'success');
+                } else {
+                    await fetchApi('/admin/blocked-periods', { method: 'POST', body: JSON.stringify(payload) });
+                    showNotification('Bloqueo creado.', 'success');
+                }
+                resetBlockForm();
                 fetchAndDisplayBlockedPeriods();
             } catch(error) {
                 showNotification(error.message, 'error');
             }
         });
+
+        const cancelBlockEditBtn = document.getElementById('cancel-block-edit-btn');
+        if (cancelBlockEditBtn) {
+            cancelBlockEditBtn.addEventListener('click', () => {
+                resetBlockForm();
+                showNotification('Edición cancelada.', 'info');
+            });
+        }
+    }
+
+    function resetBlockForm() {
+        document.getElementById('block-edit-id').value = '';
+        createBlockForm.reset();
+        const cancelBlockEditBtn = document.getElementById('cancel-block-edit-btn');
+        if (cancelBlockEditBtn) cancelBlockEditBtn.style.display = 'none';
+        const submitBtn = createBlockForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.innerHTML = '<span class="material-symbols-outlined text-sm">lock</span> Aplicar Bloqueo';
     }
     
     if (blocksListContainer) {
@@ -363,15 +420,22 @@ function setupGlobalEventListeners() {
                 const endTime = btn.dataset.end;
                 const reason = btn.dataset.reason;
                 const courtId = btn.dataset.courtid;
+                const blockId = btn.dataset.blockid;
 
+                document.getElementById('block-edit-id').value = blockId;
                 document.getElementById('block-court-select').value = courtId;
                 document.getElementById('block-start-time').value = startTime;
                 document.getElementById('block-end-time').value = endTime;
                 document.getElementById('block-reason').value = reason;
 
+                // Modo edición visible
+                const cancelBlockEditBtn = document.getElementById('cancel-block-edit-btn');
+                if (cancelBlockEditBtn) cancelBlockEditBtn.style.display = 'flex';
+                const submitBtn = document.getElementById('create-block-form').querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.innerHTML = '<span class="material-symbols-outlined text-sm">save</span> Guardar Cambios';
+
                 // Scroll to form
                 document.getElementById('create-block-form').scrollIntoView({ behavior: 'smooth' });
-                showNotification('Datos cargados. Crea un nuevo bloqueo para reemplazar el anterior si es necesario.', 'info');
             }
         });
     }

@@ -210,6 +210,37 @@ if (window.tailwind) tailwind.config = {
                     </div>
                 </div>
             </details>
+
+            <!-- Public Registration -->
+            <details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
+                <summary class="flex items-center justify-between p-6 cursor-pointer select-none bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
+                            <span class="material-symbols-outlined text-2xl">person_add</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-primary">Registro de Usuarios</h3>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
+                </summary>
+                <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Permite que cualquier persona cree una cuenta desde la página de inicio de sesión. La cuenta quedará pendiente de aprobación hasta que la actives aquí.
+                    </p>
+                    <div class="flex items-center gap-3 mb-6">
+                        <input id="setting-public-registration" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                        <label for="setting-public-registration" class="text-sm font-medium text-gray-700 dark:text-gray-300">Activar registro público</label>
+                    </div>
+                    <div class="flex justify-start gap-2">
+                        <button type="button" id="save-public-registration-btn" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                            <span class="material-symbols-outlined text-sm">check</span>
+                            Aceptar
+                        </button>
+                        <button type="button" id="cancel-public-registration-btn" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </details>
         </div>
 
         <!-- INFRASTRUCTURE TAB -->
@@ -330,6 +361,7 @@ if (window.tailwind) tailwind.config = {
                             Crear Nuevo Bloqueo
                         </h4>
                         <form id="create-block-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <input type="hidden" id="block-edit-id">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pista a Bloquear</label>
                                 <select id="block-court-select" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" required></select>
@@ -350,10 +382,13 @@ if (window.tailwind) tailwind.config = {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motivo del Bloqueo</label>
                                 <input id="block-reason" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" placeholder="Ej. Lluvia, Mantenimiento, Torneo..." type="text"/>
                             </div>
-                            <div class="md:col-span-2 flex justify-start">
+                            <div class="md:col-span-2 flex justify-start gap-2">
                                 <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
                                     <span class="material-symbols-outlined text-sm">lock</span>
                                     Aplicar Bloqueo
+                                </button>
+                                <button type="button" id="cancel-block-edit-btn" style="display:none;" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
+                                    Cancelar Edición
                                 </button>
                             </div>
                         </form>

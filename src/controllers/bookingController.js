@@ -1,9 +1,12 @@
 const db = require('../config/database');
-const { addMinutes } = require('date-fns');
+const { addMinutes, addDays } = require('date-fns');
+const { fromZonedTime, formatInTimeZone } = require('date-fns-tz');
 const sendEmail = require('../services/emailService');
 const ics = require('ics');
 const crypto = require('crypto'); // Necesario para la lista de espera
 const realtime = require('../services/realtime');
+
+const APP_TIMEZONE = process.env.APP_TIMEZONE || 'Europe/Madrid';
 
 /**
  * @description Crea una nueva reserva (privada o partida abierta)
@@ -25,9 +28,10 @@ const createBooking = async (req, res) => {
     await client.query('BEGIN');
 
     // --- NEW LOGIC START ---
-    // 0. Consultar instance_settings para límites de partidas abiertas
+    // 0. Consultar instance_settings para límites de partidas abiertas,
+    // días de antelación, optimización de huecos y hora de cierre
     const settingsResult = await client.query(
-      "SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('limit_open_matches_enabled', 'max_open_matches_per_user')"
+      "SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('limit_open_matches_enabled', 'max_open_matches_per_user', 'booking_advance_days', 'enable_booking_gap_optimization', 'operating_close_time')"
     );
 
     const settings = settingsResult.rows.reduce((acc, s) => {
@@ -37,6 +41,15 @@ const createBooking = async (req, res) => {
 
     const limitOpenMatchesEnabled = settings.limit_open_matches_enabled === 'true';
     const maxOpenMatchesPerUser = parseInt(settings.max_open_matches_per_user || '0', 10);
+    const gapOptimization = settings.enable_booking_gap_optimization === 'true';
+
+    // 0b. Días de antelación: no se puede reservar más allá de hoy + N días
+    const advanceDays = parseInt(settings.booking_advance_days || '7', 10);
+    const todayStr = formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd');
+    const lastAllowedStart = addDays(fromZonedTime(`${todayStr}T00:00:00`, APP_TIMEZONE), advanceDays + 1);
+    if (bookingStartTime >= lastAllowedStart) {
+      throw new Error(`No se puede reservar con más de ${advanceDays} días de antelación.`);
+    }
 
     if (isOpenMatch && limitOpenMatchesEnabled) {
       const userOpenMatchesResult = await client.query(
@@ -69,6 +82,26 @@ const createBooking = async (req, res) => {
 
     if (bookingsResult.rows.length > 0 || blockedResult.rows.length > 0) {
         throw new Error('El horario seleccionado ya no está disponible.');
+    }
+
+    // Regla 2b: Optimización de huecos — la reserva no puede dejar un hueco
+    // de 30 minutos suelto al final del bloque libre.
+    if (gapOptimization) {
+        const [nextBookingResult, nextBlockedResult] = await Promise.all([
+            client.query("SELECT start_time FROM bookings WHERE court_id = $1 AND status = 'confirmed' AND start_time > $2 ORDER BY start_time ASC LIMIT 1", [courtId, bookingStartTime]),
+            client.query("SELECT start_time FROM blocked_periods WHERE court_id = $1 AND start_time > $2 ORDER BY start_time ASC LIMIT 1", [courtId, bookingStartTime])
+        ]);
+        const closeTime = settings.operating_close_time || '22:00';
+        const bookingDateStr = formatInTimeZone(bookingStartTime, APP_TIMEZONE, 'yyyy-MM-dd');
+        let blockEnd = fromZonedTime(`${bookingDateStr}T${closeTime}:00`, APP_TIMEZONE);
+        for (const c of [...nextBookingResult.rows, ...nextBlockedResult.rows]) {
+            const cStart = new Date(c.start_time);
+            if (cStart > bookingStartTime && cStart < blockEnd) blockEnd = cStart;
+        }
+        const remainderMinutes = (blockEnd.getTime() - bookingStartTime.getTime()) / 60000 - durationMinutes;
+        if (remainderMinutes === 30) {
+            throw new Error('Esta duración dejaría un hueco de 30 minutos sin reservar. Elige la otra duración disponible (o empieza en el siguiente tramo libre).');
+        }
     }
 
     // 3. Insertamos la nueva reserva

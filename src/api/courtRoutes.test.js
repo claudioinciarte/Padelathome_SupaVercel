@@ -31,28 +31,28 @@ describe('Court Routes', () => {
   });
 
   describe('GET /api/courts', () => {
-    it('should get all active courts for a regular user', async () => {
+    it('should return only active courts (SQL filtra is_active = true)', async () => {
+      // El controlador delega el filtro en SQL: el mock devuelve el resultado ya filtrado
       const courts = [
         { id: 1, name: 'Court 1', is_active: true },
-        { id: 2, name: 'Court 2', is_active: false },
       ];
       pool.query.mockResolvedValue({ rows: courts });
-      protect.mockImplementationOnce((req, res, next) => {
-        req.user = { id: 1, role: 'user' };
-        next();
-      });
 
       const res = await request(app).get('/api/courts');
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveLength(1);
       expect(res.body[0].id).toEqual(1);
+      // Verificamos que la query pida solo pistas activas
+      expect(pool.query).toHaveBeenCalledWith(
+        expect.stringContaining('is_active = true')
+      );
     });
 
-    it('should get all courts (including inactive) for an admin', async () => {
+    it('should return only active courts for an admin too', async () => {
+      // El panel admin usa /api/admin/courts para ver las inactivas
       const courts = [
         { id: 1, name: 'Court 1', is_active: true },
-        { id: 2, name: 'Court 2', is_active: false },
       ];
       pool.query.mockResolvedValue({ rows: courts });
       protect.mockImplementationOnce((req, res, next) => {
@@ -63,7 +63,7 @@ describe('Court Routes', () => {
       const res = await request(app).get('/api/courts');
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(2);
+      expect(res.body).toHaveLength(1);
     });
   });
 

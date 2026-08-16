@@ -332,6 +332,23 @@ const deleteBlockedPeriod = async (req, res) => {
   }
 };
 
+const updateBlockedPeriod = async (req, res) => {
+  try {
+    const { blockedPeriodId } = req.params;
+    const { courtId, startTime, endTime, reason, is_full_day } = req.body;
+    if (!courtId || !startTime || !endTime) return res.status(400).json({ message: 'courtId, startTime y endTime son requeridos.' });
+    const { rows } = await pool.query(
+      "UPDATE blocked_periods SET court_id = $1, start_time = $2, end_time = $3, reason = $4, is_full_day = $5, updated_at = NOW() WHERE id = $6 RETURNING *",
+      [courtId, startTime, endTime, reason, is_full_day || false, blockedPeriodId]
+    );
+    if (rows.length === 0) return res.status(404).json({ message: 'Período de bloqueo no encontrado.' });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Error al actualizar período de bloqueo:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
 const getBlockedPeriods = async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT bp.*, c.name as court_name FROM blocked_periods bp JOIN courts c ON c.id = bp.court_id WHERE bp.end_time > NOW() ORDER BY bp.start_time ASC");
@@ -488,6 +505,7 @@ module.exports = {
   deleteCourt,
   createBlockedPeriod,
   deleteBlockedPeriod,
+  updateBlockedPeriod,
   getBlockedPeriods,
   getSettings,
   updateSettings,

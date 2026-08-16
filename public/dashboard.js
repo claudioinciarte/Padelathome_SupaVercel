@@ -409,7 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         modalHandlers.onConfirmBooking({ startTime, durationMinutes: parseInt(duration), isOpenMatch });
                         refreshData();
                     } else { 
-                        Modals.showBookingModal(startTime, [60, 90]);
+                        // Duraciones ofrecidas por el servidor (optimización de huecos)
+                        Modals.showBookingModal(startTime, (slotData.durations && slotData.durations.length) ? slotData.durations : [60, 90]);
                     }
                     break;
                 case 'cancel':
