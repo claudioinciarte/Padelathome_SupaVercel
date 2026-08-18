@@ -1,4 +1,4 @@
-const CACHE_NAME = 'padelathome-cache-v2';
+const CACHE_NAME = 'padelathome-cache-v3';
 // Lista de archivos base para que la app cargue offline
 const urlsToCache = [
   '/',
@@ -60,5 +60,59 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => caches.match(event.request))
+  );
+});
+
+// --- Notificaciones Push ---
+// Recibe el push del servidor y muestra la notificación del sistema.
+// Si la pestaña ya está abierta en esa página, no duplica la notificación
+// (el chat en tiempo real ya la muestra).
+self.addEventListener('push', event => {
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch (e) {
+    // Payload vacío o no JSON: usamos valores por defecto
+  }
+
+  const title = data.title || 'Padel@Home';
+  const options = {
+    body: data.body || '',
+    icon: data.icon || '/images/icon-192x192.png',
+    badge: '/images/icon-192x192.png',
+    data: { url: data.url || '/' },
+  };
+
+  event.waitUntil(
+    (async () => {
+      const windowClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const alreadyOpen = windowClients.some(client => {
+        try {
+          return client.url.includes(data.url || '/noop');
+        } catch (e) {
+          return false;
+        }
+      });
+      if (alreadyOpen) return;
+      return self.registration.showNotification(title, options);
+    })()
+  );
+});
+
+// Click en la notificación: abre (o enfoca) la página de la partida.
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      for (const client of windowClients) {
+        try {
+          if (client.url.includes(url) && 'focus' in client) {
+            return client.focus();
+          }
+        } catch (e) { /* ignorar */ }
+      }
+      return self.clients.openWindow(url);
+    })
   );
 });

@@ -456,21 +456,6 @@
     </div>
   
     <div id="notification-container"></div>
-    <script>
-        // Carga Socket.IO solo si el servidor lo sirve (Raspberry Pi).
-        // En Vercel (serverless) no hay WebSocket: el chat usa REST + polling.
-        (function () {
-            if (location.hostname.indexOf('vercel.app') !== -1) return;
-            try {
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', '/socket.io/socket.io.js', false);
-                xhr.send();
-                if (xhr.status === 200) {
-                    eval(xhr.responseText);
-                }
-            } catch (e) { /* sin tiempo real */ }
-        })();
-    </script>
     <script type="module" src="dashboard.js"></script>
     <script src="main.js"></script>
 </body>

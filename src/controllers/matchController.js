@@ -1,6 +1,7 @@
 const pool = require('../config/database');
 const sendEmail = require('../services/emailService');
 const realtime = require('../services/realtime');
+const { sendPushToUsers } = require('../services/pushService');
 
 const getOpenMatches = async (req, res) => {
   try {
@@ -109,6 +110,8 @@ const leaveOpenMatch = async (req, res) => {
 
     // 3. REGLA: Cancelación a última hora (< 6h)
     // Si faltan 6 horas o menos, y alguien (CUALQUIERA) se va, la partida se cancela.
+    let cancellationParticipants = [];
+    const formattedDate = new Date(booking.start_time).toLocaleString('es-ES', { timeZone: 'UTC' });
     if (hoursRemaining <= autoCancelHoursBefore) {
       await client.query("UPDATE bookings SET status = 'cancelled_by_admin' WHERE id = $1", [bookingId]);
       console.log(`Partida ${bookingId} cancelada por abandono a última hora.`);
@@ -122,26 +125,9 @@ const leaveOpenMatch = async (req, res) => {
             AND u.id != $3
         `;
         const participantsResult = await client.query(participantsQuery, [bookingId, booking.user_id, userId]);
-        const participants = participantsResult.rows;
-
-        const formattedDate = new Date(booking.start_time).toLocaleString('es-ES', { timeZone: 'UTC' });
-
-        for (const participant of participants) {
-          sendEmail({
-            to: participant.email,
-            subject: 'Cancelación de Partida Abierta - Padel@Home',
-            html: `
-              <h3>Hola ${participant.name},</h3>
-              <p>Te informamos que la partida abierta programada para el <strong>${formattedDate}</strong> ha sido cancelada.</p>
-              <p>El motivo es que un jugador ha abandonado la partida quedando menos de ${autoCancelHoursBefore} horas para el inicio, por lo que el sistema la ha cancelado automáticamente.</p>
-              <p>Disculpa las molestias.</p>
-              <p>Atentamente,<br>El equipo de Padel@Home</p>
-            `
-          });
-        }
-        console.log(`Notificaciones de cancelación enviadas a ${participants.length} participantes (partida ${bookingId}).`);
+        cancellationParticipants = participantsResult.rows;
       } catch (emailError) {
-        console.error(`Error al enviar correos de cancelación para la partida ${bookingId}:`, emailError);
+        console.error(`Error al obtener correos de cancelación para la partida ${bookingId}:`, emailError);
       }
     }
     // 4. REGLA: El organizador abandona (y faltan MÁS de 6 horas)
@@ -167,6 +153,29 @@ const leaveOpenMatch = async (req, res) => {
     // (Simplemente se libera un hueco).
 
     await client.query('COMMIT');
+
+    // Enviamos los correos de cancelación después del COMMIT
+    if (cancellationParticipants.length > 0) {
+      try {
+        for (const participant of cancellationParticipants) {
+          await sendEmail({
+            to: participant.email,
+            subject: 'Cancelación de Partida Abierta - Padel@Home',
+            html: `
+              <h3>Hola ${participant.name},</h3>
+              <p>Te informamos que la partida abierta programada para el <strong>${formattedDate}</strong> ha sido cancelada.</p>
+              <p>El motivo es que un jugador ha abandonado la partida quedando menos de ${autoCancelHoursBefore} horas para el inicio, por lo que el sistema la ha cancelado automáticamente.</p>
+              <p>Disculpa las molestias.</p>
+              <p>Atentamente,<br>El equipo de Padel@Home</p>
+            `
+          });
+        }
+        console.log(`Notificaciones de cancelación enviadas a ${cancellationParticipants.length} participantes (partida ${bookingId}).`);
+      } catch (emailError) {
+        console.error(`Error al enviar correos de cancelación para la partida ${bookingId}:`, emailError);
+      }
+    }
+
     res.json({ message: 'Has abandonado la partida correctamente.' });
 
     // Get updated participant count after leaving
@@ -200,14 +209,15 @@ const getMatchParticipants = async (req, res) => {
     }
     const ownerId = bookingResult.rows[0].user_id;
 
-    // Buscamos a todos los participantes y sus nombres
+    // Buscamos a todos los participantes y sus nombres (con indicador de dueño
+    // para que el modal pueda mostrar el badge "Organizador" y los permisos)
     const participantsResult = await pool.query(
-      `SELECT u.id, u.name
+      `SELECT u.id, u.name, (u.id = $2) as is_owner
        FROM match_participants mp
        JOIN users u ON mp.user_id = u.id
        WHERE mp.booking_id = $1
        ORDER BY mp.joined_at ASC`,
-      [bookingId]
+      [bookingId, ownerId]
     );
 
     // Añadimos al organizador si no está ya en la lista de participantes (puede que no esté en match_participants)
@@ -216,7 +226,7 @@ const getMatchParticipants = async (req, res) => {
     if (!isOrganizerInParticipants) {
       const organizerResult = await pool.query("SELECT id, name FROM users WHERE id = $1", [ownerId]);
       if (organizerResult.rows.length > 0) {
-        participants.unshift(organizerResult.rows[0]); // Añadir al principio
+        participants.unshift({ ...organizerResult.rows[0], is_owner: true }); // Añadir al principio
       }
     }
 
@@ -326,6 +336,27 @@ const sendMatchMessage = async (req, res) => {
     savedMessage.user_name = userResult.rows[0] ? userResult.rows[0].name : 'Usuario';
 
     realtime.emitToMatch(bookingId, 'receiveMessage', savedMessage);
+
+    // Notificación push al resto de participantes de la partida
+    try {
+      const participantsIdsResult = await pool.query(
+        `SELECT DISTINCT user_id FROM (
+           SELECT user_id FROM match_participants WHERE booking_id = $1
+           UNION ALL
+           SELECT user_id FROM bookings WHERE id = $1
+         ) t`,
+        [bookingId]
+      );
+      const participantIds = participantsIdsResult.rows.map(r => r.user_id);
+      await sendPushToUsers(participantIds, {
+        title: `${savedMessage.user_name} ha escrito en la partida`,
+        body: savedMessage.message.length > 140 ? `${savedMessage.message.slice(0, 140)}…` : savedMessage.message,
+        url: `/match-details.html?id=${bookingId}`,
+        icon: '/images/icon-192x192.png',
+      }, userId);
+    } catch (pushError) {
+      console.error('Error enviando push del chat:', pushError);
+    }
 
     res.status(201).json(savedMessage);
   } catch (error) {

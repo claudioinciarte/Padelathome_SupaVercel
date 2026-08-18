@@ -19,7 +19,6 @@ function setupCourtForm() {
         e.preventDefault();
         const id = document.getElementById('court-id').value;
         const name = document.getElementById('court-name').value;
-        const buildingId = document.getElementById('court-building').value;
         const description = document.getElementById('court-description').value;
         const isActive = document.getElementById('court-is-active').checked;
 
@@ -33,14 +32,14 @@ function setupCourtForm() {
                 // Note: Assuming PUT /admin/courts/:id exists
                 await fetchApi(`/admin/courts/${id}`, {
                     method: 'PUT',
-                    body: JSON.stringify({ name, buildingId, description, is_active: isActive })
+                    body: JSON.stringify({ name, description, is_active: isActive })
                 });
                 showNotification('Pista actualizada', 'success');
             } else {
                 // Create
                 await fetchApi('/admin/courts', {
                     method: 'POST',
-                    body: JSON.stringify({ name, buildingId, description })
+                    body: JSON.stringify({ name, description })
                 });
                 showNotification('Pista creada', 'success');
             }
@@ -67,27 +66,11 @@ function resetCourtForm() {
 
 export async function loadCourts() {
     const container = document.getElementById('courts-list-container');
-    const buildingSelect = document.getElementById('court-building');
     const blockCourtSelect = document.getElementById('block-court-select');
 
     if (!container) return;
 
     try {
-        // Load buildings first to populate select
-        const buildings = await fetchApi('/admin/buildings');
-        const buildingMap = {};
-
-        if (buildingSelect) {
-            buildingSelect.innerHTML = '<option value="">Seleccionar edificio...</option>';
-            buildings.forEach(b => {
-                const opt = document.createElement('option');
-                opt.value = b.id;
-                opt.textContent = b.name || b.address;
-                buildingSelect.appendChild(opt);
-                buildingMap[b.id] = b.name || b.address;
-            });
-        }
-
         const courts = await fetchApi('/admin/courts');
 
         // Populate block court select
@@ -119,12 +102,10 @@ export async function loadCourts() {
                 ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-800">Activa</span>'
                 : '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-800">Inactiva</span>';
 
-            const buildingName = buildingMap[c.building_id] ? `(${buildingMap[c.building_id]})` : '';
-
             div.innerHTML = `
                 <div>
                     <div class="flex items-center gap-2">
-                        <h5 class="text-base font-semibold text-gray-900 dark:text-white">${c.name} ${buildingName}</h5>
+                        <h5 class="text-base font-semibold text-gray-900 dark:text-white">${c.name}</h5>
                         <span class="px-2 py-0.5 rounded text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">ID: ${c.id}</span>
                         ${activeBadge}
                     </div>
@@ -163,7 +144,6 @@ function editCourt(id, courts) {
 
     document.getElementById('court-id').value = court.id;
     document.getElementById('court-name').value = court.name;
-    document.getElementById('court-building').value = court.building_id || '';
     document.getElementById('court-description').value = court.description || '';
 
     // Show active checkbox for editing

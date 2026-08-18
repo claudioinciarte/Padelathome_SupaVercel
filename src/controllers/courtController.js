@@ -2,13 +2,10 @@ const pool = require('../config/database');
 
 const getAllCourts = async (req, res) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM courts ORDER BY name");
-    // Filtramos solo las activas si el usuario no es admin
-    if (req.user.role !== 'admin') {
-      res.json(rows.filter(court => court.is_active));
-    } else {
-      res.json(rows); // El admin las ve todas
-    }
+    // Solo pistas activas: /api/courts es el endpoint de reserva (dashboard).
+    // El panel admin usa /api/admin/courts para verlas todas (incl. inactivas).
+    const { rows } = await pool.query("SELECT * FROM courts WHERE is_active = true ORDER BY name");
+    res.json(rows);
   } catch (error) {
     console.error('Error al obtener las pistas:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });

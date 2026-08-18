@@ -15,6 +15,7 @@ const {
   deleteCourt,
   createBlockedPeriod,
   deleteBlockedPeriod,
+  updateBlockedPeriod,
   getBlockedPeriods,
   getSettings,
   updateSettings,
@@ -48,6 +49,7 @@ router.delete('/courts/:courtId', protect, isAdmin, deleteCourt);
 // Rutas de Gestión de Bloqueos
 router.get('/blocked-periods', protect, isAdmin, getBlockedPeriods);
 router.post('/blocked-periods', protect, isAdmin, createBlockedPeriod);
+router.put('/blocked-periods/:blockedPeriodId', protect, isAdmin, updateBlockedPeriod);
 router.delete('/blocked-periods/:blockedPeriodId', protect, isAdmin, deleteBlockedPeriod);
 
 // Rutas de Gestión de Ajustes

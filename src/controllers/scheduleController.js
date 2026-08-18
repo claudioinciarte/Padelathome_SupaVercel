@@ -18,6 +18,39 @@ function isSlotAvailable(start, end, bookings, blocked) {
     return true;
 }
 
+// Fin del bloque libre que empieza en slotTime: el siguiente conflicto
+// (reserva o bloqueo) que comienza después del slot, o el cierre del día.
+function getFreeBlockEnd(slotTime, dayEndTime, bookings, blocked) {
+    let blockEnd = dayEndTime;
+    for (const c of [...bookings, ...blocked]) {
+        const cStart = new Date(c.start_time);
+        if (cStart > slotTime && cStart < blockEnd) blockEnd = cStart;
+    }
+    return blockEnd;
+}
+
+// Duraciones ofrecidas para un slot libre (60 y/o 90 minutos).
+// Con la optimización de huecos activa, solo se ofrecen duraciones que NO
+// dejen un hueco de 30 minutos suelto al final del bloque libre: el resto
+// del bloque debe poder rellenarse con reservas de 60/90. Ej.: bloque libre
+// de 90 min -> solo 90 (60 dejaría 30 sueltos); bloque de 120 -> solo 60
+// (90 dejaría 30); bloque de 150 -> 60 y 90.
+function computeSlotDurations(slotTime, dayEndTime, bookings, blocked, gapOptimization) {
+    const durations = [];
+    for (const duration of [60, 90]) {
+        const end = new Date(slotTime.getTime() + duration * 60000);
+        if (end > dayEndTime) continue;
+        if (!isSlotAvailable(slotTime, end, bookings, blocked)) continue;
+        if (gapOptimization) {
+            const blockEnd = getFreeBlockEnd(slotTime, dayEndTime, bookings, blocked);
+            const remainderMinutes = (blockEnd.getTime() - slotTime.getTime()) / 60000 - duration;
+            if (remainderMinutes === 30) continue; // dejaría un hueco de media hora
+        }
+        durations.push(duration);
+    }
+    return durations;
+}
+
 // Convierte 'yyyy-MM-dd' a un instante en la zona horaria de la app
 function dateOnlyToUtc(dateStr) {
     return fromZonedTime(`${dateStr}T00:00:00`, APP_TIMEZONE);
@@ -53,26 +86,19 @@ const getAvailability = async (req, res) => {
         const [bookingsResult, blockedResult, settingsResult] = await Promise.all([
             pool.query("SELECT start_time, end_time FROM bookings WHERE court_id = $1 AND status = 'confirmed' AND start_time >= $2 AND start_time <= $3", [courtId, startOfTargetDate, endOfTargetDate]),
             pool.query("SELECT start_time, end_time, reason FROM blocked_periods WHERE court_id = $1 AND start_time >= $2 AND start_time <= $3", [courtId, startOfTargetDate, endOfTargetDate]),
-            pool.query("SELECT setting_value FROM instance_settings WHERE setting_key IN ('operating_open_time', 'operating_close_time')")
+            pool.query("SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('operating_open_time', 'operating_close_time', 'enable_booking_gap_optimization')")
         ]);
         const bookings = bookingsResult.rows;
         const blockedPeriods = blockedResult.rows;
         const openTime = settingsResult.rows.find(s => s.setting_key === 'operating_open_time')?.setting_value || '08:00';
         const closeTime = settingsResult.rows.find(s => s.setting_key === 'operating_close_time')?.setting_value || '22:00';
+        const gapOptimization = settingsResult.rows.find(s => s.setting_key === 'enable_booking_gap_optimization')?.setting_value === 'true';
         const availableSlots = [];
         const dayStartTime = fromZonedTime(`${date}T${openTime}:00`, APP_TIMEZONE);
         const dayEndTime = fromZonedTime(`${date}T${closeTime}:00`, APP_TIMEZONE);
         for (let i = dayStartTime; i < dayEndTime; i = new Date(i.getTime() + 30 * 60000)) {
             const potentialStartTime = new Date(i);
-            const availableDurations = [];
-            const endTime60 = new Date(potentialStartTime.getTime() + 60 * 60000);
-            if (isSlotAvailable(potentialStartTime, endTime60, bookings, blockedPeriods) && endTime60 <= dayEndTime) {
-                availableDurations.push(60);
-            }
-            const endTime90 = new Date(potentialStartTime.getTime() + 90 * 60000);
-            if (isSlotAvailable(potentialStartTime, endTime90, bookings, blockedPeriods) && endTime90 <= dayEndTime) {
-                availableDurations.push(90);
-            }
+            const availableDurations = computeSlotDurations(potentialStartTime, dayEndTime, bookings, blockedPeriods, gapOptimization);
             if (availableDurations.length > 0) {
                 availableSlots.push({ startTime: potentialStartTime.toISOString(), availableDurations });
             }
@@ -112,7 +138,7 @@ const getWeekSchedule = async (req, res) => {
     const [blockedResult, participantsResult, settingsResult, waitlistResult] = await Promise.all([
       pool.query("SELECT start_time, end_time, reason FROM blocked_periods WHERE court_id = $1 AND start_time >= $2 AND end_time <= $3", [courtId, weekStart, weekEnd]),
       pool.query("SELECT booking_id, COUNT(user_id) as participant_count FROM match_participants WHERE booking_id = ANY($1::bigint[]) GROUP BY booking_id", [bookingIds]),
-      pool.query("SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('operating_open_time', 'operating_close_time')"),
+      pool.query("SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('operating_open_time', 'operating_close_time', 'enable_booking_gap_optimization')"),
       pool.query("SELECT slot_start_time, COUNT(user_id) as count FROM waiting_list_entries WHERE court_id = $1 AND slot_start_time >= $2 AND slot_start_time <= $3 AND status = 'waiting' GROUP BY slot_start_time", [courtId, weekStart, weekEnd])
     ]);
 
@@ -121,6 +147,7 @@ const getWeekSchedule = async (req, res) => {
 
     const openTime = settingsResult.rows.find(s => s.setting_key === 'operating_open_time')?.setting_value || '08:00';
     const closeTime = settingsResult.rows.find(s => s.setting_key === 'operating_close_time')?.setting_value || '22:00';
+    const gapOptimization = settingsResult.rows.find(s => s.setting_key === 'enable_booking_gap_optimization')?.setting_value === 'true';
 
     const schedule = {};
     for (let d = 0; d < 7; d++) {
@@ -166,6 +193,9 @@ const getWeekSchedule = async (req, res) => {
                   slotInfo.status = 'booked';
               }
           }
+        } else {
+          // Slot libre: duraciones ofrecidas según la optimización de huecos
+          slotInfo.availableDurations = computeSlotDurations(slotTime, dayEndTime, bookingsResult.rows, blockedResult.rows, gapOptimization);
         }
         schedule[dayString].push(slotInfo);
       }
@@ -211,7 +241,7 @@ const getDaySchedule = async (req, res) => {
         );
 
         const settingsResult = await pool.query(
-            "SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('operating_open_time', 'operating_close_time')"
+            "SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('operating_open_time', 'operating_close_time', 'enable_booking_gap_optimization')"
         );
 
         // 2. Procesar los datos
@@ -219,6 +249,7 @@ const getDaySchedule = async (req, res) => {
         const blockedPeriods = blockedResult.rows;
         const openTime = settingsResult.rows.find(s => s.setting_key === 'operating_open_time')?.setting_value || '08:00';
         const closeTime = settingsResult.rows.find(s => s.setting_key === 'operating_close_time')?.setting_value || '22:00';
+        const gapOptimization = settingsResult.rows.find(s => s.setting_key === 'enable_booking_gap_optimization')?.setting_value === 'true';
 
         // 3. Generar los slots del día (zona horaria de la app)
         const daySlots = [];
@@ -263,14 +294,7 @@ const getDaySchedule = async (req, res) => {
                 }
             } else {
                 // Calcular duraciones disponibles si el slot está libre
-                const endTime60 = new Date(slotTime.getTime() + 60 * 60000);
-                if (isSlotAvailable(slotTime, endTime60, bookings, blockedPeriods) && endTime60 <= dayEndTime) {
-                    slotInfo.availableDurations.push(60);
-                }
-                const endTime90 = new Date(slotTime.getTime() + 90 * 60000);
-                if (isSlotAvailable(slotTime, endTime90, bookings, blockedPeriods) && endTime90 <= dayEndTime) {
-                    slotInfo.availableDurations.push(90);
-                }
+                slotInfo.availableDurations = computeSlotDurations(slotTime, dayEndTime, bookings, blockedPeriods, gapOptimization);
                 // Si es 'available' pero no hay duraciones, no lo mostramos
                 if (slotInfo.availableDurations.length === 0) {
                     continue;

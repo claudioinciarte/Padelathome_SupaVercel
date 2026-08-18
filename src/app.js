@@ -22,6 +22,7 @@ const adminRoutes = require('./api/adminRoutes');
 const waitingListRoutes = require('./api/waitingListRoutes');
 const matchRoutes = require('./api/matchRoutes');
 const cronRoutes = require('./api/cronRoutes');
+const pushRoutes = require('./api/pushRoutes');
 
 // Creación de la aplicación Express (exportable, compatible con Vercel serverless)
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/waiting-list', waitingListRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/cron', cronRoutes);
+app.use('/api/push', pushRoutes);
 
 // Healthcheck para Vercel y monitoreo
 app.get('/api/health', (req, res) => {

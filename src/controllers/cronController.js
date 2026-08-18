@@ -89,7 +89,7 @@ const cleanIncompleteOpenMatches = async () => {
           const formattedDate = new Date(booking.start_time).toLocaleString('es-ES', { timeZone: 'UTC' });
 
           for (const participant of participants) {
-            sendEmail({
+            await sendEmail({
               to: participant.email,
               subject: 'Cancelación de Partida Abierta - Padel@Home',
               html: `
@@ -148,7 +148,7 @@ const processExpiredWaitlistEntries = async () => {
 
       // 2b. Buscamos a la siguiente persona en la cola para el mismo slot
       const nextInLineResult = await client.query(
-        `SELECT wle.id, u.name as user_name, u.email as user_email, wle.slot_start_time
+        `SELECT wle.id, wle.user_id, u.name as user_name, u.email as user_email, wle.slot_start_time
          FROM waiting_list_entries wle
          JOIN users u ON wle.user_id = u.id
          WHERE wle.court_id = $1 AND wle.slot_start_time = $2 AND wle.status = 'waiting'
@@ -158,8 +158,10 @@ const processExpiredWaitlistEntries = async () => {
       );
 
       // 2c. Si hay alguien más en la lista...
+      let nextUser = null;
+      let confirmationUrl = '';
       if (nextInLineResult.rows.length > 0) {
-        const nextUser = nextInLineResult.rows[0];
+        nextUser = nextInLineResult.rows[0];
         const confirmationToken = crypto.randomBytes(32).toString('hex');
         const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutos
 
@@ -169,16 +171,20 @@ const processExpiredWaitlistEntries = async () => {
         );
 
         const appUrl = process.env.APP_URL || '';
-        const confirmationUrl = `${appUrl}/confirm-booking.html?token=${confirmationToken}`;
-        sendEmail({
+        confirmationUrl = `${appUrl}/confirm-booking.html?token=${confirmationToken}`;
+      }
+
+      await client.query('COMMIT');
+
+      // Enviamos el correo después del COMMIT
+      if (nextUser) {
+        await sendEmail({
           to: nextUser.user_email,
           subject: '¡Un hueco se ha liberado en Padel@Home!',
           html: `<h3>¡Hola, ${nextUser.user_name}!</h3><p>El turno anterior ha expirado. ¡Ahora es tu oportunidad!</p><p>Tienes <strong>30 minutos</strong> para confirmar la reserva haciendo clic en el enlace.</p><a href="${confirmationUrl}">Confirmar mi Reserva</a>`
         });
         console.log(`[CRON JOB] - Turno expirado. Notificando al siguiente usuario: ${nextUser.user_id}`);
       }
-
-      await client.query('COMMIT');
     }
 
     return { expired: expiredEntriesResult.rows.length };

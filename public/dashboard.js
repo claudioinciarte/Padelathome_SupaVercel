@@ -4,6 +4,7 @@ import * as Modals from './js/ui/modals.js';
 import * as Calendar from './js/components/Calendar.js';
 import * as BookingCard from './js/components/BookingCard.js';
 import * as CourtSelector from './js/components/CourtSelector.js';
+import { subscribeToCalendarChanges } from './js/services/supabase.js';
 
 // --- Utilidades Locales ---
 const debounce = (func, delay) => {
@@ -29,16 +30,8 @@ const EMPTY_BOOKING_STATE = `
     <p class="text-slate-400 dark:text-slate-500 text-sm mt-1">Selecciona una fecha en el calendario para reservar.</p>
 `;
 
-// Inicializar WebSocket safely
-let socket;
-try {
-    socket = io();
-    socket.on('connect', () => console.log('Connected to WebSocket'));
-} catch(e) {
-    console.warn("Socket.io not available");
-    // Mock for verification environment if needed, or just null checks later
-    socket = { on: () => {} };
-}
+// En Vercel no hay Socket.IO: el tiempo real llega por Supabase Realtime
+// (replicación de Postgres), suscrito en init() con subscribeToCalendarChanges.
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!authToken) {
@@ -51,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedCourtId = null;
     let userActiveBookings = [];
     let userWaitingListEntries = [];
+    let currentUserId = null;
 
     // --- Elementos del DOM ---
     const welcomeMessageDesktop = document.getElementById('welcome-message-desktop');
@@ -206,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchUserProfile = async () => {
         try {
             const user = await fetchApi('/users/me');
+            currentUserId = user.id;
             if(welcomeMessageDesktop) welcomeMessageDesktop.textContent = `Padel@Home`; // Or user name if preferred on desktop
             if(welcomeMessageMobile) welcomeMessageMobile.textContent = `${user.name}!`;
             if (user.role === 'admin') {
@@ -414,7 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         modalHandlers.onConfirmBooking({ startTime, durationMinutes: parseInt(duration), isOpenMatch });
                         refreshData();
                     } else { 
-                        Modals.showBookingModal(startTime, [60, 90]);
+                        // Duraciones ofrecidas por el servidor (optimización de huecos)
+                        Modals.showBookingModal(startTime, (slotData.durations && slotData.durations.length) ? slotData.durations : [60, 90]);
                     }
                     break;
                 case 'cancel':
@@ -427,7 +423,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         modalHandlers.onLeaveMatch(bookingId);
                     } else {
                         fetchApi(`/matches/${bookingId}/participants`).then(({ participants: p }) => {
-                            Modals.showMyMatchModal({ bookingId, startTime, isOwner: participationType === 'owner' }, p);
+                            // El dueño se determina desde la respuesta del servidor
+                            // (is_owner), no desde el slot: más robusto.
+                            const myEntry = p.find(x => String(x.id) === String(currentUserId));
+                            Modals.showMyMatchModal({ bookingId, startTime, isOwner: !!(myEntry && myEntry.is_owner) }, p);
                         });
                     }
                     break;
@@ -460,20 +459,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Carga inicial
         await fetchUserProfile();
-        try {
-            const courts = await fetchApi('/courts');
-            if (courts.length > 0) {
-                CourtSelector.render(courtSelectDropdown, courts, courts[0].id);
-                selectedCourtId = courts[0].id;
-                // If there's only one court, we might hide the selector container
-                if (courts.length <= 1) {
-                    courtSelectorContainer.style.display = 'none';
+
+        // Carga (y recarga) las pistas activas en el selector. Si la pista
+        // seleccionada deja de estar activa, pasamos a la primera disponible.
+        const loadCourtsAndSelect = async () => {
+            try {
+                const courts = await fetchApi('/courts');
+                const activeCourts = courts.filter(c => c.is_active);
+                if (activeCourts.length === 0) {
+                    selectedCourtId = null;
+                    CourtSelector.render(courtSelectDropdown, [], null);
+                    if (courtSelectorContainer) courtSelectorContainer.style.display = 'none';
+                    updateCalendarView();
+                    return;
                 }
-                refreshData();
-            } else {
-                showNotification('No hay pistas disponibles', 'error');
+                const stillSelected = activeCourts.some(c => String(c.id) === String(selectedCourtId));
+                if (!stillSelected) selectedCourtId = activeCourts[0].id;
+                CourtSelector.render(courtSelectDropdown, activeCourts, selectedCourtId);
+                // If there's only one court, we might hide the selector container
+                if (courtSelectorContainer) {
+                    courtSelectorContainer.style.display = activeCourts.length <= 1 ? 'none' : '';
+                }
+                await refreshData();
+            } catch (e) {
+                console.error('Error cargando pistas:', e);
             }
-        } catch (e) { showNotification(e.message, 'error'); }
+        };
+
+        await loadCourtsAndSelect();
 
         // Event Listeners UI Generales
         const logoutHandler = () => { localStorage.removeItem('authToken'); window.location.href = '/login.html'; };
@@ -503,10 +516,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('resize', debounce(updateCalendarView, 250));
 
-        // Websocket update
-        socket.on('booking:created', refreshData);
-        socket.on('booking:cancelled', refreshData);
-        socket.on('match:updated', refreshData);
+        // Tiempo real con Supabase Realtime: cualquier cambio en reservas,
+        // participantes, bloqueos o lista de espera refresca el dashboard;
+        // los cambios en pistas (activar/desactivar) recargan el selector.
+        subscribeToCalendarChanges(debounce((change) => {
+            if (change.table === 'courts') {
+                loadCourtsAndSelect();
+            } else {
+                refreshData();
+            }
+        }, 400));
     };
 
     init();

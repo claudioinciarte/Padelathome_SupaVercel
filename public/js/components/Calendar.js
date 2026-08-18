@@ -134,6 +134,7 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
                 case 'available':
                     button.classList.add('bg-green-100', 'dark:bg-green-900/30', 'text-green-700', 'dark:text-green-300', 'hover:bg-green-200', 'dark:hover:bg-green-900/50');
                     button.textContent = 'Libre';
+                    if (daySlot.availableDurations) button.dataset.durations = daySlot.availableDurations.join(',');
                     td.appendChild(button);
                     break;
 
@@ -363,7 +364,8 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
 
     switch (status) {
         case 'available':
-            const durations = [60, 90];
+            // Duraciones ofrecidas por el servidor (optimización de huecos)
+            const durations = (slotData.durations && slotData.durations.length) ? slotData.durations : [60, 90];
             const optionsHtml = durations.map((d, i) => {
                 // Default first one selected logic for visual rendering
                 // We'll handle selection class toggling in JS, but here is the markup
@@ -520,7 +522,8 @@ export function init(container, onSlotClick) {
                     participants: dataset.participants,
                     maxParticipants: dataset.maxParticipants,
                     duration: dataset.duration,
-                    waitlistCount: dataset.waitlistcount
+                    waitlistCount: dataset.waitlistcount,
+                    durations: dataset.durations ? dataset.durations.split(',').map(Number) : null
                 };
                 if (slotData.status && slotData.status !== 'past') {
                     onSlotClick(slotData);

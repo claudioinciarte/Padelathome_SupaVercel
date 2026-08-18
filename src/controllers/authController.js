@@ -92,7 +92,7 @@ const forgotPassword = async (req, res) => {
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, user.id, expires_at]);
 
     const resetUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
-    sendEmail({
+    await sendEmail({
       to: user.email,
       subject: 'Restablece tu contraseña de Padel@Home',
       html: `<h3>Hola, ${user.name}</h3><p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva:</p><a href="${resetUrl}">Restablecer Contraseña</a><p>Este enlace expirará en 30 minutos.</p>`

@@ -1,11 +1,18 @@
 import { fetchApi } from './js/services/api.js';
 import { showNotification } from './js/utils.js';
+import { subscribeToMatchChat } from './js/services/supabase.js';
+import { isPushSupported, getPushSubscription, subscribeToPush, unsubscribeFromPush } from './js/services/push.js';
+
+// El service worker puede no estar registrado aún si el usuario entró
+// directo a esta página (en dashboard.html se registra en main.js).
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get('id');
     const token = localStorage.getItem('authToken');
-    const socket = window.io ? window.io() : { emit: () => {}, on: () => {} }; // graceful fallback
 
     if (!bookingId || !token) {
         window.location.href = '/dashboard.html';
@@ -15,6 +22,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentUser = null;
     let matchData = null;
     let renderedMessageCount = 0;
+    const renderedMessageIds = new Set(); // Deduplicación POST-echo vs Realtime
+
+    // --- Notificaciones (Web Push + Web Notifications) ---
+    let pushEnabled = localStorage.getItem('pushEnabled') === 'true';
+    const bellButton = document.getElementById('btn-notifications');
+    const bellIcon = document.getElementById('notifications-icon');
+
+    const updateBell = () => {
+      if (!bellButton) return;
+      if (!isPushSupported()) { bellButton.classList.add('hidden'); return; }
+      bellButton.classList.remove('hidden');
+      if (pushEnabled) {
+        bellIcon.textContent = 'notifications_active';
+        bellButton.classList.add('text-primary');
+      } else {
+        bellIcon.textContent = 'notifications_none';
+        bellButton.classList.remove('text-primary');
+      }
+    };
+
+    const setPushState = (enabled) => {
+      pushEnabled = enabled;
+      localStorage.setItem('pushEnabled', enabled ? 'true' : 'false');
+      updateBell();
+    };
+
+    const enableNotifications = async () => {
+      if (!isPushSupported()) {
+        showNotification('Las notificaciones no están soportadas en este navegador.', 'error');
+        return;
+      }
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          showNotification('Permiso de notificaciones denegado.', 'error');
+          setPushState(false);
+          return;
+        }
+        await subscribeToPush();
+        setPushState(true);
+        showNotification('Notificaciones activadas: recibirás los mensajes de tus partidas.', 'success');
+      } catch (e) {
+        console.error('Error activando notificaciones:', e);
+        showNotification('No se pudieron activar las notificaciones.', 'error');
+        setPushState(false);
+      }
+    };
+
+    const disableNotifications = async () => {
+      await unsubscribeFromPush();
+      setPushState(false);
+      showNotification('Notificaciones desactivadas.', 'info');
+    };
+
+    if (bellButton) {
+      bellButton.addEventListener('click', () => {
+        if (pushEnabled) disableNotifications();
+        else enableNotifications();
+      });
+    }
+
+    // Sincroniza el estado real de la suscripción al cargar la página
+    getPushSubscription().then(sub => {
+      const subscribed = !!sub;
+      if (pushEnabled && !subscribed) setPushState(false);
+      else if (!pushEnabled && subscribed) setPushState(true);
+      updateBell();
+    });
 
     // Inicializar elementos del DOM
     const chatForm = document.getElementById('chat-form');
@@ -158,10 +233,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatWindow.innerHTML = data.messages.map(m => createMessageHtml(m, currentUserId)).join('');
         chatWindow.scrollTop = chatWindow.scrollHeight;
         renderedMessageCount = data.messages.length;
+        renderedMessageIds.clear();
+        data.messages.forEach(m => renderedMessageIds.add(String(m.id)));
     }
 
     function createMessageHtml(data, currentUserId) {
-        const isSent = data.user_id === currentUserId || data.userId === currentUserId; // handle both historic (user_id) and realtime (userId) properties
+        // Normalizamos a string: la API devuelve los ids como string (pg) y
+        // Supabase Realtime como number (JSON), y la comparación debe ser estable.
+        const isSent = String(data.user_id ?? data.userId ?? '') === String(currentUserId);
         const time = new Date(data.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         const userName = data.user_name || data.userName;
 
@@ -193,13 +272,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function joinChat(id, user) {
-        // En despliegues con Socket.IO (Raspberry Pi) usamos tiempo real.
-        // En Vercel serverless no hay WebSocket: el envío se hace por REST
-        // y la recepción mediante sondeo periódico (polling).
-        const hasRealtime = !!window.io;
-        if (hasRealtime) {
-            socket.emit('joinMatchChat', id);
-        }
+        // Envío siempre por REST (persiste en la BD).
+        // Recepción en tiempo real con Supabase Realtime (replicación de
+        // Postgres); si el canal no conecta, cae a sondeo periódico.
+        const playerNames = {};
+        (matchData.players || []).forEach(p => { playerNames[p.id] = p.name; });
 
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -207,8 +284,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(!msg) return;
 
             try {
-                // Guardar siempre por REST: persiste en la BD y en modo
-                // Socket.IO se reemitirá al resto de usuarios de la sala.
                 const savedMessage = await fetchApi(`/matches/${id}/messages`, {
                     method: 'POST',
                     body: JSON.stringify({ message: msg })
@@ -224,28 +299,67 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        if (hasRealtime) {
-            socket.on('receiveMessage', (data) => {
-                appendMessage(data, user.id);
-            });
-        } else {
-            // Polling cada 5 segundos (fallback serverless)
-            setInterval(async () => {
+        let realtimeActive = false;
+        let pollingTimer = null;
+
+        const stopPolling = () => {
+            if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+        };
+        const startPolling = () => {
+            if (pollingTimer) return;
+            pollingTimer = setInterval(async () => {
                 try {
                     const data = await fetchApi(`/matches/${id}/details`);
                     if (data.messages.length !== renderedMessageCount) {
                         chatWindow.innerHTML = data.messages.map(m => createMessageHtml(m, user.id)).join('');
                         chatWindow.scrollTop = chatWindow.scrollHeight;
                         renderedMessageCount = data.messages.length;
+                        renderedMessageIds.clear();
+                        data.messages.forEach(m => renderedMessageIds.add(String(m.id)));
                     }
                 } catch (err) {
                     // Silencioso: reintentará en el siguiente ciclo
                 }
             }, 5000);
-        }
+        };
+
+        subscribeToMatchChat(id, (msg) => {
+            realtimeActive = true;
+            stopPolling();
+            msg.user_name = playerNames[String(msg.user_id)] || 'Usuario';
+            appendMessage(msg, user.id);
+
+            // Notificación del sistema si no es nuestro mensaje y la pestaña
+            // no está enfocada. Si el push está activo, el service worker ya
+            // muestra la notificación (sin duplicar cuando la pestaña está abierta).
+            if (String(msg.user_id) !== String(user.id) && document.hidden && !pushEnabled) {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try {
+                        const notification = new Notification(`${msg.user_name} dice:`, {
+                            body: msg.message.length > 140 ? `${msg.message.slice(0, 140)}…` : msg.message,
+                            icon: '/images/icon-192x192.png',
+                            tag: `match-chat-${id}`,
+                        });
+                        notification.onclick = () => { window.focus(); };
+                    } catch (e) { /* silencioso */ }
+                }
+            }
+        }, (status) => {
+            if (status === 'SUBSCRIBED') {
+                realtimeActive = true;
+                stopPolling();
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                if (!realtimeActive) startPolling();
+            }
+        });
     }
 
     function appendMessage(data, currentUserId) {
+        // El id puede llegar como string (API) o number (Realtime): normalizamos.
+        const msgId = data.id != null ? String(data.id) : null;
+        if (msgId && renderedMessageIds.has(msgId)) return; // Ya renderizado (POST-echo o duplicado)
+        if (msgId) renderedMessageIds.add(msgId);
+        if (renderedMessageIds.size > 500) renderedMessageIds.clear(); // Evita crecer sin límite
         const messageEl = createMessageHtml(data, currentUserId);
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = messageEl;

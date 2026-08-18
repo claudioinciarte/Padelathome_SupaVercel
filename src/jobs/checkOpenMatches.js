@@ -45,7 +45,7 @@ async function cancelIncompleteMatches() {
         
         // 4. Enviamos el correo de cancelación a todos los apuntados
         for (const user of usersResult.rows) {
-          sendEmail({
+          await sendEmail({
             to: user.email,
             subject: 'Partida Abierta Cancelada en Padel@Home',
             html: `<h3>Hola, ${user.name}</h3>

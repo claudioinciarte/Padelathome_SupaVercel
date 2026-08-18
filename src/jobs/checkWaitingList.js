@@ -50,7 +50,7 @@ async function processExpiredWaitlistEntries() {
         );
         
         const confirmationUrl = `${process.env.APP_URL}/confirm-booking.html?token=${confirmationToken}`;
-        sendEmail({
+        await sendEmail({
             to: nextUser.user_email,
             subject: '¡Un hueco se ha liberado en Padel@Home!',
             html: `<h3>¡Hola, ${nextUser.user_name}!</h3><p>El turno anterior ha expirado. ¡Ahora es tu oportunidad!</p><p>Tienes <strong>30 minutos</strong> para confirmar la reserva haciendo clic en el enlace.</p><a href="${confirmationUrl}">Confirmar mi Reserva</a>`

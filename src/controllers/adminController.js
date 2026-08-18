@@ -50,7 +50,7 @@ const approveUser = async (req, res) => {
     const result = await pool.query("UPDATE users SET account_status = 'active' WHERE id = $1 AND account_status = 'pending_approval' RETURNING *", [userId]);
     if (result.rows.length === 0) return res.status(404).json({ message: 'Usuario no encontrado o ya está activo.' });
     const approvedUser = result.rows[0];
-    sendEmail({ to: approvedUser.email, subject: '¡Tu cuenta en Padel@Home ha sido aprobada!', html: `<h3>¡Hola, ${approvedUser.name}!</h3><p>Tu cuenta ha sido aprobada. ¡Ya puedes iniciar sesión!</p>` });
+    await sendEmail({ to: approvedUser.email, subject: '¡Tu cuenta en Padel@Home ha sido aprobada!', html: `<h3>¡Hola, ${approvedUser.name}!</h3><p>Tu cuenta ha sido aprobada. ¡Ya puedes iniciar sesión!</p>` });
     res.json({ message: 'Usuario aprobado exitosamente.', user: { id: approvedUser.id, name: approvedUser.name, account_status: approvedUser.account_status }});
   } catch (error) {
     console.error('Error al aprobar usuario:', error);
@@ -90,8 +90,8 @@ const inviteUser = async (req, res) => {
     const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, newUser.id, expires_at]);
     const setPasswordUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
-    sendEmail({ to: newUser.email, subject: '¡Bienvenido a Padel@Home! Establece tu contraseña', html: `<h3>¡Hola, ${newUser.name}!</h3><p>Un administrador te ha creado una cuenta en Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer tu contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer mi contraseña</a>`});
     await client.query('COMMIT');
+    await sendEmail({ to: newUser.email, subject: '¡Bienvenido a Padel@Home! Establece tu contraseña', html: `<h3>¡Hola, ${newUser.name}!</h3><p>Un administrador te ha creado una cuenta en Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer tu contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer mi contraseña</a>`});
     res.status(201).json({ message: 'Usuario invitado exitosamente.', user: newUser });
   } catch (error) {
     await client.query('ROLLBACK');
@@ -109,7 +109,7 @@ const resetUserPassword = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    const userResult = await pool.query("SELECT id, name, email FROM users WHERE id = $1", [userId]);
+    const userResult = await client.query("SELECT id, name, email FROM users WHERE id = $1", [userId]);
     if (userResult.rows.length === 0) {
       await client.query('ROLLBACK');
       return res.status(404).json({ message: 'Usuario no encontrado.' });
@@ -121,14 +121,15 @@ const resetUserPassword = async (req, res) => {
 
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, user.id, expires_at]);
 
+    await client.query('COMMIT');
+
     const setPasswordUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
-    sendEmail({
+    await sendEmail({
       to: user.email,
       subject: 'Restablecimiento de Contraseña para Padel@Home',
       html: `<h3>¡Hola, ${user.name}!</h3><p>Se ha solicitado un restablecimiento de contraseña para tu cuenta de Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer una nueva contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer nueva contraseña</a><p>Si no solicitaste este cambio, por favor ignora este correo.</p>`
     });
 
-    await client.query('COMMIT');
     res.status(200).json({ message: 'Enlace de restablecimiento de contraseña enviado al correo del usuario.' });
 
   } catch (error) {
@@ -166,18 +167,17 @@ const updateUserRole = async (req, res) => {
 };
 
 // --- Funciones de Gestión de Pistas ---
+// NOTA: la tabla courts NO tiene columna building_id (las pistas son globales
+// de la comunidad, no por edificio). El formulario del admin lo marcaba como
+// "solo informativo"; se elimina por completo.
 const createCourt = async (req, res) => {
-  const { name, buildingId, description, is_active } = req.body;
-  if (!name || !buildingId) return res.status(400).json({ message: 'Nombre y edificio son requeridos.' });
-
-  // Safe integer parsing
-  const bId = parseInt(buildingId);
-  if (isNaN(bId)) return res.status(400).json({ message: 'ID de edificio inválido.' });
+  const { name, description, is_active } = req.body;
+  if (!name) return res.status(400).json({ message: 'El nombre de la pista es requerido.' });
 
   try {
     const { rows } = await pool.query(
-      "INSERT INTO courts (name, building_id, description, is_active) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, bId, description, is_active !== undefined ? is_active : true]
+      "INSERT INTO courts (name, description, is_active) VALUES ($1, $2, $3) RETURNING *",
+      [name, description, is_active !== undefined ? is_active : true]
     );
     res.status(201).json(rows[0]);
   } catch (error) {
@@ -199,13 +199,9 @@ const getAllCourts = async (req, res) => {
 const updateCourt = async (req, res) => {
   try {
     const { courtId } = req.params;
-    const { name, buildingId, description, is_active } = req.body;
+    const { name, description, is_active } = req.body;
 
     if (!name) return res.status(400).json({ message: 'El nombre de la pista es requerido.' });
-
-    // Safe integer parsing
-    const bId = parseInt(buildingId);
-    if (isNaN(bId)) return res.status(400).json({ message: 'ID de edificio inválido.' });
 
     // If is_active is missing (undefined), retrieve current value or default?
     // Postgres will fail if passed undefined to param unless handled.
@@ -216,8 +212,8 @@ const updateCourt = async (req, res) => {
     const activeState = is_active !== undefined ? is_active : true;
 
     const { rows } = await pool.query(
-      "UPDATE courts SET name = $1, building_id = $2, description = $3, is_active = $4, updated_at = NOW() WHERE id = $5 RETURNING *",
-      [name, bId, description, activeState, courtId]
+      "UPDATE courts SET name = $1, description = $2, is_active = $3, updated_at = NOW() WHERE id = $4 RETURNING *",
+      [name, description, activeState, courtId]
     );
     if (rows.length === 0) return res.status(404).json({ message: 'Pista no encontrada.' });
     res.json(rows[0]);
@@ -332,6 +328,23 @@ const deleteBlockedPeriod = async (req, res) => {
     res.json({ message: 'Período de bloqueo eliminado exitosamente.' });
   } catch (error) {
     console.error('Error al eliminar período de bloqueo:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
+const updateBlockedPeriod = async (req, res) => {
+  try {
+    const { blockedPeriodId } = req.params;
+    const { courtId, startTime, endTime, reason, is_full_day } = req.body;
+    if (!courtId || !startTime || !endTime) return res.status(400).json({ message: 'courtId, startTime y endTime son requeridos.' });
+    const { rows } = await pool.query(
+      "UPDATE blocked_periods SET court_id = $1, start_time = $2, end_time = $3, reason = $4, is_full_day = $5, updated_at = NOW() WHERE id = $6 RETURNING *",
+      [courtId, startTime, endTime, reason, is_full_day || false, blockedPeriodId]
+    );
+    if (rows.length === 0) return res.status(404).json({ message: 'Período de bloqueo no encontrado.' });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Error al actualizar período de bloqueo:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
@@ -492,6 +505,7 @@ module.exports = {
   deleteCourt,
   createBlockedPeriod,
   deleteBlockedPeriod,
+  updateBlockedPeriod,
   getBlockedPeriods,
   getSettings,
   updateSettings,

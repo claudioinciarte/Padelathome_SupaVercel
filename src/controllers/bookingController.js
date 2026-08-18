@@ -1,9 +1,12 @@
 const db = require('../config/database');
-const { addMinutes } = require('date-fns');
+const { addMinutes, addDays } = require('date-fns');
+const { fromZonedTime, formatInTimeZone } = require('date-fns-tz');
 const sendEmail = require('../services/emailService');
 const ics = require('ics');
 const crypto = require('crypto'); // Necesario para la lista de espera
 const realtime = require('../services/realtime');
+
+const APP_TIMEZONE = process.env.APP_TIMEZONE || 'Europe/Madrid';
 
 /**
  * @description Crea una nueva reserva (privada o partida abierta)
@@ -25,9 +28,10 @@ const createBooking = async (req, res) => {
     await client.query('BEGIN');
 
     // --- NEW LOGIC START ---
-    // 0. Consultar instance_settings para límites de partidas abiertas
+    // 0. Consultar instance_settings para límites de partidas abiertas,
+    // días de antelación, optimización de huecos y hora de cierre
     const settingsResult = await client.query(
-      "SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('limit_open_matches_enabled', 'max_open_matches_per_user')"
+      "SELECT setting_key, setting_value FROM instance_settings WHERE setting_key IN ('limit_open_matches_enabled', 'max_open_matches_per_user', 'booking_advance_days', 'enable_booking_gap_optimization', 'operating_close_time')"
     );
 
     const settings = settingsResult.rows.reduce((acc, s) => {
@@ -37,6 +41,15 @@ const createBooking = async (req, res) => {
 
     const limitOpenMatchesEnabled = settings.limit_open_matches_enabled === 'true';
     const maxOpenMatchesPerUser = parseInt(settings.max_open_matches_per_user || '0', 10);
+    const gapOptimization = settings.enable_booking_gap_optimization === 'true';
+
+    // 0b. Días de antelación: no se puede reservar más allá de hoy + N días
+    const advanceDays = parseInt(settings.booking_advance_days || '7', 10);
+    const todayStr = formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd');
+    const lastAllowedStart = addDays(fromZonedTime(`${todayStr}T00:00:00`, APP_TIMEZONE), advanceDays + 1);
+    if (bookingStartTime >= lastAllowedStart) {
+      throw new Error(`No se puede reservar con más de ${advanceDays} días de antelación.`);
+    }
 
     if (isOpenMatch && limitOpenMatchesEnabled) {
       const userOpenMatchesResult = await client.query(
@@ -64,11 +77,31 @@ const createBooking = async (req, res) => {
     // Regla 2: ¿El slot sigue disponible?
     const [bookingsResult, blockedResult] = await Promise.all([
         client.query("SELECT start_time, end_time FROM bookings WHERE court_id = $1 AND status = 'confirmed' AND start_time < $2 AND end_time > $3", [courtId, bookingEndTime, bookingStartTime]),
-        db.query("SELECT start_time, end_time FROM blocked_periods WHERE court_id = $1 AND start_time < $2 AND end_time > $3", [courtId, bookingEndTime, bookingStartTime])
+        client.query("SELECT start_time, end_time FROM blocked_periods WHERE court_id = $1 AND start_time < $2 AND end_time > $3", [courtId, bookingEndTime, bookingStartTime])
     ]);
 
     if (bookingsResult.rows.length > 0 || blockedResult.rows.length > 0) {
         throw new Error('El horario seleccionado ya no está disponible.');
+    }
+
+    // Regla 2b: Optimización de huecos — la reserva no puede dejar un hueco
+    // de 30 minutos suelto al final del bloque libre.
+    if (gapOptimization) {
+        const [nextBookingResult, nextBlockedResult] = await Promise.all([
+            client.query("SELECT start_time FROM bookings WHERE court_id = $1 AND status = 'confirmed' AND start_time > $2 ORDER BY start_time ASC LIMIT 1", [courtId, bookingStartTime]),
+            client.query("SELECT start_time FROM blocked_periods WHERE court_id = $1 AND start_time > $2 ORDER BY start_time ASC LIMIT 1", [courtId, bookingStartTime])
+        ]);
+        const closeTime = settings.operating_close_time || '22:00';
+        const bookingDateStr = formatInTimeZone(bookingStartTime, APP_TIMEZONE, 'yyyy-MM-dd');
+        let blockEnd = fromZonedTime(`${bookingDateStr}T${closeTime}:00`, APP_TIMEZONE);
+        for (const c of [...nextBookingResult.rows, ...nextBlockedResult.rows]) {
+            const cStart = new Date(c.start_time);
+            if (cStart > bookingStartTime && cStart < blockEnd) blockEnd = cStart;
+        }
+        const remainderMinutes = (blockEnd.getTime() - bookingStartTime.getTime()) / 60000 - durationMinutes;
+        if (remainderMinutes === 30) {
+            throw new Error('Esta duración dejaría un hueco de 30 minutos sin reservar. Elige la otra duración disponible (o empieza en el siguiente tramo libre).');
+        }
     }
 
     // 3. Insertamos la nueva reserva
@@ -85,7 +118,7 @@ const createBooking = async (req, res) => {
 
     // 5. Obtenemos los datos para el email DENTRO de la transacción
     const userResult = await client.query("SELECT name, email FROM users WHERE id = $1", [userId]);
-    const courtResult = await db.query("SELECT name FROM courts WHERE id = $1", [courtId]);
+    const courtResult = await client.query("SELECT name FROM courts WHERE id = $1", [courtId]);
     
     await client.query('COMMIT');
 
@@ -105,7 +138,7 @@ const createBooking = async (req, res) => {
     
     const { error, value } = ics.createEvent(event);
     if (!error) {
-        sendEmail({
+        await sendEmail({
             to: user.email,
             subject: `Confirmación de Reserva en Padel@Home para el ${bookingStartTime.toLocaleDateString('es-ES')}`,
             html: `<h3>¡Hola, ${user.name}!</h3><p>Tu reserva ha sido confirmada. Adjuntamos un evento de calendario.</p>`,
@@ -202,10 +235,12 @@ const cancelMyBooking = async (req, res) => {
     );
 
     // 3. Si encontramos a alguien...
+    let luckyUser = null;
+    let confirmationToken = null;
     if (waitingListResult.rows.length > 0) {
-      const luckyUser = waitingListResult.rows[0];
+      luckyUser = waitingListResult.rows[0];
       
-      const confirmationToken = crypto.randomBytes(32).toString('hex');
+      confirmationToken = crypto.randomBytes(32).toString('hex');
       const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutos
 
       // 4. Actualizamos su estado a 'notified' y guardamos el token
@@ -213,10 +248,15 @@ const cancelMyBooking = async (req, res) => {
         "UPDATE waiting_list_entries SET status = 'notified', confirmation_token = $1, notification_expires_at = $2, notification_sent_at = NOW() WHERE id = $3",
         [confirmationToken, expires_at, luckyUser.id]
       );
+    }
+    // --- FIN DE LÓGICA DE LISTA DE ESPERA ---
 
-      // 5. Le enviamos el correo de notificación
+    await client.query('COMMIT');
+
+    // 5. Le enviamos el correo de notificación (después del COMMIT)
+    if (luckyUser) {
       const confirmationUrl = `${process.env.APP_URL || ''}/confirm-booking.html?token=${confirmationToken}`;
-      sendEmail({
+      await sendEmail({
         to: luckyUser.user_email,
         subject: '¡Un hueco se ha liberado en Padel@Home!',
         html: `<h3>¡Hola, ${luckyUser.user_name}!</h3><p>Se ha liberado el horario por el que estabas esperando (${new Date(luckyUser.slot_start_time).toLocaleString('es-ES')}).</p><p>Tienes <strong>30 minutos</strong> para confirmar la reserva haciendo clic en el siguiente enlace. Después, tu turno expirará.</p><a href="${confirmationUrl}">Confirmar mi Reserva</a>`
@@ -224,9 +264,7 @@ const cancelMyBooking = async (req, res) => {
       console.log(`Notificación de lista de espera enviada al usuario ${luckyUser.user_id}`);
       realtime.emit('waitlist:notificationSent', { userId: luckyUser.user_id, slotStartTime: luckyUser.slot_start_time }); // Emit WebSocket event
     }
-    // --- FIN DE LÓGICA DE LISTA DE ESPERA ---
 
-    await client.query('COMMIT');
     res.json({ message: 'Reserva cancelada exitosamente.' });
     realtime.emit('booking:cancelled', { bookingId: bookingId, courtId: cancelledBooking.court_id, startTime: cancelledBooking.start_time });
 
