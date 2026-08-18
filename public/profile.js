@@ -32,6 +32,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userInitialsAvatar = document.getElementById('user-initials-avatar');
     const userFullNameDisplay = document.getElementById('user-full-name-display');
 
+    // --- Apariencia (tema claro/oscuro/sistema) ---
+    const themeSelect = document.getElementById('theme-select');
+    if (themeSelect && window.PadelTheme) {
+        themeSelect.value = window.PadelTheme.get();
+        themeSelect.addEventListener('change', () => {
+            window.PadelTheme.set(themeSelect.value);
+            showNotification('Tema actualizado.', 'success');
+        });
+    }
+
     const getInitials = (name) => {
         if (!name) return '';
         return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();

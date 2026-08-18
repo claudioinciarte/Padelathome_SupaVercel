@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Dashboard de Usuario - Padel@Home</title>
 <link rel="stylesheet" href="/tailwind.css">
+<script src="/js/services/theme.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
@@ -63,7 +64,7 @@
 </div>
 <button id="logout-button-desktop" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
 <span class="material-icons-outlined text-sm mr-2">logout</span>
-                        Cerrar Sesión
+                        Cerrar SesiÃ³n
                     </button>
 </div>
 </div>
@@ -102,7 +103,7 @@
 <div class="hidden lg:flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
 <div>
 <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Panel de Control</h2>
-<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestiona tus reservas y perfil fácilmente.</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestiona tus reservas y perfil fÃ¡cilmente.</p>
 </div>
 <div class="flex flex-wrap gap-3 header-buttons">
 <button id="admin-panel-btn" style="display: none;" class="flex items-center px-4 py-2 bg-primary text-white rounded-lg shadow hover:bg-blue-700 transition font-medium text-sm">
@@ -125,7 +126,7 @@
 <div class="flex items-center justify-between mb-4">
 <h3 class="text-lg font-semibold text-primary flex items-center">
 <span class="material-icons-outlined mr-2">calendar_today</span>
-                    Mi Próxima Reserva
+                    Mi PrÃ³xima Reserva
                 </h3>
 </div>
 <div id="my-booking-desktop" class="flex flex-col items-center justify-center py-8 bg-slate-50 dark:bg-slate-800/50 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700">
@@ -141,7 +142,7 @@
 <div id="my-booking-container-mobile" class="lg:hidden bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors duration-200">
 <div class="flex items-center gap-2 mb-3">
 <span class="material-symbols-rounded text-primary">calendar_clock</span>
-<h2 class="text-lg font-bold text-primary">Mi Próxima Reserva</h2>
+<h2 class="text-lg font-bold text-primary">Mi PrÃ³xima Reserva</h2>
 </div>
 <div id="my-booking-mobile" class="flex flex-col items-center justify-center">
 <!-- Initial Empty State -->
@@ -214,7 +215,7 @@
 </main>
 <footer class="bg-surface-light dark:bg-surface-dark mt-8 py-6 border-t border-slate-200 dark:border-slate-800">
 <div class="max-w-7xl mx-auto px-4 text-center">
-<p class="text-slate-500 dark:text-slate-400 text-sm">© 2025 Padel@Home. Todos los derechos reservados.</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Â© 2025 Padel@Home. Todos los derechos reservados.</p>
 </div>
 </footer>
 
@@ -254,7 +255,7 @@
                 </div>
                 <div class="booking-modal-duration-section">
                     <label class="duration-label">
-                        Por favor, elige la duración:
+                        Por favor, elige la duraciÃ³n:
                     </label>
                     <div id="modal-options-container" class="duration-options-grid">
                         <!-- Duration buttons will be injected by JS -->
@@ -296,7 +297,7 @@
                 </div>
                 <div class="flex flex-col w-full mb-8">
                     <p class="text-slate-600 dark:text-slate-400 text-base font-medium leading-relaxed px-2">
-                        Esta pista ya está reservada para el horario seleccionado. ¿Quieres que te notifiquemos si la reserva se cancela y el horario queda libre?
+                        Esta pista ya estÃ¡ reservada para el horario seleccionado. Â¿Quieres que te notifiquemos si la reserva se cancela y el horario queda libre?
                     </p>
                 </div>
                 <div class="flex flex-col w-full gap-3 sm:flex-row sm:gap-4">
@@ -304,7 +305,7 @@
                         <span class="truncate">No, gracias</span>
                     </button>
                     <button id="waitlist-join-btn" class="flex-1 cursor-pointer items-center justify-center rounded-xl h-12 px-6 bg-primary hover:bg-blue-600 text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-lg shadow-blue-500/25 transition-all focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none order-1 sm:order-2">
-                        <span class="truncate">Sí, agregarme a la lista</span>
+                        <span class="truncate">SÃ­, agregarme a la lista</span>
                     </button>
                 </div>
             </div>
@@ -324,12 +325,12 @@
                 </div>
                 <div class="mt-5 text-center sm:mt-4 sm:text-left w-full">
                     <h3 class="text-xl font-semibold leading-6 text-slate-900 dark:text-white" id="already-listed-modal-title">
-                        Ya estás en la lista
+                        Ya estÃ¡s en la lista
                     </h3>
                     <div class="mt-3">
                         <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                             Actualmente tienes un turno reservado en la lista de espera para este horario. <br class="hidden sm:block"/>
-                            ¿Deseas cancelar tu solicitud y ser eliminado de la lista?
+                            Â¿Deseas cancelar tu solicitud y ser eliminado de la lista?
                         </p>
                     </div>
                 </div>
@@ -337,7 +338,7 @@
             <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button id="withdraw-waitlist-btn" class="inline-flex w-full justify-center items-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:text-red-600 hover:border-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-red-400 transition-all" type="button">
                     <span class="material-icons-round text-lg mr-2">delete_outline</span>
-                    Sí, eliminar
+                    SÃ­, eliminar
                 </button>
                 <button id="stay-on-waitlist-btn" class="inline-flex w-full justify-center items-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto dark:ring-offset-slate-900 transition-all" type="button">
                     No, mantener
@@ -374,15 +375,15 @@
                     </ul>
                 </div>
                 <div class="join-match-modal-confirmation-section">
-                    <h3>¿Quieres unirte a esta partida?</h3>
-                    <p>Se enviará una notificación al organizador.</p>
+                    <h3>Â¿Quieres unirte a esta partida?</h3>
+                    <p>Se enviarÃ¡ una notificaciÃ³n al organizador.</p>
                 </div>
             </div>
             <div class="join-match-modal-footer">
                 <button id="join-match-cancel-btn" class="modal-button-cancel">No, gracias</button>
                 <button id="join-match-confirm-btn" class="modal-button-confirm">
                     <span class="material-icons-round">check_circle</span>
-                    Sí, unirme
+                    SÃ­, unirme
                 </button>
             </div>
         </div>
@@ -392,10 +393,10 @@
     <div id="my-booking-modal-overlay" class="hidden">
         <div id="my-booking-modal" class="card">
             <h3>Mi Reserva</h3>
-            <p>Esta pista ya está reservada por ti para el <strong id="my-booking-modal-time">--:--</strong>.</p>
-            <p>¿Quieres cancelarla?</p>
+            <p>Esta pista ya estÃ¡ reservada por ti para el <strong id="my-booking-modal-time">--:--</strong>.</p>
+            <p>Â¿Quieres cancelarla?</p>
             <div id="my-booking-modal-options">
-                <button id="my-booking-cancel-btn">Sí, cancelar</button>
+                <button id="my-booking-cancel-btn">SÃ­, cancelar</button>
                 <button id="my-booking-close-btn">No, mantener</button>
             </div>
         </div>
@@ -420,7 +421,7 @@
                 <span class="material-icons">calendar_today</span>
                 <div>
                     <p class="my-match-modal-time-banner-text">
-                        Estás inscrito en esta partida abierta para el:
+                        EstÃ¡s inscrito en esta partida abierta para el:
                     </p>
                     <p id="my-match-modal-time" class="my-match-modal-time-text">
                         <!-- Time will be injected by JS -->
