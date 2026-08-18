@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Panel de AdministraciÃ³n - Padel@Home</title>
+<title>Panel de Administración - Padel@Home</title>
 <link rel="stylesheet" href="/tailwind.css">
     <script src="/js/services/theme.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
@@ -99,7 +99,7 @@ if (window.tailwind) tailwind.config = {
                         </button>
                         <button id="logout-button" class="flex-1 md:flex-none px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
                             <span class="material-symbols-outlined text-sm">logout</span>
-                            Cerrar SesiÃ³n
+                            Cerrar Sesión
                         </button>
                     </div>
                 </div>
@@ -120,7 +120,7 @@ if (window.tailwind) tailwind.config = {
                 </button>
                 <button class="tab-link border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors" data-tab="statistics">
                     <span class="material-symbols-outlined text-lg">bar_chart</span>
-                    EstadÃ­sticas
+                    Estadísticas
                 </button>
             </nav>
         </div>
@@ -144,10 +144,10 @@ if (window.tailwind) tailwind.config = {
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre Completo</label>
-                            <input id="invite-name" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm h-10 px-3" placeholder="Ej. Juan PÃ©rez" type="text" required/>
+                            <input id="invite-name" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm h-10 px-3" placeholder="Ej. Juan Pérez" type="text" required/>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Correo ElectrÃ³nico</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Correo Electrónico</label>
                             <input id="invite-email" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm h-10 px-3" placeholder="usuario@ejemplo.com" type="email" required/>
                         </div>
                         <div>
@@ -167,7 +167,7 @@ if (window.tailwind) tailwind.config = {
                         <div class="col-span-1 md:col-span-2 flex justify-end">
                             <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 h-10">
                                 <span class="material-symbols-outlined text-sm">send</span>
-                                Enviar InvitaciÃ³n
+                                Enviar Invitación
                             </button>
                         </div>
                     </form>
@@ -253,7 +253,7 @@ if (window.tailwind) tailwind.config = {
                         <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-primary">
                             <span class="material-symbols-outlined text-2xl">domain</span>
                         </div>
-                        <h3 class="text-lg font-bold text-primary">GestiÃ³n de Edificios</h3>
+                        <h3 class="text-lg font-bold text-primary">Gestión de Edificios</h3>
                     </div>
                     <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
                 </summary>
@@ -261,17 +261,17 @@ if (window.tailwind) tailwind.config = {
                     <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
                         <h4 id="building-form-title" class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary text-base">add_circle</span>
-                            AÃ±adir Nuevo Edificio
+                            Añadir Nuevo Edificio
                         </h4>
                         <form id="building-form" class="grid grid-cols-1 gap-6">
                             <input type="hidden" id="building-id">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">DirecciÃ³n / Nombre del Edificio</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección / Nombre del Edificio</label>
                                 <input id="building-address" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" placeholder="Ej. Torre Central - Av. Principal 123" type="text" required/>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">DescripciÃ³n</label>
-                                <textarea id="building-description" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm px-3 py-2" placeholder="DescripciÃ³n breve de las instalaciones..." rows="3"></textarea>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                                <textarea id="building-description" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm px-3 py-2" placeholder="Descripción breve de las instalaciones..." rows="3"></textarea>
                             </div>
                             <div class="flex justify-start gap-2">
                                 <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm">
@@ -300,7 +300,7 @@ if (window.tailwind) tailwind.config = {
                         <div class="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
                             <span class="material-symbols-outlined text-2xl">sports_tennis</span>
                         </div>
-                        <h3 class="text-lg font-bold text-primary">GestiÃ³n de Pistas</h3>
+                        <h3 class="text-lg font-bold text-primary">Gestión de Pistas</h3>
                     </div>
                     <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
                 </summary>
@@ -351,7 +351,7 @@ if (window.tailwind) tailwind.config = {
                         <div class="p-3 bg-red-50 dark:bg-red-900/30 rounded-lg text-red-600 dark:text-red-400">
                             <span class="material-symbols-outlined text-2xl">block</span>
                         </div>
-                        <h3 class="text-lg font-bold text-primary">GestiÃ³n de Bloqueos</h3>
+                        <h3 class="text-lg font-bold text-primary">Gestión de Bloqueos</h3>
                     </div>
                     <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
                 </summary>
@@ -426,23 +426,23 @@ if (window.tailwind) tailwind.config = {
                                 <input id="setting-close-time" type="time" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">DÃ­as de AntelaciÃ³n</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Días de Antelación</label>
                                 <input id="setting-advance-days" type="number" min="1" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3">
                             </div>
                             <div class="flex items-start gap-3 pt-2">
                                 <div class="flex items-center h-5">
                                     <input id="setting-gap-optimization" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
                                 </div>
-                                <label for="setting-gap-optimization" class="text-sm font-medium text-gray-700 dark:text-gray-300">OptimizaciÃ³n de Huecos</label>
+                                <label for="setting-gap-optimization" class="text-sm font-medium text-gray-700 dark:text-gray-300">Optimización de Huecos</label>
                             </div>
                             <div class="flex items-start gap-3 pt-2">
                                 <div class="flex items-center h-5">
                                     <input id="setting-limit-open-matches-enabled" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
                                 </div>
-                                <label for="setting-limit-open-matches-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">Limitar CreaciÃ³n Partidas Abiertas</label>
+                                <label for="setting-limit-open-matches-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">Limitar Creación Partidas Abiertas</label>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">MÃ¡x. Partidas Abiertas / Usuario</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Máx. Partidas Abiertas / Usuario</label>
                                 <input id="setting-max-open-matches-per-user" type="number" min="0" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3">
                             </div>
                             <div>
@@ -466,15 +466,15 @@ if (window.tailwind) tailwind.config = {
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                        EstadÃ­sticas del Sistema
+                        Estadísticas del Sistema
                     </h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        VisiÃ³n general del rendimiento, uso de pistas y actividad financiera.
+                        Visión general del rendimiento, uso de pistas y actividad financiera.
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
                     <select class="block w-full md:w-auto border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary text-sm py-2 px-3">
-                        <option>Ãšltimos 30 dÃ­as</option>
+                        <option>Ãšltimos 30 días</option>
                     </select>
                     <button class="p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
                         <span class="material-symbols-outlined text-xl">download</span>
@@ -535,12 +535,12 @@ if (window.tailwind) tailwind.config = {
                         <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                             <span class="material-symbols-outlined text-8xl text-primary">calendar_month</span>
                         </div>
-                        <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm mb-2 uppercase tracking-wide z-10">Reservas (30 dÃ­as)</h4>
+                        <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm mb-2 uppercase tracking-wide z-10">Reservas (30 días)</h4>
                         <div id="stat-total-bookings-30d" class="mt-2 text-6xl font-bold text-primary z-10">--</div>
                     </div>
                     <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
                         <div class="flex justify-between items-center mb-6">
-                            <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wide">Usuarios MÃ¡s Activos</h4>
+                            <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wide">Usuarios Más Activos</h4>
                         </div>
                         <div id="stat-top-users-list" class="space-y-4">
                             <!-- Populated by JS -->
@@ -548,7 +548,7 @@ if (window.tailwind) tailwind.config = {
                         </div>
                     </div>
                     <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
-                        <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm mb-6 uppercase tracking-wide text-center">Horas Pico (30 dÃ­as)</h4>
+                        <h4 class="text-gray-500 dark:text-gray-400 font-medium text-sm mb-6 uppercase tracking-wide text-center">Horas Pico (30 días)</h4>
                         <div id="stat-peak-hours-list" class="space-y-4">
                             <!-- Populated by JS -->
                             <p class="text-sm text-gray-500 text-center">Cargando...</p>
