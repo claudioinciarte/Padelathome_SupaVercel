@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Panel de Administración - Padel@Home</title>
 <link rel="stylesheet" href="/tailwind.css">
+    <script src="/js/services/theme.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/style.css">
@@ -451,7 +452,7 @@ if (window.tailwind) tailwind.config = {
                 </div>
                 <div class="flex items-center gap-2">
                     <select class="block w-full md:w-auto border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary text-sm py-2 px-3">
-                        <option>Últimos 30 días</option>
+                        <option>Ãšltimos 30 días</option>
                     </select>
                     <button class="p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
                         <span class="material-symbols-outlined text-xl">download</span>
@@ -540,12 +541,5 @@ if (window.tailwind) tailwind.config = {
         </footer>
     </main>
 
-    <button class="fixed bottom-6 right-6 p-3 bg-primary hover:bg-primary-dark text-white rounded-full shadow-lg transition-colors z-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" onclick="document.documentElement.classList.toggle('dark')">
-        <span class="material-symbols-outlined block dark:hidden">dark_mode</span>
-        <span class="material-symbols-outlined hidden dark:block">light_mode</span>
-    </button>
-
-    <script type="module" src="admin.js"></script>
-    <script src="main.js"></script>
 </body>
 </html>

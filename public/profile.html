@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Mi Perfil de Usuario - Padel@Home</title>
 <link rel="stylesheet" href="/tailwind.css">
+<script src="/js/services/theme.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
 <link rel="stylesheet" href="/style.css">
@@ -172,6 +173,28 @@
                         </button>
 </div>
 </div>
+
+<!-- --- Apariencia (modo claro/oscuro/sistema) --- -->
+<div class="bg-surface-light dark:bg-surface-dark shadow rounded-lg overflow-hidden border border-border-light dark:border-border-dark">
+    <div class="px-4 py-5 border-b border-border-light dark:border-border-dark sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-primary">Apariencia</h3>
+        <p class="mt-1 max-w-2xl text-sm text-text-muted-light dark:text-text-muted-dark">
+            Elige cómo se muestra la aplicación: claro, oscuro o siguiendo la configuración de tu dispositivo.
+        </p>
+    </div>
+    <div class="px-4 py-5 sm:px-6">
+        <label for="theme-select" class="block text-sm font-medium text-text-light dark:text-text-dark">Tema de la aplicación</label>
+        <select id="theme-select" class="mt-1 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-800 text-text-light dark:text-text-dark">
+            <option value="system">Sistema (recomendado)</option>
+            <option value="light">Claro</option>
+            <option value="dark">Oscuro</option>
+        </select>
+        <p class="mt-2 text-xs text-text-muted-light dark:text-text-muted-dark">
+            El cambio se aplica al instante en toda la aplicación.
+        </p>
+    </div>
+</div>
+
 </div>
 </div>
 </main>

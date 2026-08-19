@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
 <link rel="stylesheet" href="/tailwind.css">
 <link rel="stylesheet" href="/style.css">
+<script src="/js/services/theme.js"></script>
 <script>
         if (window.tailwind) tailwind.config = {
             darkMode: "class",
@@ -362,14 +363,6 @@
             </p>
 </div>
 </footer>
-<script>
-        // Check local storage or system preference
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-    </script>
 <script type="module">
     import { mountAppHeader } from '/js/components/app-header.js';
     mountAppHeader({ page: 'faq' });
