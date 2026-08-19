@@ -1,11 +1,14 @@
 import { fetchApi, authToken } from './js/services/api.js';
 import { showNotification } from './js/utils.js';
+import { mountAppHeader } from './js/components/app-header.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     if (!authToken) {
         window.location.href = '/login.html';
         return;
     }
+
+    mountAppHeader({ page: 'profile' });
 
     // --- DOM Element References ---
     const profileForm = document.getElementById('profile-form');

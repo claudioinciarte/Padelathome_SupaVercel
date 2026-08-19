@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
 <link rel="stylesheet" href="/tailwind.css">
+<link rel="stylesheet" href="/style.css">
 <script>
         if (window.tailwind) tailwind.config = {
             darkMode: "class",
@@ -62,22 +63,7 @@
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-body antialiased transition-colors duration-300 min-h-screen flex flex-col">
-<header class="sticky top-0 z-50 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex justify-between items-center h-16">
-<div class="flex items-center gap-3">
-<span class="material-icons-round text-primary text-3xl">sports_tennis</span>
-<h1 class="text-xl font-bold text-text-main-light dark:text-text-main-dark tracking-tight">
-                        Padel@Home <span class="font-normal text-text-muted-light dark:text-text-muted-dark text-base hidden sm:inline">| Centro de Ayuda</span>
-</h1>
-</div>
-<a class="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm font-medium text-text-main-light dark:text-text-main-dark hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-transparent hover:border-gray-300 dark:hover:border-gray-600" href="/dashboard.html">
-<span class="material-icons-round text-lg group-hover:-translate-x-1 transition-transform duration-200">arrow_back</span>
-                    Volver al Dashboard
-                </a>
-</div>
-</div>
-</header>
+
 <main class="flex-grow w-full max-w-4xl mx-auto px-4 sm:px-6 py-10">
 <div class="text-center mb-12">
 <h2 class="text-3xl sm:text-4xl font-extrabold text-text-main-light dark:text-text-main-dark mb-4">
@@ -384,5 +370,8 @@
             document.documentElement.classList.remove('dark')
         }
     </script>
-
+<script type="module">
+    import { mountAppHeader } from '/js/components/app-header.js';
+    mountAppHeader({ page: 'faq' });
+</script>
 </body></html>

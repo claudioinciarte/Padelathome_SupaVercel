@@ -3,6 +3,7 @@ import { showNotification } from './js/utils.js';
 import * as UserManager from './js/managers/UserManager.js';
 import * as BuildingManager from './js/managers/BuildingManager.js';
 import * as CourtManager from './js/managers/CourtManager.js';
+import { mountAppHeader } from './js/components/app-header.js';
 
 // Valor actual del registro público (para poder cancelar cambios)
 let currentPublicRegistration = 'false';
@@ -14,6 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    mountAppHeader({ page: 'admin' });
+
     try {
         const user = await fetchApi('/users/me');
         if (user.role !== 'admin') {
@@ -24,8 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // --- 2. INICIALIZACIÓN DE MÓDULOS ---
         
-        document.getElementById('admin-name').textContent = user.name;
-
         // Inicializar todos los managers
         UserManager.init();
         BuildingManager.init();
@@ -256,8 +257,6 @@ async function fetchAndDisplayBlockedPeriods() {
 
 
 function setupGlobalEventListeners() {
-    const logoutButton = document.getElementById('logout-button');
-    const dashboardButton = document.getElementById('dashboard-link');
     const tabLinks = document.querySelectorAll('.tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
     const settingsForm = document.getElementById('settings-form');
@@ -267,19 +266,6 @@ function setupGlobalEventListeners() {
     // New element references for general settings
     const limitOpenMatchesEnabledCheckbox = document.getElementById('setting-limit-open-matches-enabled');
     const maxOpenMatchesPerUserInput = document.getElementById('setting-max-open-matches-per-user');
-
-    if (logoutButton) {
-        logoutButton.addEventListener('click', () => {
-            localStorage.removeItem('authToken');
-            window.location.href = '/login.html';
-        });
-    }
-
-    if (dashboardButton) {
-        dashboardButton.addEventListener('click', () => {
-            window.location.href = '/dashboard.html';
-        });
-    }
 
     tabLinks.forEach(link => {
         link.addEventListener('click', () => {

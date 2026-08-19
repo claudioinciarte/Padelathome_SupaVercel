@@ -5,6 +5,7 @@ import * as Calendar from './js/components/Calendar.js';
 import * as BookingCard from './js/components/BookingCard.js';
 import * as CourtSelector from './js/components/CourtSelector.js';
 import { subscribeToCalendarChanges } from './js/services/supabase.js';
+import { mountAppHeader } from './js/components/app-header.js';
 
 // --- Utilidades Locales ---
 const debounce = (func, delay) => {
@@ -39,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    mountAppHeader({ page: 'dashboard' });
+
     // --- Estado Global ---
     let currentDisplayedDate = new Date();
     let selectedCourtId = null;
@@ -47,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUserId = null;
 
     // --- Elementos del DOM ---
-    const welcomeMessageDesktop = document.getElementById('welcome-message-desktop');
     const welcomeMessageMobile = document.getElementById('welcome-message-mobile');
     const myBookingContainerDesktop = document.getElementById('my-booking-desktop');
     const myBookingContainerMobile = document.getElementById('my-booking-mobile');
@@ -56,16 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevWeekBtn = document.getElementById('prev-week-btn');
     const nextWeekBtn = document.getElementById('next-week-btn');
     const weekDatesTitle = document.getElementById('week-dates-title');
-    const logoutButtonDesktop = document.getElementById('logout-button-desktop');
-    const logoutButtonMobile = document.getElementById('logout-button-mobile');
-    const adminPanelBtn = document.getElementById('admin-panel-btn');
-    const adminPanelBtnMobile = document.getElementById('admin-panel-btn-mobile');
     const courtSelectorContainer = document.querySelector('.court-selector-container');
     const courtSelectDropdown = document.getElementById('court-select');
-    const profileBtn = document.getElementById('profile-btn');
-    const profileBtnMobile = document.getElementById('profile-btn-mobile');
-    const faqBtn = document.getElementById('faq-button');
-    const faqBtnMobile = document.getElementById('faq-btn-mobile');
+
 
     // --- Handlers de Modales (Lógica de Negocio) ---
     const modalHandlers = {
@@ -201,12 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const user = await fetchApi('/users/me');
             currentUserId = user.id;
-            if(welcomeMessageDesktop) welcomeMessageDesktop.textContent = `Padel@Home`; // Or user name if preferred on desktop
-            if(welcomeMessageMobile) welcomeMessageMobile.textContent = `${user.name}!`;
-            if (user.role === 'admin') {
-                 if(adminPanelBtn) adminPanelBtn.style.display = 'flex';
-                 if(adminPanelBtnMobile) adminPanelBtnMobile.style.display = 'flex';
-            }
+            if (welcomeMessageMobile) welcomeMessageMobile.textContent = user.name;
         } catch (e) { console.error(e); }
     };
 
@@ -487,23 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         await loadCourtsAndSelect();
-
-        // Event Listeners UI Generales
-        const logoutHandler = () => { localStorage.removeItem('authToken'); window.location.href = '/login.html'; };
-        if(logoutButtonDesktop) logoutButtonDesktop.addEventListener('click', logoutHandler);
-        if(logoutButtonMobile) logoutButtonMobile.addEventListener('click', logoutHandler);
-
-        const goToAdmin = () => window.location.href = '/admin.html';
-        if(adminPanelBtn) adminPanelBtn.addEventListener('click', goToAdmin);
-        if(adminPanelBtnMobile) adminPanelBtnMobile.addEventListener('click', goToAdmin);
-
-        const goToProfile = () => window.location.href = '/profile.html';
-        if(profileBtn) profileBtn.addEventListener('click', goToProfile);
-        if(profileBtnMobile) profileBtnMobile.addEventListener('click', goToProfile);
-
-        const goToFaq = () => window.location.href = '/faq.html';
-        if(faqBtn) faqBtn.addEventListener('click', goToFaq);
-        if(faqBtnMobile) faqBtnMobile.addEventListener('click', goToFaq);
 
         prevWeekBtn.addEventListener('click', () => {
             currentDisplayedDate.setDate(currentDisplayedDate.getDate() - 7);

@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="/tailwind.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link rel="stylesheet" href="/style.css">
 <script>
         if (window.tailwind) tailwind.config = {
             darkMode: "class",
@@ -39,30 +40,8 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark font-body text-text-light dark:text-text-dark min-h-screen flex flex-col transition-colors duration-200">
 <div id="notification-container"></div>
-<nav class="bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark sticky top-0 z-10">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex justify-between h-16">
-<div class="flex">
-<div class="flex-shrink-0 flex items-center">
-<span class="material-icons-outlined text-primary text-3xl mr-2">sports_tennis</span>
-<span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Padel@Home</span>
-</div>
-</div>
-<div class="flex items-center space-x-4">
-<button class="p-2 rounded-full text-text-muted-light dark:text-text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
-<span class="material-icons-outlined">notifications</span>
-</button>
-<div class="relative">
-<div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm">
-                            JM
-                        </div>
-</div>
-</div>
-</div>
-</div>
-</nav>
 <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-<div class="md:flex md:items-center md:justify-between mb-8">
+<div class="mb-8">
 <div class="flex-1 min-w-0">
 <h2 class="text-2xl font-bold leading-7 text-text-light dark:text-text-dark sm:text-3xl sm:truncate">
                     Mi Perfil
@@ -70,12 +49,6 @@
 <p class="mt-1 text-sm text-text-muted-light dark:text-text-muted-dark">
                     Gestiona tu información personal y seguridad de la cuenta.
                 </p>
-</div>
-<div class="mt-4 flex md:mt-0 md:ml-4">
-<a class="inline-flex items-center px-4 py-2 border border-border-light dark:border-border-dark rounded-md shadow-sm text-sm font-medium text-text-light dark:text-text-dark bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors" href="/dashboard.html">
-<span class="material-icons-outlined text-lg mr-2">arrow_back</span>
-                    Volver al Dashboard
-                </a>
 </div>
 </div>
 <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">

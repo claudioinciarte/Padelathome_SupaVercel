@@ -2,6 +2,7 @@ import { fetchApi } from './js/services/api.js';
 import { showNotification } from './js/utils.js';
 import { subscribeToMatchChat } from './js/services/supabase.js';
 import { isPushSupported, getPushSubscription, subscribeToPush, unsubscribeFromPush } from './js/services/push.js';
+import { mountAppHeader } from './js/components/app-header.js';
 
 // El service worker puede no estar registrado aún si el usuario entró
 // directo a esta página (en dashboard.html se registra en main.js).
@@ -18,6 +19,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '/dashboard.html';
         return;
     }
+
+    mountAppHeader({
+        page: 'dashboard',
+        extraHtml: `<button id="btn-notifications" title="Activar notificaciones de la partida" class="app-header-icon-btn hidden"><span id="notifications-icon" class="material-symbols-outlined">notifications_none</span></button>`
+    });
 
     let currentUser = null;
     let matchData = null;
@@ -102,19 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         matchData = await fetchApi(`/matches/${bookingId}/details`);
 
         renderMatch(matchData, currentUser.id);
-
-        // Top right avatar update
-        if (currentUser && currentUser.name) {
-            const names = currentUser.name.split(' ');
-            const initials = names.length > 1
-                ? names[0][0].toUpperCase() + names[names.length - 1][0].toUpperCase()
-                : names[0].substring(0, 2).toUpperCase();
-            const avatarSpan = document.getElementById('user-avatar-text');
-            if (avatarSpan) {
-                avatarSpan.textContent = initials;
-            }
-        }
-
         joinChat(bookingId, currentUser);
         setupActions(bookingId);
     } catch (err) {
