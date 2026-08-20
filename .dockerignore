@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+.env
+.env.save
+.git
+.gitignore
+supabase
+*.test.js
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -1,0 +1,86 @@
+# ============================================================
+# Padel@Home - docker-compose (modo Docker autónomo, Opción B)
+#
+# Levanta:
+#   db  -> PostgreSQL 16 local con volumen persistente (pgdata)
+#   app -> la aplicación Node (server.js: HTTP + Socket.IO + cron)
+#
+# USO:
+#   cp .env.docker.example .env
+#   # edita .env (JWT_SECRET, CRON_SECRET, SMTP_*, APP_URL, VAPID_*)
+#   docker compose up -d --build
+#
+# PERSISTENCIA: los datos viven en el volumen `pgdata`. El esquema
+# (supabase/01_schema.sql + 03_seed_clean.sql) se ejecuta SOLO la
+# primera vez que el volumen se crea. Reinicios, updates o
+# `docker compose down/up` NO borran los datos.
+# ============================================================
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: padel
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-padel_local_password}
+      POSTGRES_DB: padelathome
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Init scripts: se ejecutan solo en el primer arranque del volumen
+      - ./supabase/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./supabase/03_seed_clean.sql:/docker-entrypoint-initdb.d/03_seed_clean.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U padel -d padelathome"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks:
+      - padel-net
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      # Postgres local (sin SSL) - la app ya soporta DB_SSL=false
+      DATABASE_URL: "postgresql://padel:${POSTGRES_PASSWORD:-padel_local_password}@db:5432/padelathome"
+      DB_SSL: "false"
+      DB_POOL_MAX: "5"
+      # Secretos de la app (obligatorio cambiarlos en .env)
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET es obligatorio. Genera uno con: openssl rand -hex 32}"
+      CRON_SECRET: "${CRON_SECRET:?CRON_SECRET es obligatorio. Genera uno con: openssl rand -hex 32}"
+      # Email
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Padel@Home}
+      # URL pública (para enlaces de email)
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      # Web Push / VAPID
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@example.com}
+      # Zona horaria
+      TZ: ${TZ:-Europe/Madrid}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    networks:
+      - padel-net
+
+volumes:
+  pgdata:
+
+networks:
+  padel-net:
+    driver: bridge

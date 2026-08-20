@@ -252,6 +252,21 @@ npm start              # servidor en http://localhost:3000 (con Socket.IO y cron
 
 > En local el `JWT_SECRET` de `.env.example` viene entre comillas porque contiene `#` (dotenv lo truncaría).
 
+### Paso 7 — (Opcional) Despliegue con Docker (modo autónomo, Postgres local)
+
+La versión Docker levanta la app en **modo persistente** (`server.js`: Socket.IO + node-cron) con su **propio PostgreSQL local** en un volumen Docker. Es una instancia independiente de Supabase/Vercel: los datos viven en el volumen `pgdata` y sobreviven a reinicios y actualizaciones.
+
+```bash
+cp .env.docker.example .env   # rellena JWT_SECRET, CRON_SECRET, SMTP_*, APP_URL, VAPID_*
+docker compose up -d --build
+```
+
+- **Persistencia**: el esquema (`supabase/01_schema.sql` + `03_seed_clean.sql`) se ejecuta **solo la primera vez** que se crea el volumen. `docker compose down/up`, reinicios o `docker compose pull` no borran los datos.
+- **Backup**: `docker compose exec db pg_dump -U padel padelathome > backup.sql`
+- **Healthcheck**: `curl http://localhost:3000/api/health` → `{"status":"ok"}`
+- **Admin inicial**: `admin` / `admin` (cámbiala en el primer login).
+- Los cron jobs (partidas incompletas + lista de espera) los ejecuta `cronJobs.js` (node-cron) cada 30 min, igual que hace GitHub Actions en el despliegue de Vercel.
+
 ---
 
 ## Pruebas
