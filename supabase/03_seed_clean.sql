@@ -12,9 +12,10 @@
 -- ============================================================
 
 -- --- Usuario administrador ---
--- Email: admin | Password: admin (hash bcrypt)
+-- Email: admin@padelathome.local | Password: admin (hash bcrypt)
+-- (email válido: el login del frontend exige formato email)
 INSERT INTO public.users (id, email, password_hash, name, role, account_status, is_active, is_approved)
-VALUES (1, 'admin', '$2b$10$eYv4WYTz1DjSPuZvN43JEeUeq81A7hdyH5cW9cYCcxto3tbrdxtuS', 'Administrador', 'admin', 'active', true, true)
+VALUES (1, 'admin@padelathome.local', '$2b$10$eYv4WYTz1DjSPuZvN43JEeUeq81A7hdyH5cW9cYCcxto3tbrdxtuS', 'Administrador', 'admin', 'active', true, true)
 ON CONFLICT (id) DO NOTHING;
 
 -- --- Ajustes por defecto ---
