@@ -11,10 +11,10 @@ WORKDIR /app
 # Código fuente primero (el postinstall compila Tailwind y necesita tailwind/ y public/)
 COPY . .
 
-# Instalar dependencias SIN disparar postinstall (lo lanzamos después explícito)
-RUN npm ci --ignore-scripts
+# Instalar dependencias (postinstall compila Tailwind; bcrypt compila su binding nativo)
+RUN npm ci
 
-# Compilar Tailwind a public/tailwind.css
+# Compilar Tailwind a public/tailwind.css (idempotente; postinstall ya lo hizo)
 RUN npm run css:build
 
 # ---------- Stage 2: runtime (imagen mínima) ----------
@@ -31,9 +31,9 @@ WORKDIR /app
 RUN useradd --create-home --shell /bin/false padel && \
     mkdir -p /app && chown -R padel:padel /app
 
-# Dependencias de producción (sin devDependencies; el CSS ya está compilado)
-COPY --from=build --chown=padel:padel /app/package*.json ./
-RUN npm ci --omit=dev --ignore-scripts
+# Dependencias de producción COMPLETAS desde el build stage
+# (incluye bindings nativos como bcrypt_lib.node ya compilados)
+COPY --from=build --chown=padel:padel /app/node_modules ./node_modules
 
 # Aplicación (build stage ya tiene public/tailwind.css compilado)
 COPY --from=build --chown=padel:padel /app/src ./src
