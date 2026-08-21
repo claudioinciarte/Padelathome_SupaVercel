@@ -2,6 +2,7 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env'
 
 const pool = require('../config/database');
 const sendEmail = require('../services/emailService');
+const { renderTemplate } = require('../services/emailTemplateService');
 const crypto = require('crypto');
 
 async function processExpiredWaitlistEntries() {
@@ -50,10 +51,16 @@ async function processExpiredWaitlistEntries() {
         );
         
         const confirmationUrl = `${process.env.APP_URL}/confirm-booking.html?token=${confirmationToken}`;
+        const slotTime = 'el turno anterior ha expirado';
+        const { subject, html } = await renderTemplate('waitlist.slot', {
+          userName: nextUser.user_name,
+          slotTime,
+          confirmationUrl
+        });
         await sendEmail({
             to: nextUser.user_email,
-            subject: '¡Un hueco se ha liberado en Padel@Home!',
-            html: `<h3>¡Hola, ${nextUser.user_name}!</h3><p>El turno anterior ha expirado. ¡Ahora es tu oportunidad!</p><p>Tienes <strong>30 minutos</strong> para confirmar la reserva haciendo clic en el enlace.</p><a href="${confirmationUrl}">Confirmar mi Reserva</a>`
+            subject,
+            html
         });
         console.log(`[CRON JOB] - Turno expirado. Notificando al siguiente usuario: ${nextUser.user_id}`);
       }

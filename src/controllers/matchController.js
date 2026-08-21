@@ -1,5 +1,6 @@
 const pool = require('../config/database');
 const sendEmail = require('../services/emailService');
+const { renderTemplate } = require('../services/emailTemplateService');
 const realtime = require('../services/realtime');
 const { sendPushToUsers } = require('../services/pushService');
 
@@ -158,16 +159,16 @@ const leaveOpenMatch = async (req, res) => {
     if (cancellationParticipants.length > 0) {
       try {
         for (const participant of cancellationParticipants) {
+          const cancelReason = `El motivo es que un jugador ha abandonado la partida quedando menos de ${autoCancelHoursBefore} horas para el inicio, por lo que el sistema la ha cancelado automáticamente.`;
+          const { subject, html } = await renderTemplate('match.cancel', {
+            userName: participant.name,
+            formattedDate,
+            cancelReason
+          });
           await sendEmail({
             to: participant.email,
-            subject: 'Cancelación de Partida Abierta - Padel@Home',
-            html: `
-              <h3>Hola ${participant.name},</h3>
-              <p>Te informamos que la partida abierta programada para el <strong>${formattedDate}</strong> ha sido cancelada.</p>
-              <p>El motivo es que un jugador ha abandonado la partida quedando menos de ${autoCancelHoursBefore} horas para el inicio, por lo que el sistema la ha cancelado automáticamente.</p>
-              <p>Disculpa las molestias.</p>
-              <p>Atentamente,<br>El equipo de Padel@Home</p>
-            `
+            subject,
+            html
           });
         }
         console.log(`Notificaciones de cancelación enviadas a ${cancellationParticipants.length} participantes (partida ${bookingId}).`);

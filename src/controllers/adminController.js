@@ -2,6 +2,7 @@ const pool = require('../config/database');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const sendEmail = require('../services/emailService');
+const { renderTemplate } = require('../services/emailTemplateService');
 
 // --- Funciones de Gestión de Usuarios ---
 const deleteUser = async (req, res) => {
@@ -50,7 +51,8 @@ const approveUser = async (req, res) => {
     const result = await pool.query("UPDATE users SET account_status = 'active' WHERE id = $1 AND account_status = 'pending_approval' RETURNING *", [userId]);
     if (result.rows.length === 0) return res.status(404).json({ message: 'Usuario no encontrado o ya está activo.' });
     const approvedUser = result.rows[0];
-    await sendEmail({ to: approvedUser.email, subject: '¡Tu cuenta en Padel@Home ha sido aprobada!', html: `<h3>¡Hola, ${approvedUser.name}!</h3><p>Tu cuenta ha sido aprobada. ¡Ya puedes iniciar sesión!</p>` });
+    const { subject, html } = await renderTemplate('account.approved', { userName: approvedUser.name });
+    await sendEmail({ to: approvedUser.email, subject, html });
     res.json({ message: 'Usuario aprobado exitosamente.', user: { id: approvedUser.id, name: approvedUser.name, account_status: approvedUser.account_status }});
   } catch (error) {
     console.error('Error al aprobar usuario:', error);
@@ -91,7 +93,8 @@ const inviteUser = async (req, res) => {
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, newUser.id, expires_at]);
     const setPasswordUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
     await client.query('COMMIT');
-    await sendEmail({ to: newUser.email, subject: '¡Bienvenido a Padel@Home! Establece tu contraseña', html: `<h3>¡Hola, ${newUser.name}!</h3><p>Un administrador te ha creado una cuenta en Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer tu contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer mi contraseña</a>`});
+    const { subject, html } = await renderTemplate('account.welcome', { userName: newUser.name, setPasswordUrl });
+    await sendEmail({ to: newUser.email, subject, html });
     res.status(201).json({ message: 'Usuario invitado exitosamente.', user: newUser });
   } catch (error) {
     await client.query('ROLLBACK');
@@ -124,10 +127,11 @@ const resetUserPassword = async (req, res) => {
     await client.query('COMMIT');
 
     const setPasswordUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
+    const { subject, html } = await renderTemplate('password.reset', { userName: user.name, setPasswordUrl });
     await sendEmail({
       to: user.email,
-      subject: 'Restablecimiento de Contraseña para Padel@Home',
-      html: `<h3>¡Hola, ${user.name}!</h3><p>Se ha solicitado un restablecimiento de contraseña para tu cuenta de Padel@Home.</p><p>Por favor, haz clic en el siguiente enlace para establecer una nueva contraseña. El enlace es válido por 24 horas.</p><a href="${setPasswordUrl}">Establecer nueva contraseña</a><p>Si no solicitaste este cambio, por favor ignora este correo.</p>`
+      subject,
+      html
     });
 
     res.status(200).json({ message: 'Enlace de restablecimiento de contraseña enviado al correo del usuario.' });
@@ -488,6 +492,93 @@ const getDashboardStats = async (req, res) => {
 };
 
 
+// --- Plantillas de correo (Comunicaciones) ---
+
+// GET /api/admin/email-templates
+// Devuelve las 7 plantillas con key, name, subject, html_template, updated_at.
+// Lee de la tabla email_templates (con fallback a defaults si la DB no responde).
+const getEmailTemplates = async (req, res) => {
+  try {
+    const { listTemplates, CONTEXT_VARS } = require('../services/emailTemplateService');
+    const templates = await listTemplates();
+    // Añadimos las variables disponibles por plantilla para que el frontend
+    // pueda pintar el panel de variables insertables sin una segunda llamada.
+    const withVars = templates.map(t => ({
+      ...t,
+      available_vars: CONTEXT_VARS[t.key] || [],
+    }));
+    res.json(withVars);
+  } catch (error) {
+    console.error('Error al obtener plantillas de correo:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
+// PUT /api/admin/email-templates/:key
+// Actualiza subject + html_template de una plantilla.
+// Valida que las {{variables}} usadas existan en CONTEXT_VARS[key]; si usa una
+// no disponible, devuelve 400 con la lista de variables desconocidas.
+// Body: { subject: string, html_template: string }
+const updateEmailTemplate = async (req, res) => {
+  try {
+    const { key } = req.params;
+    const { subject, html_template } = req.body;
+    const {
+      validateTemplateVars,
+      CONTEXT_VARS,
+      DEFAULT_TEMPLATES,
+    } = require('../services/emailTemplateService');
+
+    // 1. La clave debe existir en el catálogo
+    if (!DEFAULT_TEMPLATES[key]) {
+      return res.status(404).json({ message: `Plantilla no encontrada: ${key}` });
+    }
+
+    // 2. Validar tipos básicos
+    if (typeof subject !== 'string' || typeof html_template !== 'string') {
+      return res.status(400).json({ message: 'subject y html_template son obligatorios y deben ser texto.' });
+    }
+
+    // 3. Validar variables {{...}} contra el catálogo CONTEXT_VARS
+    const validation = validateTemplateVars(key, subject, html_template);
+    if (!validation.ok) {
+      return res.status(400).json({
+        message: `Variables no permitidas en la plantilla "${key}": ${validation.unknown.join(', ')}. ` +
+          `Disponibles: ${(CONTEXT_VARS[key] || []).join(', ') || '(ninguna)'}.`,
+        unknown_vars: validation.unknown,
+        available_vars: CONTEXT_VARS[key] || [],
+      });
+    }
+
+    // 4. Persistir en DB (UPSERT por key)
+    const name = DEFAULT_TEMPLATES[key].name; // el nombre no es editable desde aquí
+    await pool.query(
+      `INSERT INTO email_templates (key, name, subject, html_template, updated_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (key) DO UPDATE SET
+         subject = EXCLUDED.subject,
+         html_template = EXCLUDED.html_template,
+         updated_at = NOW()
+       RETURNING key, name, subject, html_template, updated_at`,
+      [key, name, subject, html_template]
+    );
+
+    // 5. Devolver la plantilla actualizada + variables disponibles
+    const { rows } = await pool.query(
+      'SELECT key, name, subject, html_template, updated_at FROM email_templates WHERE key = $1',
+      [key]
+    );
+    const row = rows[0];
+    res.json({
+      ...row,
+      available_vars: CONTEXT_VARS[key] || [],
+    });
+  } catch (error) {
+    console.error('Error al actualizar plantilla de correo:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
 // --- Exportamos TODAS las funciones del controlador ---
 module.exports = {
   deleteUser,
@@ -511,5 +602,7 @@ module.exports = {
   updateSettings,
   getDashboardStats,
   resetUserPassword,
-  updateUserRole, // <-- añade esto
+  updateUserRole,
+  getEmailTemplates,
+  updateEmailTemplate,
 };

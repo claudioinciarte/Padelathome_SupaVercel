@@ -3,6 +3,7 @@ import { showNotification } from './js/utils.js';
 import * as UserManager from './js/managers/UserManager.js';
 import * as BuildingManager from './js/managers/BuildingManager.js';
 import * as CourtManager from './js/managers/CourtManager.js';
+import * as EmailTemplateManager from './js/managers/EmailTemplateManager.js';
 
 // Valor actual del registro público (para poder cancelar cambios)
 let currentPublicRegistration = 'false';
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         UserManager.init();
         BuildingManager.init();
         CourtManager.init();
+        EmailTemplateManager.init();
 
         // Cargar datos y configurar eventos globales
         initializeAdminPanel();

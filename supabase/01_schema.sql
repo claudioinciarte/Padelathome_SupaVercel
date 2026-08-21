@@ -16,6 +16,7 @@ DROP TABLE IF EXISTS public.users CASCADE;
 DROP TABLE IF EXISTS public.courts CASCADE;
 DROP TABLE IF EXISTS public.buildings CASCADE;
 DROP TABLE IF EXISTS public.instance_settings CASCADE;
+DROP TABLE IF EXISTS public.email_templates CASCADE;
 DROP TYPE IF EXISTS public.account_status_enum CASCADE;
 DROP TYPE IF EXISTS public.booking_status_enum CASCADE;
 DROP TYPE IF EXISTS public.user_role_enum CASCADE;
@@ -244,6 +245,17 @@ CREATE SEQUENCE public.push_subscriptions_id_seq
     CACHE 1;
 ALTER SEQUENCE public.push_subscriptions_id_seq OWNED BY public.push_subscriptions.id;
 
+-- --- TABLA email_templates (plantillas de correos editables desde el panel admin) ---
+CREATE TABLE public.email_templates (
+    id serial PRIMARY KEY,
+    key text NOT NULL UNIQUE,
+    name text NOT NULL,
+    subject text NOT NULL,
+    html_template text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 -- --- DEFAULTS de id ---
 ALTER TABLE ONLY public.blocked_periods ALTER COLUMN id SET DEFAULT nextval('public.blocked_periods_id_seq'::regclass);
 ALTER TABLE ONLY public.bookings ALTER COLUMN id SET DEFAULT nextval('public.bookings_id_seq'::regclass);
@@ -289,6 +301,7 @@ CREATE TRIGGER set_timestamp_buildings BEFORE UPDATE ON public.buildings FOR EAC
 CREATE TRIGGER set_timestamp_courts BEFORE UPDATE ON public.courts FOR EACH ROW EXECUTE FUNCTION public.trigger_set_timestamp();
 CREATE TRIGGER set_timestamp_instance_settings BEFORE UPDATE ON public.instance_settings FOR EACH ROW EXECUTE FUNCTION public.trigger_set_timestamp();
 CREATE TRIGGER set_timestamp_users BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.trigger_set_timestamp();
+CREATE TRIGGER set_timestamp_email_templates BEFORE UPDATE ON public.email_templates FOR EACH ROW EXECUTE FUNCTION public.trigger_set_timestamp();
 
 -- --- FOREIGN KEYS ---
 ALTER TABLE ONLY public.blocked_periods

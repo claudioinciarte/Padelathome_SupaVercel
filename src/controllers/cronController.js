@@ -4,6 +4,7 @@
 // por GitHub Actions (u otro programador externo).
 const pool = require('../config/database');
 const sendEmail = require('../services/emailService');
+const { renderTemplate } = require('../services/emailTemplateService');
 const crypto = require('crypto');
 
 // --- Verificación del secreto compartido para los endpoints de cron ---
@@ -89,16 +90,16 @@ const cleanIncompleteOpenMatches = async () => {
           const formattedDate = new Date(booking.start_time).toLocaleString('es-ES', { timeZone: 'UTC' });
 
           for (const participant of participants) {
+            const cancelReason = `El motivo es que no se alcanzó el número mínimo de jugadores requeridos (${booking.target_players}) para realizar el encuentro.`;
+            const { subject, html } = await renderTemplate('match.cancel', {
+              userName: participant.name,
+              formattedDate,
+              cancelReason
+            });
             await sendEmail({
               to: participant.email,
-              subject: 'Cancelación de Partida Abierta - Padel@Home',
-              html: `
-                <h3>Hola ${participant.name},</h3>
-                <p>Te informamos que la partida abierta programada para el <strong>${formattedDate}</strong> ha sido cancelada.</p>
-                <p>El motivo es que no se alcanzó el número mínimo de jugadores requeridos (${booking.target_players}) para realizar el encuentro.</p>
-                <p>Disculpa las molestias y esperamos verte pronto en otra partida.</p>
-                <p>Atentamente,<br>El equipo de Padel@Home</p>
-              `
+              subject,
+              html
             });
           }
         } catch (err) {
@@ -178,10 +179,16 @@ const processExpiredWaitlistEntries = async () => {
 
       // Enviamos el correo después del COMMIT
       if (nextUser) {
+        const slotTime = 'el turno anterior ha expirado';
+        const { subject, html } = await renderTemplate('waitlist.slot', {
+          userName: nextUser.user_name,
+          slotTime,
+          confirmationUrl
+        });
         await sendEmail({
           to: nextUser.user_email,
-          subject: '¡Un hueco se ha liberado en Padel@Home!',
-          html: `<h3>¡Hola, ${nextUser.user_name}!</h3><p>El turno anterior ha expirado. ¡Ahora es tu oportunidad!</p><p>Tienes <strong>30 minutos</strong> para confirmar la reserva haciendo clic en el enlace.</p><a href="${confirmationUrl}">Confirmar mi Reserva</a>`
+          subject,
+          html
         });
         console.log(`[CRON JOB] - Turno expirado. Notificando al siguiente usuario: ${nextUser.user_id}`);
       }

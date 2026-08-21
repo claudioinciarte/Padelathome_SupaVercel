@@ -4,6 +4,7 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env'
 
 const pool = require('../config/database');
 const sendEmail = require('../services/emailService');
+const { renderTemplate } = require('../services/emailTemplateService');
 
 async function cancelIncompleteMatches() {
   console.log(`[CRON JOB - Partidas Abiertas] - ${new Date().toISOString()} - Verificando partidas incompletas...`);
@@ -45,14 +46,17 @@ async function cancelIncompleteMatches() {
         
         // 4. Enviamos el correo de cancelación a todos los apuntados
         for (const user of usersResult.rows) {
+          const formattedDate = new Date(match.start_time).toLocaleString('es-ES');
+          const cancelReason = `La partida abierta ha sido cancelada automáticamente porque no se ha alcanzado el mínimo de ${match.max_participants} jugadores ${match.auto_cancel_hours_before} horas antes de su inicio. El slot de la pista ha sido liberado.`;
+          const { subject, html } = await renderTemplate('match.cancel', {
+            userName: user.name,
+            formattedDate,
+            cancelReason
+          });
           await sendEmail({
             to: user.email,
-            subject: 'Partida Abierta Cancelada en Padel@Home',
-            html: `<h3>Hola, ${user.name}</h3>
-                   <p>La partida abierta programada para el ${new Date(match.start_time).toLocaleString('es-ES')} ha sido 
-                   cancelada automáticamente porque no se ha alcanzado el mínimo de ${match.max_participants} jugadores
-                   ${match.auto_cancel_hours_before} horas antes de su inicio.</p>
-                   <p>El slot de la pista ha sido liberado.</p>`
+            subject,
+            html
           });
         }
         console.log(`[CRON JOB - Partidas Abiertas] - Partida ${match.id} cancelada. Notificando a ${usersResult.rows.length} participantes.`);

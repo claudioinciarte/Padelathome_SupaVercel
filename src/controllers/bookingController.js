@@ -2,6 +2,7 @@ const db = require('../config/database');
 const { addMinutes, addDays } = require('date-fns');
 const { fromZonedTime, formatInTimeZone } = require('date-fns-tz');
 const sendEmail = require('../services/emailService');
+const { renderTemplate } = require('../services/emailTemplateService');
 const ics = require('ics');
 const crypto = require('crypto'); // Necesario para la lista de espera
 const realtime = require('../services/realtime');
@@ -138,10 +139,14 @@ const createBooking = async (req, res) => {
     
     const { error, value } = ics.createEvent(event);
     if (!error) {
+        const { subject, html } = await renderTemplate('booking.confirm', {
+            userName: user.name,
+            date: bookingStartTime.toLocaleDateString('es-ES')
+        });
         await sendEmail({
             to: user.email,
-            subject: `Confirmación de Reserva en Padel@Home para el ${bookingStartTime.toLocaleDateString('es-ES')}`,
-            html: `<h3>¡Hola, ${user.name}!</h3><p>Tu reserva ha sido confirmada. Adjuntamos un evento de calendario.</p>`,
+            subject,
+            html,
             attachments: [{ filename: 'invitacion.ics', content: value, contentType: 'text/calendar' }]
         });
     }
@@ -256,10 +261,15 @@ const cancelMyBooking = async (req, res) => {
     // 5. Le enviamos el correo de notificación (después del COMMIT)
     if (luckyUser) {
       const confirmationUrl = `${process.env.APP_URL || ''}/confirm-booking.html?token=${confirmationToken}`;
+      const { subject, html } = await renderTemplate('waitlist.slot', {
+        userName: luckyUser.user_name,
+        slotTime: new Date(luckyUser.slot_start_time).toLocaleString('es-ES'),
+        confirmationUrl
+      });
       await sendEmail({
         to: luckyUser.user_email,
-        subject: '¡Un hueco se ha liberado en Padel@Home!',
-        html: `<h3>¡Hola, ${luckyUser.user_name}!</h3><p>Se ha liberado el horario por el que estabas esperando (${new Date(luckyUser.slot_start_time).toLocaleString('es-ES')}).</p><p>Tienes <strong>30 minutos</strong> para confirmar la reserva haciendo clic en el siguiente enlace. Después, tu turno expirará.</p><a href="${confirmationUrl}">Confirmar mi Reserva</a>`
+        subject,
+        html
       });
       console.log(`Notificación de lista de espera enviada al usuario ${luckyUser.user_id}`);
       realtime.emit('waitlist:notificationSent', { userId: luckyUser.user_id, slotStartTime: luckyUser.slot_start_time }); // Emit WebSocket event

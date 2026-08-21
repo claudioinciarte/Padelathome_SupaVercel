@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../services/emailService');
+const { renderTemplate } = require('../services/emailTemplateService');
 
 // Nota: La función 'registerUser' se mantiene para el registro público
 // aunque el flujo principal ahora es 'inviteUser' (en adminController)
@@ -92,10 +93,11 @@ const forgotPassword = async (req, res) => {
     await client.query("INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)", [resetToken, user.id, expires_at]);
 
     const resetUrl = `${process.env.APP_URL || ''}/reset-password.html?token=${resetToken}`;
+    const { subject, html } = await renderTemplate('auth.password-reset', { userName: user.name, resetUrl });
     await sendEmail({
       to: user.email,
-      subject: 'Restablece tu contraseña de Padel@Home',
-      html: `<h3>Hola, ${user.name}</h3><p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva:</p><a href="${resetUrl}">Restablecer Contraseña</a><p>Este enlace expirará en 30 minutos.</p>`
+      subject,
+      html
     });
     res.json({ message: 'Si tu cuenta existe, se ha enviado un enlace para restablecer la contraseña.' });
   } catch (error) {

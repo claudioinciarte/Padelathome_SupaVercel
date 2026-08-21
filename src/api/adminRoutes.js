@@ -22,6 +22,8 @@ const {
   getDashboardStats,
   resetUserPassword,
   updateUserRole,
+  getEmailTemplates,
+  updateEmailTemplate,
 } = require('../controllers/adminController');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 
@@ -58,5 +60,9 @@ router.put('/settings', protect, isAdmin, updateSettings);
 
 // Rutas de Estadísticas
 router.get('/stats', protect, isAdmin, getDashboardStats);
+
+// Rutas de Plantillas de Correo (Comunicaciones)
+router.get('/email-templates', protect, isAdmin, getEmailTemplates);
+router.put('/email-templates/:key', protect, isAdmin, updateEmailTemplate);
 
 module.exports = router;

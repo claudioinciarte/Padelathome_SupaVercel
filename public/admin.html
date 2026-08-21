@@ -80,6 +80,54 @@ if (window.tailwind) tailwind.config = {
         );
         border-radius: 50%;
     }
+    /* Email template editor */
+    .tpl-toolbar button {
+        min-width: 2rem;
+    }
+    .tpl-toolbar .tpl-divider {
+        width: 1px;
+        height: 1.5rem;
+        background: rgba(0,0,0,0.1);
+        margin: 0 0.25rem;
+    }
+    .dark .tpl-toolbar .tpl-divider {
+        background: rgba(255,255,255,0.1);
+    }
+    .tpl-editor {
+        min-height: 280px;
+        outline: none;
+    }
+    .tpl-editor:focus {
+        border-color: #2563EB;
+        box-shadow: 0 0 0 1px #2563EB;
+    }
+    .tpl-editor h2 { font-size: 1.5rem; font-weight: 700; margin: 0.5em 0; }
+    .tpl-editor h3 { font-size: 1.25rem; font-weight: 600; margin: 0.5em 0; }
+    .tpl-editor ul { list-style: disc; padding-left: 1.5rem; }
+    .tpl-editor a { color: #2563EB; text-decoration: underline; }
+    .tpl-preview {
+        min-height: 280px;
+        overflow-y: auto;
+    }
+    .tpl-preview h2 { font-size: 1.5rem; font-weight: 700; margin: 0.5em 0; }
+    .tpl-preview h3 { font-size: 1.25rem; font-weight: 600; margin: 0.5em 0; }
+    .tpl-preview ul { list-style: disc; padding-left: 1.5rem; }
+    .tpl-preview a { color: #2563EB; text-decoration: underline; }
+    .tpl-var-chip {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .tpl-var-chip:hover {
+        background: rgba(99, 102, 241, 0.2);
+        color: #4f46e5;
+    }
 </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-body text-text-light dark:text-text-dark min-h-screen transition-colors duration-300">
@@ -121,6 +169,10 @@ if (window.tailwind) tailwind.config = {
                 <button class="tab-link border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors" data-tab="statistics">
                     <span class="material-symbols-outlined text-lg">bar_chart</span>
                     Estadísticas
+                </button>
+                <button class="tab-link border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors" data-tab="communications">
+                    <span class="material-symbols-outlined text-lg">mail</span>
+                    Comunicaciones
                 </button>
             </nav>
         </div>
@@ -556,6 +608,29 @@ if (window.tailwind) tailwind.config = {
                     </div>
                 </div>
             </section>
+        </div>
+
+        <!-- COMMUNICATIONS TAB -->
+        <div id="communications" class="tab-content space-y-4">
+            <details class="group bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300" open="">
+                <summary class="flex items-center justify-between p-6 cursor-pointer select-none bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
+                            <span class="material-symbols-outlined text-2xl">edit_document</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-primary">Plantillas de Correos</h3>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400 expand-icon transition-transform duration-300">expand_more</span>
+                </summary>
+                <div class="px-6 pb-6 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Edita el asunto y cuerpo de los correos que se envían a los usuarios. Usa <code class="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">{{variable}}</code> para insertar datos dinámicos. La vista previa muestra el resultado con datos de ejemplo.
+                    </p>
+                    <div id="email-templates-list" class="space-y-3">
+                        <p class="text-sm text-gray-500">Cargando plantillas...</p>
+                    </div>
+                </div>
+            </details>
         </div>
 
         <footer class="mt-12 py-6 text-center text-sm text-gray-400 dark:text-gray-500 border-t border-gray-200 dark:border-gray-800">
