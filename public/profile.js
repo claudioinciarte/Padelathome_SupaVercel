@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // User display elements
     const userInitialsAvatar = document.getElementById('user-initials-avatar');
     const userFullNameDisplay = document.getElementById('user-full-name-display');
+    const navUserAvatar = document.getElementById('nav-user-avatar');
 
     // --- Apariencia (tema claro/oscuro/sistema) ---
     const themeSelect = document.getElementById('theme-select');
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             userFullNameDisplay.textContent = user.name;
             userInitialsAvatar.textContent = getInitials(user.name);
+            if (navUserAvatar) navUserAvatar.textContent = getInitials(user.name);
 
         } catch (error) {
             showNotification(error.message, 'error');
