@@ -16,7 +16,7 @@
         theme: {
           extend: {
             colors: {
-              primary: "#2563EB", // Ensuring consistency with global app brand
+              primary: "#CCFF00", // Volt — Amarillo neón (texto negro encima)
               secondary: "#006e37",
               surface: "#f8f9fa",
               "on-surface": "#2d3335",
@@ -94,8 +94,8 @@
                     <img src="/images/match-hero.png" alt="Padel Court" class="w-full h-full object-cover"/>
 
                     <div class="absolute top-4 left-4 md:inset-0 md:bg-gradient-to-t md:from-black/60 md:to-transparent md:flex md:flex-end md:items-end md:p-6 md:top-auto md:left-auto">
-                        <span id="match-status-badge" class="bg-secondary text-white px-4 py-1.5 md:px-3 md:py-1 rounded-full font-bold text-xs tracking-widest uppercase flex items-center gap-2 backdrop-blur-sm shadow-md md:shadow-none">
-                            <span class="w-2 h-2 rounded-full bg-white animate-pulse md:hidden"></span>
+                        <span id="match-status-badge" class="bg-amber-100 dark:bg-gray-800 text-amber-800 dark:text-amber-300 px-4 py-1.5 md:px-3 md:py-1 rounded-full font-bold text-xs tracking-widest uppercase flex items-center gap-2 backdrop-blur-sm shadow-md md:shadow-none">
+                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse md:hidden"></span>
                             ABIERTA
                         </span>
                     </div>
@@ -185,7 +185,7 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-on-surface leading-tight">Chat de la Partida</h3>
-                            <p class="text-[10px] text-secondary font-bold uppercase tracking-widest">En línea</p>
+                            <p class="text-[10px] text-primary font-bold uppercase tracking-widest">En línea</p>
                         </div>
                     </div>
                 </div>
@@ -202,7 +202,7 @@
                             <span class="material-symbols-outlined text-xl">add_circle</span>
                         </button>
                         <input id="chat-input" type="text" autocomplete="off" class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-1 lg:py-0 text-on-surface placeholder:text-outline-variant" placeholder="Escribe un mensaje..."/>
-                        <button type="submit" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-90">
+                        <button type="submit" class="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-90">
                             <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">send</span>
                         </button>
                     </form>

@@ -86,7 +86,7 @@ export async function loadBuildings() {
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${b.description || 'Sin descripción'}</p>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button data-id="${b.id}" class="edit-building-btn flex-1 sm:flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+                    <button data-id="${b.id}" class="edit-building-btn flex-1 sm:flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-primary border border-gray-300 dark:border-gray-700 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
                         <span class="material-symbols-outlined text-base">edit</span>
                         Editar
                     </button>

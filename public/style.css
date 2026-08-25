@@ -1,22 +1,24 @@
 :root {
-    --pah-primary: #2563EB; /* primary */
-    --pah-primary-dark: #1D4ED8; /* primary-dark */
-    --pah-background: #F8FAFC; /* background-light */
+    --pah-primary: #CCFF00; /* Volt */
+    --pah-primary-dark: #B9E600;
+    --pah-background: #F4F4F5; /* background-light */
     --pah-surface: #FFFFFF; /* surface-light */
-    --pah-text-primary: #1E293B; /* slate-800 */
-    --pah-text-secondary: #64748B; /* slate-500 */
-    --pah-border: #E2E8F0; /* slate-200 */
-    --pah-blue-light-bg: #EFF6FF; /* blue-50 */
+    --pah-text-primary: #09090B; /* casi negro */
+    --pah-text-secondary: #71717A; /* gris medio */
+    --pah-border: #E4E4E7; /* border-light */
+    --pah-blue-light-bg: #EFF6FF;
+    --pah-on-primary: #000000;
 }
 .dark {
-    --pah-primary: #3B82F6;
-    --pah-primary-dark: #2563EB;
-    --pah-background: #0F172A;
-    --pah-surface: #1E293B;
-    --pah-text-primary: #F1F5F9;
-    --pah-text-secondary: #94A3B8;
-    --pah-border: #334155;
-    --pah-blue-light-bg: rgba(30, 58, 138, 0.5); /* blue-900/50 */
+    --pah-primary: #CCFF00;
+    --pah-primary-dark: #B9E600;
+    --pah-background: #121212; /* Fondo Carbón */
+    --pah-surface: #1E1E24; /* Gris asfalto tarjetas */
+    --pah-text-primary: #FFFFFF;
+    --pah-text-secondary: #A1A1AA;
+    --pah-border: #27272A;
+    --pah-blue-light-bg: rgba(30, 30, 36, 0.6); /* asfalto translúcido */
+    --pah-on-primary: #000000;
 }
 
 /* Base resets handled by Tailwind Preflight */
@@ -143,8 +145,12 @@
 
 .button-primary {
     background-color: var(--pah-primary);
-    color: white;
+    color: black;
     border: none;
+    border-radius: 9999px;
+    font-weight: 800;
+    text-transform: uppercase;
+    box-shadow: 0 4px 16px rgba(204, 255, 0, 0.20);
 }
 .button-primary:hover {
     background-color: var(--pah-primary-dark);
@@ -167,10 +173,12 @@
 
 #waitlist-join-btn, #my-booking-cancel-btn {
     background-color: var(--pah-primary);
-    color: white;
+    color: black;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    text-transform: uppercase;
     cursor: pointer;
 }
 
@@ -426,15 +434,16 @@
     color: var(--pah-text-primary);
 }
 .modal-button-confirm {
-    padding: 0.625rem 1rem;
+    padding: 0.625rem 1.5rem;
     border: none;
-    border-radius: 0.5rem;
+    border-radius: 9999px;
     background-color: var(--pah-primary);
-    color: white;
-    font-weight: 500;
+    color: black;
+    font-weight: 800;
+    text-transform: uppercase;
     font-size: 0.875rem;
+    box-shadow: 0 4px 16px rgba(204, 255, 0, 0.20);
     cursor: pointer;
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3), 0 2px 4px -2px rgba(37, 99, 235, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;

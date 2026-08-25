@@ -42,7 +42,7 @@ export function render(container, bookings) {
                         </span>
                     </div>
                     <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto mt-3 md:mt-0">
-                        <button class="action-btn w-full md:w-auto inline-flex justify-center items-center rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors" data-action="details" data-id="${booking.id}">
+                        <button class="action-btn w-full md:w-auto inline-flex justify-center items-center rounded-full border border-primary bg-primary px-4 py-2 text-sm font-bold text-on-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors uppercase shadow-volt" data-action="details" data-id="${booking.id}">
                             <span class="material-icons-round text-lg mr-1.5 pointer-events-none">info</span>
                             Detalles
                         </button>

@@ -46,7 +46,7 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
         th.scope = 'col';
         th.className = `px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 ${
             isToday
-            ? 'text-slate-900 dark:text-white bg-blue-50/50 dark:bg-blue-900/20'
+            ? 'text-slate-900 dark:text-white bg-primary/5 dark:bg-primary/10'
             : 'text-slate-500 dark:text-slate-400'
         }`;
         th.textContent = dayName;
@@ -74,7 +74,7 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
             const daySlot = scheduleData[dayKey][index];
             const td = document.createElement('td');
             const isToday = dayKey === todayStr;
-            td.className = `px-2 py-2 text-center ${isToday ? 'bg-blue-50/10 dark:bg-blue-900/5' : ''}`;
+            td.className = `px-2 py-2 text-center ${isToday ? 'bg-primary/5 dark:bg-primary/10' : ''}`;
 
             // Logic to determine status and styling
             const slotTime = new Date(daySlot.startTime);
@@ -132,27 +132,27 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
 
             switch (status) {
                 case 'available':
-                    button.classList.add('bg-green-100', 'dark:bg-green-900/30', 'text-green-700', 'dark:text-green-300', 'hover:bg-green-200', 'dark:hover:bg-green-900/50');
-                    button.textContent = 'Libre';
+                    button.classList.add('text-status-available-light', 'dark:text-status-available-dark');
+                    button.innerHTML = '<span class="material-icons-outlined text-sm mr-1">check_circle</span> Libre';
                     if (daySlot.availableDurations) button.dataset.durations = daySlot.availableDurations.join(',');
                     td.appendChild(button);
                     break;
 
                 case 'booked':
-                    button.classList.add('bg-red-100', 'dark:bg-red-900/30', 'text-red-700', 'dark:text-red-300', 'hover:bg-red-200', 'dark:hover:bg-red-900/50');
-                    button.textContent = 'Ocupado';
+                    button.classList.add('text-status-booked-light', 'dark:text-status-booked-dark');
+                    button.innerHTML = '<span class="material-icons-outlined text-sm mr-1">lock</span> Ocupado';
                     td.appendChild(button);
                     break;
 
                 case 'open_match_available':
-                    button.classList.add('bg-amber-100', 'dark:bg-amber-900/30', 'text-amber-700', 'dark:text-amber-300', 'hover:bg-amber-200', 'dark:hover:bg-amber-900/50');
-                    button.textContent = `Abierta ${daySlot.participants || 0}/${daySlot.maxParticipants || 4}`;
+                    button.classList.add('text-status-open-light', 'dark:text-status-open-dark');
+                    button.innerHTML = `<span class="material-icons-outlined text-sm mr-1">groups</span> Abierta ${daySlot.participants || 0}/${daySlot.maxParticipants || 4}`;
                     td.appendChild(button);
                     break;
 
                 case 'open_match_full':
-                    button.classList.add('bg-amber-50', 'dark:bg-amber-900/20', 'text-amber-800/60', 'dark:text-amber-500/60');
-                    button.textContent = 'Llena';
+                    button.classList.add('text-status-booked-light', 'dark:text-status-booked-dark');
+                    button.innerHTML = '<span class="material-icons-outlined text-sm mr-1">groups</span> Llena';
                     td.appendChild(button);
                     break;
 
@@ -160,7 +160,7 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
                 case 'blocked':
                     // Non-interactive generally, but maybe admin can click? Keeping simple for user.
                     const divMaint = document.createElement('div');
-                    divMaint.className = 'h-8 w-full rounded bg-slate-600 dark:bg-slate-700 text-white flex items-center justify-center text-xs font-medium cursor-not-allowed opacity-75';
+                    divMaint.className = 'h-8 w-full rounded flex items-center justify-center text-xs font-medium cursor-not-allowed text-slate-500 dark:text-slate-400 opacity-80';
                     divMaint.title = daySlot.reason || 'Mantenimiento';
                     divMaint.innerHTML = `
                         <span class="hidden lg:inline">${daySlot.reason || 'Mantenimiento'}</span>
@@ -171,26 +171,26 @@ export function renderWeekly(container, scheduleData, weekStart, weekEnd, userAc
 
                 case 'past':
                     const divPast = document.createElement('div');
-                    divPast.className = 'h-8 w-full rounded bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center cursor-not-allowed text-slate-300 dark:text-slate-600';
+                    divPast.className = 'h-8 w-full flex items-center justify-center cursor-not-allowed text-slate-300 dark:text-slate-600';
                     divPast.innerHTML = '<span class="material-icons-outlined text-xs">block</span>';
                     td.appendChild(divPast);
                     break;
 
                 case 'my_private_booking':
-                    button.classList.add('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border', 'border-blue-200', 'dark:border-blue-800', 'hover:bg-blue-200');
-                    button.innerHTML = '<span class="material-icons-outlined text-xs mr-1">bookmark</span> Mía';
+                    button.classList.add('text-primary-dark', 'dark:text-primary');
+                    button.innerHTML = '<span class="material-icons-outlined text-sm mr-1">bookmark</span> Mía';
                     td.appendChild(button);
                     break;
 
                 case 'my_open_match':
-                    button.classList.add('bg-blue-50', 'dark:bg-blue-900/20', 'text-blue-600', 'dark:text-blue-400', 'border', 'border-blue-100', 'dark:border-blue-800');
-                    button.innerHTML = '<span class="material-icons-outlined text-xs mr-1">groups</span> Inscrito';
+                    button.classList.add('text-primary-dark', 'dark:text-primary');
+                    button.innerHTML = '<span class="material-icons-outlined text-sm mr-1">groups</span> Inscrito';
                     td.appendChild(button);
                     break;
 
                 case 'on_waitlist':
-                     button.classList.add('bg-purple-100', 'dark:bg-purple-900/30', 'text-purple-700', 'dark:text-purple-300', 'hover:bg-purple-200');
-                     button.innerHTML = '<span class="material-icons-outlined text-xs mr-1">access_time</span> Lista';
+                     button.classList.add('text-purple-600', 'dark:text-purple-300');
+                     button.innerHTML = '<span class="material-icons-outlined text-sm mr-1">access_time</span> Lista';
                      td.appendChild(button);
                      break;
 
@@ -234,59 +234,66 @@ export function renderMobileDaily(container, slots) {
         }
 
         const div = document.createElement('div');
-        div.className = `group relative bg-white dark:bg-card-dark rounded-xl flex flex-col shadow-sm border border-transparent hover:border-green-500 transition-all cursor-pointer overflow-hidden`;
+        div.className = `group relative bg-white dark:bg-card-dark rounded-xl flex flex-col shadow-sm border border-transparent hover:border-primary transition-all cursor-pointer overflow-hidden`;
 
-        // Left Border Color and Pill Styles
-        let borderClass = 'bg-slate-300'; // Default gray
-        let pillClass = 'bg-slate-100 text-slate-500';
+        // Left Border Color (accent bar) and Pill Styles (No Pills: text + icon, transparent bg)
+        let borderClass = 'bg-slate-300'; // Default gray accent bar
+        let pillClass = 'text-slate-500 dark:text-slate-400';
+        let pillIcon = 'help_outline';
         let pillText = 'Desconocido';
         let showPill = true;
         let isFinalized = false;
 
         switch(status) {
             case 'available':
-                borderClass = 'bg-green-500';
-                pillClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                borderClass = 'bg-status-available-dark';
+                pillClass = 'text-status-available-light dark:text-status-available-dark';
+                pillIcon = 'check_circle';
                 pillText = 'Disponible';
                 break;
             case 'booked':
-                borderClass = 'bg-red-500'; // Or transparent if we follow the "Finalizado" look for booked? User said Ocupado is Red.
-                pillClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                borderClass = 'bg-status-booked-light';
+                pillClass = 'text-status-booked-light dark:text-status-booked-dark';
+                pillIcon = 'lock';
                 pillText = 'Ocupado';
-                // Note: The design example had "Finalizado" without a color bar.
-                // But user requested "Ocupado is red". So we keep the bar.
                 break;
             case 'open_match_available':
-                borderClass = 'bg-amber-500';
-                pillClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
+                borderClass = 'bg-status-open-dark';
+                pillClass = 'text-status-open-light dark:text-status-open-dark';
+                pillIcon = 'groups';
                 pillText = `Partida Abierta (${slot.participants || 1}/${slot.maxParticipants || 4})`;
                 break;
             case 'open_match_full':
-                borderClass = 'bg-amber-700';
-                pillClass = 'bg-amber-100 text-amber-800';
+                borderClass = 'bg-status-booked-light';
+                pillClass = 'text-status-booked-light dark:text-status-booked-dark';
+                pillIcon = 'groups';
                 pillText = 'Partida Llena';
                 break;
             case 'my_private_booking':
-                borderClass = 'bg-blue-500';
-                pillClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                borderClass = 'bg-primary-dark';
+                pillClass = 'text-primary-dark dark:text-primary';
+                pillIcon = 'bookmark';
                 pillText = 'Mi Reserva';
                 break;
             case 'my_open_match':
-                borderClass = 'bg-blue-500';
-                pillClass = 'bg-blue-100 text-blue-800';
+                borderClass = 'bg-primary-dark';
+                pillClass = 'text-primary-dark dark:text-primary';
+                pillIcon = 'groups';
                 pillText = 'Inscrito';
                 break;
             case 'past':
                 borderClass = 'hidden'; // No border for past
                 pillClass = 'text-gray-400 dark:text-gray-500'; // Just text
+                pillIcon = 'history';
                 pillText = 'Finalizado';
                 isFinalized = true;
                 div.className = "bg-white dark:bg-card-dark rounded-xl p-4 flex flex-col opacity-60"; // Simpler container for past
                 break;
             case 'blocked':
             case 'maintenance':
-                borderClass = 'bg-slate-600';
-                pillClass = 'bg-slate-100 text-slate-600';
+                borderClass = 'bg-slate-500';
+                pillClass = 'text-slate-500 dark:text-slate-400';
+                pillIcon = 'build';
                 pillText = slot.reason || 'Mantenimiento';
                 break;
         }
@@ -297,7 +304,9 @@ export function renderMobileDaily(container, slots) {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <span class="text-lg font-bold text-gray-400 dark:text-gray-500">${formatTime(slotTime)}</span>
-                        <span class="text-sm font-medium ${pillClass}">${pillText}</span>
+                        <span class="flex items-center text-sm font-medium ${pillClass}">
+                            <span class="material-symbols-rounded text-sm mr-1">${pillIcon}</span>${pillText}
+                        </span>
                     </div>
                     <span class="material-symbols-rounded text-gray-300">expand_more</span>
                 </div>
@@ -308,12 +317,11 @@ export function renderMobileDaily(container, slots) {
                     <div class="absolute left-0 top-0 bottom-0 w-1.5 ${borderClass}"></div>
                     <div class="flex items-center gap-4 pl-2">
                         <span class="text-lg font-bold text-gray-800 dark:text-white">${formatTime(slotTime)}</span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${pillClass}">
-                            ${status === 'available' ? '<span class="w-2 h-2 rounded-full bg-green-500 mr-1"></span>' : ''}
-                            ${pillText}
+                        <span class="inline-flex items-center text-xs font-medium ${pillClass}">
+                            <span class="material-symbols-rounded text-base mr-1">${pillIcon}</span>${pillText}
                         </span>
                     </div>
-                    <span class="material-symbols-rounded text-gray-400 group-hover:text-green-500 chevron transition-transform duration-200">expand_more</span>
+                    <span class="material-symbols-rounded text-gray-400 group-hover:text-primary chevron transition-transform duration-200">expand_more</span>
                 </div>
                 <div class="slot-details hidden bg-gray-50 dark:bg-slate-800/50 p-5 pl-6 border-t border-gray-100 dark:border-slate-700"></div>
             `;
@@ -371,7 +379,7 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
                 // We'll handle selection class toggling in JS, but here is the markup
                 const isPopular = d === 60;
                 return `
-                <button class="relative py-3 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors border duration-btn ${i === 0 ? 'bg-primary text-white shadow-md ring-2 ring-primary ring-offset-1 dark:ring-offset-card-dark selected' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent hover:border-gray-300'}" data-duration="${d}">
+                <button class="relative py-3 px-4 rounded-full text-sm flex items-center justify-center gap-2 transition-colors border duration-btn ${i === 0 ? 'bg-primary text-on-primary shadow-md ring-2 ring-primary ring-offset-1 dark:ring-offset-card-dark selected' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent hover:border-gray-300'} uppercase font-extrabold shadow-volt" data-duration="${d}">
                     <span class="material-symbols-rounded text-lg">schedule</span>
                     ${d} min
                     ${isPopular ? '<span class="absolute -top-2 -right-2 bg-white text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">Popular</span>' : ''}
@@ -394,7 +402,7 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
                         </div>
                         <label class="flex items-center cursor-pointer relative">
                             <input type="checkbox" class="sr-only peer open-match-checkbox">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary dark:peer-focus:ring-primary-dark rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
                         </label>
                     </div>
                 </div>
@@ -402,7 +410,7 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
                     <button class="py-3 px-4 rounded-lg bg-white dark:bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cancel-action-btn">
                         Cancelar
                     </button>
-                    <button class="py-3 px-4 rounded-lg bg-primary hover:bg-primary_hover text-white shadow-lg shadow-blue-500/30 font-semibold text-sm transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 confirm-booking-btn">
+                    <button class="py-3 px-4 rounded-full bg-primary hover:bg-primary-dark text-on-primary shadow-volt font-semibold text-sm transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 confirm-booking-btn uppercase">
                         Confirmar
                         <span class="material-symbols-rounded text-lg">check_circle</span>
                     </button>
@@ -424,7 +432,7 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
             content = `
                 <div class="flex flex-col gap-3">
                     <p class="text-sm text-slate-600 dark:text-slate-400">Este horario está ocupado.</p>
-                    <button class="w-full py-2 bg-primary text-white rounded font-medium text-sm join-waitlist-btn">Apuntarse a Lista de Espera</button>
+                    <button class="w-full py-2 bg-primary text-on-primary rounded-full text-sm join-waitlist-btn uppercase font-extrabold shadow-volt">Apuntarse a Lista de Espera</button>
                 </div>
             `;
             break;

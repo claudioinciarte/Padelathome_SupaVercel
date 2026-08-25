@@ -115,8 +115,8 @@ async function fetchAndDisplayStats() {
                 const max = stats.topUsers[0].booking_count;
                 const width = (user.booking_count / max) * 100;
                 const initials = user.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-                const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-orange-500'];
-                const avatarColors = ['bg-blue-100 dark:bg-blue-900/50 text-primary', 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400', 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400'];
+                const colors = ['bg-primary', 'bg-primary-dark', 'bg-orange-500'];
+                const avatarColors = ['bg-primary text-on-primary dark:bg-primary/20 dark:text-primary', 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200', 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400'];
 
                 const color = colors[index % colors.length];
                 const avatarColor = avatarColors[index % avatarColors.length];
@@ -232,7 +232,7 @@ async function fetchAndDisplayBlockedPeriods() {
                         <p class="text-xs text-gray-400 mt-1 italic">${block.reason || 'Sin motivo'}</p>
                     </div>
                     <div class="flex gap-2">
-                        <button class="edit-block-btn flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                        <button class="edit-block-btn flex-none flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-primary border border-gray-300 dark:border-gray-700 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                             data-blockid="${block.id}"
                             data-courtid="${block.court_id}"
                             data-start="${block.start_time.slice(0,16)}"

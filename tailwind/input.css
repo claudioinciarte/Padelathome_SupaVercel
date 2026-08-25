@@ -1,3 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Tipografía por defecto: Inter para cuerpo, Manrope para display */
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Manrope', 'Inter', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* CSS plano (se emite siempre; Tailwind JIT hace tree-shaking de @layer) */
+/* Botón primario Volt: amarillo neón, texto negro, píldora, uppercase, glow */
+.btn-volt {
+  background-color: #CCFF00;
+  color: #000000;
+  border-radius: 9999px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 16px rgba(204, 255, 0, 0.20);
+  transition: box-shadow 0.2s ease, transform 0.15s ease, filter 0.2s ease;
+}
+.btn-volt:hover {
+  filter: brightness(1.03);
+  box-shadow: 0 4px 20px rgba(204, 255, 0, 0.32);
+}
+.btn-volt:active {
+  transform: scale(0.98);
+}
+/* Botón secundario Volt: transparente, borde, píldora, uppercase */
+.btn-volt-secondary {
+  background-color: transparent;
+  border-radius: 9999px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+}

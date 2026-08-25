@@ -14,12 +14,12 @@
         theme: {
           extend: {
             colors: {
-              primary: "#2563EB", // Royal blue for consistency
-              secondary: "#0F172A", // Dark slate for contrast
-              "background-light": "#F8FAFC", // Slate 50
-              "background-dark": "#0F172A", // Slate 900
+              primary: "#CCFF00", // VolT neón — texto negro encima (WCAG)
+              secondary: "#121212", // Dark slate for contrast
+              "background-light": "#F4F4F5", // Slate 50
+              "background-dark": "#121212", // Slate 900
               "surface-light": "#FFFFFF",
-              "surface-dark": "#1E293B",
+              "surface-dark": "#1E1E24",
             },
             fontFamily: {
               display: ["Inter", "sans-serif"],
@@ -42,14 +42,14 @@
 <body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col justify-center items-center p-4 transition-colors duration-300 relative overflow-hidden">
 <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
 <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 dark:bg-primary/10 rounded-full blur-[100px]"></div>
-<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-gray-300/20 dark:bg-gray-700/20 rounded-full blur-[100px]"></div>
 </div>
 <div class="bg-surface-light dark:bg-surface-dark shadow-2xl rounded-xl w-full max-w-md p-8 sm:p-10 relative z-10 border border-slate-100 dark:border-slate-700">
 <div class="text-center mb-8">
 <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4 dark:bg-primary/20">
 <span class="material-icons-round text-2xl">sports_tennis</span>
 </div>
-<h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Iniciar Sesión</h1>
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Iniciar Sesión</h1>
 <p class="text-slate-500 dark:text-slate-400 text-sm">
                 Bienvenido a <span class="font-semibold text-primary">Padel@Home</span>
 </p>
@@ -88,7 +88,7 @@
 </div>
 </div>
 <div>
-<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform active:scale-[0.98]" type="submit">
+<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm text-on-primary bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform active:scale-[0.98] uppercase font-extrabold shadow-volt" type="submit">
                     Iniciar Sesión
                 </button>
 </div>
@@ -99,13 +99,13 @@
 <div class="mt-8 text-center border-t border-slate-100 dark:border-slate-700 pt-6">
 <p class="text-sm text-slate-600 dark:text-slate-400">
                 ¿Olvidaste tu contraseña?
-                <a class="font-medium text-primary hover:text-sky-600 transition-colors ml-1" href="/reset-password.html">
+                <a class="font-medium text-primary hover:text-primary-dark transition-colors ml-1" href="/reset-password.html">
                     Restablécela aquí
                 </a>
 </p>
 <p id="register-link-container" class="text-sm text-slate-600 dark:text-slate-400 mt-2" style="display: none;">
     ¿No tienes una cuenta?
-    <a class="font-medium text-primary hover:text-sky-600 transition-colors ml-1" href="/register.html">
+    <a class="font-medium text-primary hover:text-primary-dark transition-colors ml-1" href="/register.html">
         Regístrate aquí
     </a>
 </p>

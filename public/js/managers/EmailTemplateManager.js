@@ -148,7 +148,7 @@ function buildEditorHtml(tpl) {
                     <span class="material-symbols-outlined text-sm">undo</span>
                     Restaurar
                 </button>
-                <button type="button" class="tpl-save-btn bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg text-sm flex items-center gap-1">
+                <button type="button" class="tpl-save-btn bg-primary hover:bg-primary-dark text-on-primary py-2 px-4 rounded-full text-sm flex items-center gap-1 uppercase font-extrabold shadow-volt">
                     <span class="material-symbols-outlined text-sm">save</span>
                     Guardar
                 </button>
