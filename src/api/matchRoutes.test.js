@@ -72,6 +72,20 @@ describe('Match Routes', () => {
       expect(res.body.matchInfo).toHaveProperty('court_name', 'Pista 1');
     });
 
+    it('should prepend the organizer when not in match_participants', async () => {
+      pool.query
+        .mockResolvedValueOnce({ rows: [{ id: 1, court_name: 'Pista 1', user_id: 2 }] }) // booking (dueño id 2)
+        .mockResolvedValueOnce({ rows: [{ id: 3, name: 'Jugador' }] }) // players: NO incluye al dueño
+        .mockResolvedValueOnce({ rows: [{ id: 2, name: 'Organizador', role: 'user' }] }) // consulta del dueño
+        .mockResolvedValueOnce({ rows: [{ id: 1, message: 'Hola' }] }); // messages
+
+      const res = await request(app).get('/api/matches/1/details');
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.players[0]).toMatchObject({ id: 2, name: 'Organizador' });
+      expect(res.body.players).toHaveLength(2);
+    });
+
     it('should return 404 if match not found', async () => {
       pool.query.mockResolvedValue({ rows: [] });
 

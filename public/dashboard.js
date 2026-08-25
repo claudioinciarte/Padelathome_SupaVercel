@@ -514,7 +514,18 @@ document.addEventListener('DOMContentLoaded', () => {
             updateCalendarView();
         });
 
-        window.addEventListener('resize', debounce(updateCalendarView, 250));
+        // Solo re-renderiza si cambia el breakpoint (móvil↔escritorio). Evita que
+        // el resize disparado por scroll en móvil (chrome/pestañas dinámicas) vuelva
+        // a renderMobileView y ponga el grid en "Cargando..." (desaparece y recarga).
+        let layoutMode = window.innerWidth <= 768;
+        const onResize = () => {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile !== layoutMode) {
+                layoutMode = isMobile;
+                updateCalendarView();
+            }
+        };
+        window.addEventListener('resize', debounce(onResize, 250));
 
         // Tiempo real con Supabase Realtime: cualquier cambio en reservas,
         // participantes, bloqueos o lista de espera refresca el dashboard;

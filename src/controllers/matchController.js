@@ -269,6 +269,14 @@ const getMatchDetails = async (req, res) => {
             [bookingId]
         );
 
+        // El organizador/dueño crea la reserva y NO está en match_participants.
+        // Asegurarlo en el line-up (mismo criterio que getMatchParticipants).
+        const ownerInPlayers = playersQuery.rows.some((p) => String(p.id) === String(match.user_id));
+        if (!ownerInPlayers) {
+            const ownerRes = await pool.query("SELECT id, name, role FROM users WHERE id = $1", [match.user_id]);
+            if (ownerRes.rows.length > 0) playersQuery.rows.unshift(ownerRes.rows[0]);
+        }
+
         // 3. Obtener el histórico de mensajes
         const messagesQuery = await pool.query(
             `SELECT m.*, u.name as user_name
