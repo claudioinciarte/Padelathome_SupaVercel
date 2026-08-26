@@ -1,11 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  /* Tipografía por defecto: Inter para cuerpo, Manrope para display */
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -13,39 +12,58 @@
   body {
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;
+    transition: background-color 150ms ease-out, color 150ms ease-out;
   }
   h1, h2, h3, h4 {
     font-family: 'Manrope', 'Inter', sans-serif;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.02em;
   }
 }
 
-/* CSS plano (se emite siempre; Tailwind JIT hace tree-shaking de @layer) */
-/* Botón primario Volt: amarillo neón, texto negro, píldora, uppercase, glow */
-.btn-volt {
-  background-color: #CCFF00;
+/* --- Vercel: Snappy transitions (150ms) + reduced motion --- */
+a, button, input, select, textarea, [role="button"], summary {
+  transition: background-color 150ms ease-out, border-color 150ms ease-out,
+    color 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out,
+    opacity 150ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Vercel: Focus ring doble de alto contraste (accesible por teclado) --- */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pah-background), 0 0 0 4px var(--pah-primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  :focus-visible { transition: none; }
+}
+
+/* --- Botón primario Vercel: azul, texto blanco, radius 6px --- */
+.btn-primary {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 150ms ease-out;
+}
+.btn-primary:hover { background-color: #1D4ED8; }
+/* En modo oscuro el azul claro usa texto negro (accesibilidad) */
+html.dark .btn-primary {
+  background-color: #60A5FA;
   color: #000000;
-  border-radius: 9999px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  box-shadow: 0 4px 16px rgba(204, 255, 0, 0.20);
-  transition: box-shadow 0.2s ease, transform 0.15s ease, filter 0.2s ease;
 }
-.btn-volt:hover {
-  filter: brightness(1.03);
-  box-shadow: 0 4px 20px rgba(204, 255, 0, 0.32);
-}
-.btn-volt:active {
-  transform: scale(0.98);
-}
-/* Botón secundario Volt: transparente, borde, píldora, uppercase */
-.btn-volt-secondary {
+html.dark .btn-primary:hover { background-color: #3b82f6; }
+
+/* --- Botón secundario Vercel: transparente, borde, radius 6px --- */
+.btn-secondary {
   background-color: transparent;
-  border-radius: 9999px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
   border: 1px solid;
+  border-radius: 6px;
+  font-weight: 500;
 }

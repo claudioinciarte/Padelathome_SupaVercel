@@ -379,7 +379,7 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
                 // We'll handle selection class toggling in JS, but here is the markup
                 const isPopular = d === 60;
                 return `
-                <button class="relative py-3 px-4 rounded-full text-sm flex items-center justify-center gap-2 transition-colors border duration-btn ${i === 0 ? 'bg-primary text-on-primary shadow-md ring-2 ring-primary ring-offset-1 dark:ring-offset-card-dark selected' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent hover:border-gray-300'} uppercase font-extrabold shadow-volt" data-duration="${d}">
+                <button class="relative py-3 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors border duration-btn ${i === 0 ? 'bg-primary text-on-primary shadow-md ring-2 ring-primary ring-offset-1 dark:ring-offset-card-dark selected' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent hover:border-gray-300'} font-medium" data-duration="${d}">
                     <span class="material-symbols-rounded text-lg">schedule</span>
                     ${d} min
                     ${isPopular ? '<span class="absolute -top-2 -right-2 bg-white text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">Popular</span>' : ''}
@@ -402,7 +402,7 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
                         </div>
                         <label class="flex items-center cursor-pointer relative">
                             <input type="checkbox" class="sr-only peer open-match-checkbox">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary dark:peer-focus:ring-primary-dark rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary dark:peer-focus:ring-primary-dark rounded-lg peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-lg after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
                         </label>
                     </div>
                 </div>
@@ -410,7 +410,7 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
                     <button class="py-3 px-4 rounded-lg bg-white dark:bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cancel-action-btn">
                         Cancelar
                     </button>
-                    <button class="py-3 px-4 rounded-full bg-primary hover:bg-primary-dark text-on-primary shadow-volt font-semibold text-sm transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 confirm-booking-btn uppercase">
+                    <button class="py-3 px-4 rounded-lg bg-primary hover:bg-primary-hover text-on-primary font-semibold text-sm transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 confirm-booking-btn">
                         Confirmar
                         <span class="material-symbols-rounded text-lg">check_circle</span>
                     </button>
@@ -432,7 +432,7 @@ function renderSlotDetails(detailsContainer, slotData, onSlotClick) {
             content = `
                 <div class="flex flex-col gap-3">
                     <p class="text-sm text-slate-600 dark:text-slate-400">Este horario está ocupado.</p>
-                    <button class="w-full py-2 bg-primary text-on-primary rounded-full text-sm join-waitlist-btn uppercase font-extrabold shadow-volt">Apuntarse a Lista de Espera</button>
+                    <button class="w-full py-2 bg-primary text-on-primary rounded-lg text-sm join-waitlist-btn font-medium">Apuntarse a Lista de Espera</button>
                 </div>
             `;
             break;

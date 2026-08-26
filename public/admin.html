@@ -15,13 +15,13 @@ if (window.tailwind) tailwind.config = {
         theme: {
             extend: {
                 colors: {
-                    primary: "#CCFF00",
-                    "primary-dark": "#B9E600",
+                    primary: "#2563EB",
+                    "primary-dark": "#60A5FA",
                     "primary-light": "#EFF6FF",
                     "background-light": "#F3F4F6",
-                    "background-dark": "#111827",
+                    "background-dark": "#000000",
                     "surface-light": "#FFFFFF",
-                    "surface-dark": "#1F2937",
+                    "surface-dark": "#0A0A0A",
                     "text-light": "#374151",
                     "text-dark": "#D1D5DB",
                 },
@@ -98,13 +98,13 @@ if (window.tailwind) tailwind.config = {
         outline: none;
     }
     .tpl-editor:focus {
-        border-color: #CCFF00;
-        box-shadow: 0 0 0 1px #CCFF00;
+        border-color: #2563EB;
+        box-shadow: 0 0 0 1px #2563EB;
     }
     .tpl-editor h2 { font-size: 1.5rem; font-weight: 700; margin: 0.5em 0; }
     .tpl-editor h3 { font-size: 1.25rem; font-weight: 600; margin: 0.5em 0; }
     .tpl-editor ul { list-style: disc; padding-left: 1.5rem; }
-    .tpl-editor a { color: #CCFF00; text-decoration: underline; }
+    .tpl-editor a { color: #2563EB; text-decoration: underline; }
     .tpl-preview {
         min-height: 280px;
         overflow-y: auto;
@@ -112,7 +112,7 @@ if (window.tailwind) tailwind.config = {
     .tpl-preview h2 { font-size: 1.5rem; font-weight: 700; margin: 0.5em 0; }
     .tpl-preview h3 { font-size: 1.25rem; font-weight: 600; margin: 0.5em 0; }
     .tpl-preview ul { list-style: disc; padding-left: 1.5rem; }
-    .tpl-preview a { color: #CCFF00; text-decoration: underline; }
+    .tpl-preview a { color: #2563EB; text-decoration: underline; }
     .tpl-var-chip {
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.75rem;
@@ -217,7 +217,7 @@ if (window.tailwind) tailwind.config = {
                             </div>
                         </div>
                         <div class="col-span-1 md:col-span-2 flex justify-end">
-                            <button type="submit" class="bg-primary hover:bg-primary-dark text-on-primary py-2 px-6 rounded-full shadow transition-colors flex items-center justify-center gap-2 h-10 uppercase font-extrabold shadow-volt">
+                            <button type="submit" class="bg-primary hover:bg-primary-hover text-on-primary py-2 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 h-10 font-medium">
                                 <span class="material-symbols-outlined text-sm">send</span>
                                 Enviar Invitación
                             </button>
@@ -284,7 +284,7 @@ if (window.tailwind) tailwind.config = {
                         <label for="setting-public-registration" class="text-sm font-medium text-gray-700 dark:text-gray-300">Activar registro público</label>
                     </div>
                     <div class="flex justify-start gap-2">
-                        <button type="button" id="save-public-registration-btn" class="bg-primary hover:bg-primary-dark text-on-primary py-2.5 px-6 rounded-full shadow transition-colors flex items-center justify-center gap-2 text-sm uppercase font-extrabold shadow-volt">
+                        <button type="button" id="save-public-registration-btn" class="bg-primary hover:bg-primary-hover text-on-primary py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm font-medium">
                             <span class="material-symbols-outlined text-sm">check</span>
                             Aceptar
                         </button>
@@ -326,7 +326,7 @@ if (window.tailwind) tailwind.config = {
                                 <textarea id="building-description" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm px-3 py-2" placeholder="Descripción breve de las instalaciones..." rows="3"></textarea>
                             </div>
                             <div class="flex justify-start gap-2">
-                                <button type="submit" class="bg-primary hover:bg-primary-dark text-on-primary py-2.5 px-6 rounded-full shadow transition-colors flex items-center justify-center gap-2 text-sm uppercase font-extrabold shadow-volt">
+                                <button type="submit" class="bg-primary hover:bg-primary-hover text-on-primary py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm font-medium">
                                     <span class="material-symbols-outlined text-sm">save</span>
                                     Guardar Edificio
                                 </button>
@@ -377,7 +377,7 @@ if (window.tailwind) tailwind.config = {
                                 <label for="court-is-active" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Activa</label>
                             </div>
                             <div class="flex justify-start gap-2">
-                                <button type="submit" class="bg-primary hover:bg-primary-dark text-on-primary py-2.5 px-6 rounded-full shadow transition-colors flex items-center justify-center gap-2 text-sm uppercase font-extrabold shadow-volt">
+                                <button type="submit" class="bg-primary hover:bg-primary-hover text-on-primary py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm font-medium">
                                     <span class="material-symbols-outlined text-sm">save</span>
                                     Guardar Pista
                                 </button>
@@ -436,7 +436,7 @@ if (window.tailwind) tailwind.config = {
                                 <input id="block-reason" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:ring-primary focus:border-primary sm:text-sm py-2.5 px-3" placeholder="Ej. Lluvia, Mantenimiento, Torneo..." type="text"/>
                             </div>
                             <div class="md:col-span-2 flex justify-start gap-2">
-                                <button type="submit" class="bg-primary hover:bg-primary-dark text-on-primary py-2.5 px-6 rounded-full shadow transition-colors flex items-center justify-center gap-2 text-sm uppercase font-extrabold shadow-volt">
+                                <button type="submit" class="bg-primary hover:bg-primary-hover text-on-primary py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm font-medium">
                                     <span class="material-symbols-outlined text-sm">lock</span>
                                     Aplicar Bloqueo
                                 </button>
@@ -503,7 +503,7 @@ if (window.tailwind) tailwind.config = {
                             </div>
                         </div>
                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-start">
-                             <button type="submit" class="bg-primary hover:bg-primary-dark text-on-primary py-2.5 px-6 rounded-full shadow transition-colors flex items-center justify-center gap-2 text-sm uppercase font-extrabold shadow-volt">
+                             <button type="submit" class="bg-primary hover:bg-primary-hover text-on-primary py-2.5 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2 text-sm font-medium">
                                 <span class="material-symbols-outlined text-sm">save</span>
                                 Guardar Ajustes
                             </button>

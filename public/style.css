@@ -1,24 +1,26 @@
 :root {
-    --pah-primary: #CCFF00; /* Volt */
-    --pah-primary-dark: #B9E600;
-    --pah-background: #F4F4F5; /* background-light */
+    --pah-primary: #2563EB; /* azul primario */
+    --pah-primary-dark: #60A5FA; /* azul claro (dark mode) */
+    --pah-primary-hover: #1D4ED8;
+    --pah-background: #FAFAFA; /* background-light */
     --pah-surface: #FFFFFF; /* surface-light */
-    --pah-text-primary: #09090B; /* casi negro */
-    --pah-text-secondary: #71717A; /* gris medio */
-    --pah-border: #E4E4E7; /* border-light */
+    --pah-text-primary: #111827;
+    --pah-text-secondary: #666666;
+    --pah-border: #EAEAEA;
     --pah-blue-light-bg: #EFF6FF;
-    --pah-on-primary: #000000;
+    --pah-on-primary: #FFFFFF;
 }
 .dark {
-    --pah-primary: #CCFF00;
-    --pah-primary-dark: #B9E600;
-    --pah-background: #121212; /* Fondo Carbón */
-    --pah-surface: #1E1E24; /* Gris asfalto tarjetas */
-    --pah-text-primary: #FFFFFF;
-    --pah-text-secondary: #A1A1AA;
-    --pah-border: #27272A;
-    --pah-blue-light-bg: rgba(30, 30, 36, 0.6); /* asfalto translúcido */
-    --pah-on-primary: #000000;
+    --pah-primary: #60A5FA;
+    --pah-primary-dark: #60A5FA;
+    --pah-primary-hover: #3B82F6;
+    --pah-background: #000000; /* Fondo negro */
+    --pah-surface: #0A0A0A; /* tarjetas */
+    --pah-text-primary: #EDEDED;
+    --pah-text-secondary: #888888;
+    --pah-border: #333333;
+    --pah-blue-light-bg: rgba(10, 10, 10, 0.6);
+    --pah-on-primary: #000000; /* texto negro sobre azul claro */
 }
 
 /* Base resets handled by Tailwind Preflight */
@@ -145,15 +147,14 @@
 
 .button-primary {
     background-color: var(--pah-primary);
-    color: black;
+    color: var(--pah-on-primary);
     border: none;
-    border-radius: 9999px;
-    font-weight: 800;
-    text-transform: uppercase;
-    box-shadow: 0 4px 16px rgba(204, 255, 0, 0.20);
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 150ms ease-out;
 }
 .button-primary:hover {
-    background-color: var(--pah-primary-dark);
+    background-color: var(--pah-primary-hover);
 }
 
 .button-danger {
@@ -173,13 +174,13 @@
 
 #waitlist-join-btn, #my-booking-cancel-btn {
     background-color: var(--pah-primary);
-    color: black;
+    color: var(--pah-on-primary);
     border: none;
     padding: 0.5rem 1.25rem;
-    border-radius: 9999px;
-    font-weight: 700;
-    text-transform: uppercase;
+    border-radius: 6px;
+    font-weight: 500;
     cursor: pointer;
+    transition: background-color 150ms ease-out;
 }
 
 #notification-container {
@@ -436,21 +437,20 @@
 .modal-button-confirm {
     padding: 0.625rem 1.5rem;
     border: none;
-    border-radius: 9999px;
+    border-radius: 6px;
     background-color: var(--pah-primary);
-    color: black;
-    font-weight: 800;
-    text-transform: uppercase;
+    color: var(--pah-on-primary);
+    font-weight: 500;
     font-size: 0.875rem;
-    box-shadow: 0 4px 16px rgba(204, 255, 0, 0.20);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem; /* gap-2 */
+    transition: background-color 150ms ease-out;
 }
 .modal-button-confirm:hover {
-    background-color: var(--pah-primary-dark);
+    background-color: var(--pah-primary-hover);
 }
 .modal-button-confirm .material-icons-round {
     font-size: 1rem;
