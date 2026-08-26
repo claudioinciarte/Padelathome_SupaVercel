@@ -50,75 +50,72 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-200">
 <!-- Desktop Header (Hidden on Mobile) -->
-<header class="hidden lg:block bg-surface-light dark:bg-surface-dark shadow-sm sticky top-0 z-20 transition-colors duration-200">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex justify-between items-center h-16">
-<div class="flex items-center">
-<span class="material-icons-outlined text-primary text-3xl mr-2">sports_tennis</span>
-<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white" id="welcome-message-desktop">Padel@Home</h1>
-</div>
-<div class="flex items-center space-x-4">
-<div class="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-300">
-<span class="material-icons-outlined">account_circle</span>
-<span class="font-medium">Jose Agustin Inciarte Melean</span>
-</div>
-<button id="logout-button-desktop" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center">
-<span class="material-icons-outlined text-sm mr-2">logout</span>
+<header class="bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 shadow-sm transition-colors duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row justify-between items-center py-3 md:h-16 gap-2 md:gap-0">
+            <!-- Logo / Brand -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-center md:justify-start">
+                <span class="material-symbols-rounded text-primary text-3xl">sports_tennis</span>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white" id="welcome-message-desktop">Padel@Home</h1>
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+                <!-- Bienvenida usuario (móvil + desktop compacto) -->
+                <span class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 font-medium truncate">
+                    <span class="material-symbols-rounded text-lg hidden sm:inline">account_circle</span>
+                    <span id="welcome-message-mobile" class="truncate">Bienvenido</span>
+                </span>
+
+                <div class="flex items-center gap-2">
+                    <!-- Botones móvil (iconos) -->
+                    <button id="admin-panel-btn-mobile" style="display:none;" class="md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-primary transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <span class="material-symbols-rounded text-xl">admin_panel_settings</span>
+                        <span class="sr-only">Admin</span>
+                    </button>
+                    <button id="profile-btn-mobile" class="md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-primary transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <span class="material-symbols-rounded text-xl">person</span>
+                        <span class="sr-only">Mi Perfil</span>
+                    </button>
+                    <button id="faq-btn-mobile" class="md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-primary transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <span class="material-symbols-rounded text-xl">help</span>
+                        <span class="sr-only">FAQ</span>
+                    </button>
+
+                    <!-- Botones desktop (con texto) -->
+                    <button id="admin-panel-btn" style="display: none;" class="hidden md:inline-flex items-center px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-200 text-sm font-medium transition shadow-sm justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">admin_panel_settings</span>
+                        Admin
+                    </button>
+                    <button id="profile-btn" class="hidden md:inline-flex items-center px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-200 text-sm font-medium transition shadow-sm justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">person</span>
+                        Mi Perfil
+                    </button>
+                    <button id="faq-button" onclick="location.href='/faq.html'" class="hidden md:inline-flex items-center px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-200 text-sm font-medium transition shadow-sm justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">help_outline</span>
+                        FAQ
+                    </button>
+
+                    <!-- Logout móvil (icono) + desktop (texto) -->
+                    <button id="logout-button-mobile" class="md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors">
+                        <span class="material-symbols-rounded text-xl">logout</span>
+                        <span class="sr-only">Cerrar Sesión</span>
+                    </button>
+                    <button id="logout-button-desktop" class="hidden md:inline-flex items-center px-4 py-2 rounded-full bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition shadow-sm justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">logout</span>
                         Cerrar Sesión
                     </button>
-</div>
-</div>
-</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 space-y-6 lg:space-y-8 min-h-screen pb-24">
-
-<!-- Mobile Header Section -->
-<header class="lg:hidden mb-6">
-<h1 class="text-2xl font-bold text-primary leading-tight mb-6">
-    Bienvenido, <br/>
-    <span class="text-slate-800 dark:text-white" id="welcome-message-mobile">Jose Agustin Inciarte Melean!</span>
-</h1>
-<div class="grid grid-cols-2 gap-3 mb-6">
-<button id="admin-panel-btn-mobile" style="display: none;" class="flex items-center justify-center gap-2 py-3 px-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-<span class="material-symbols-rounded text-primary text-xl">admin_panel_settings</span>
-<span class="text-sm font-medium">Admin</span>
-</button>
-<button id="profile-btn-mobile" class="flex items-center justify-center gap-2 py-3 px-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-<span class="material-symbols-rounded text-primary text-xl">person</span>
-<span class="text-sm font-medium">Mi Perfil</span>
-</button>
-<button id="faq-btn-mobile" class="flex items-center justify-center gap-2 py-3 px-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-<span class="material-symbols-rounded text-primary text-xl">help</span>
-<span class="text-sm font-medium">FAQ</span>
-</button>
-<button id="logout-button-mobile" class="flex items-center justify-center gap-2 py-3 px-4 bg-slate-600 text-white rounded-xl shadow-sm hover:bg-slate-700 transition-colors">
-<span class="material-symbols-rounded text-xl">logout</span>
-<span class="text-sm font-medium">Salir</span>
-</button>
-</div>
-</header>
-
-<!-- Desktop Title & Actions (Hidden on Mobile) -->
-<div class="hidden lg:flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-<div>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 lg:space-y-8 min-h-screen pb-24">
+<!-- Título de página -->
+<div class="lg:hidden mt-2">
 <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Panel de Control</h2>
 <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestiona tus reservas y perfil fácilmente.</p>
-</div>
-<div class="flex flex-wrap gap-3 header-buttons">
-<button id="admin-panel-btn" style="display: none;" class="flex items-center px-4 py-2 bg-primary text-on-primary rounded-lg shadow hover:bg-primary-hover transition text-sm font-medium">
-<span class="material-icons-outlined mr-2 text-lg">admin_panel_settings</span>
-                    Panel de Admin
-                </button>
-<button id="profile-btn" class="flex items-center px-4 py-2 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition font-medium text-sm">
-<span class="material-icons-outlined mr-2 text-lg">person</span>
-                    Mi Perfil
-                </button>
-<button id="faq-button" onclick="location.href='/faq.html'" class="flex items-center px-4 py-2 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition font-medium text-sm">
-<span class="material-icons-outlined mr-2 text-lg">help_outline</span>
-                    FAQ
-                </button>
-</div>
 </div>
 
 <!-- My Booking Section (Desktop) -->

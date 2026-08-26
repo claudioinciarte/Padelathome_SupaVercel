@@ -467,6 +467,15 @@
     }
 }
 
+/* --- Dashboard unified header (mobile vs desktop visibility) --- */
+/* El JS muestra el botón admin desktop con style.display='flex', que anula la
+   clase hidden en móvil. Forzamos que la versión desktop solo aparezca en md+. */
+@media (max-width: 767px) {
+    #admin-panel-btn, #profile-btn, #faq-button, #logout-button-desktop {
+        display: none !important;
+    }
+}
+
 /* --- Join Match Modal Styles --- */
 
 .join-match-modal-container {
