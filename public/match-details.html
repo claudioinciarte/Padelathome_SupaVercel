@@ -44,7 +44,7 @@
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 2rem); }
     </style>
 </head>
-<body class="bg-surface text-on-surface font-body antialiased pb-24 md:pb-8">
+<body class="bg-surface dark:bg-background-dark text-on-surface dark:text-text-dark font-body antialiased pb-24 md:pb-8">
 
 <!-- Notification Container -->
 <div id="notification-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
@@ -75,7 +75,7 @@
                 <span class="material-symbols-outlined">share</span>
             </button>
             <!-- Desktop Profile Icon -->
-            <div class="hidden md:block w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
+            <div class="hidden md:block w-8 h-8 rounded-full bg-surface-container-high dark:bg-[#1a1a1a] overflow-hidden">
                 <div id="user-avatar-text" class="w-full h-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">U</div>
             </div>
         </div>
@@ -89,7 +89,7 @@
         <div class="lg:col-span-8 space-y-6 md:space-y-8">
 
             <!-- Hero Section / Match Summary -->
-            <section class="bg-surface-container-lowest md:p-1 md:border border-outline-variant/10 md:rounded-xl md:shadow-sm overflow-hidden">
+            <section class="bg-surface-container-lowest dark:bg-surface-dark md:p-1 md:border border-outline-variant/10 md:rounded-xl md:shadow-sm overflow-hidden">
                 <div class="relative h-48 md:h-64 rounded-3xl md:rounded-lg overflow-hidden mb-4 md:mb-6 shadow-lg md:shadow-none">
                     <img src="/images/match-hero.png" alt="Padel Court" class="w-full h-full object-cover"/>
 
@@ -105,9 +105,9 @@
                 <div class="md:px-6 md:pb-6 space-y-4 md:space-y-6">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h2 id="match-court-name" class="text-3xl font-black italic tracking-tighter text-on-surface md:text-primary uppercase md:mb-1">Cargando...</h2>
+                            <h2 id="match-court-name" class="text-3xl font-black italic tracking-tighter text-on-surface dark:text-text-dark md:text-primary uppercase md:mb-1">Cargando...</h2>
 
-                            <div class="flex items-center gap-2 mt-1 text-on-surface-variant font-medium md:hidden">
+                            <div class="flex items-center gap-2 mt-1 text-on-surface dark:text-text-dark-variant dark:text-text-muted-dark font-medium md:hidden">
                                 <span class="material-symbols-outlined text-primary text-sm">calendar_month</span>
                                 <span id="match-date-mobile">--</span>
                                 <span class="w-1 h-1 rounded-full bg-outline-variant mx-1"></span>
@@ -115,25 +115,25 @@
                                 <span id="match-time-mobile">--</span>
                             </div>
 
-                            <p class="hidden md:flex items-center gap-2 text-on-surface-variant">
+                            <p class="hidden md:flex items-center gap-2 text-on-surface dark:text-text-dark-variant dark:text-text-muted-dark">
                                 <span class="material-symbols-outlined text-sm">location_on</span>
                                 Club Padel Premium
                             </p>
                         </div>
                         <div class="hidden md:block text-right">
-                            <span id="match-time-desktop" class="block text-2xl font-bold text-on-surface">--:-- - --:--</span>
-                            <span id="match-date-desktop" class="text-sm font-medium text-on-surface-variant">-- de --</span>
+                            <span id="match-time-desktop" class="block text-2xl font-bold text-on-surface dark:text-text-dark">--:-- - --:--</span>
+                            <span id="match-date-desktop" class="text-sm font-medium text-on-surface dark:text-text-dark-variant dark:text-text-muted-dark">-- de --</span>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap gap-2 md:gap-4 md:pt-4">
-                        <span class="bg-surface-container-high md:bg-surface-container-low px-4 py-2 rounded-xl md:rounded-lg text-sm font-semibold text-on-surface flex items-center gap-2">
+                        <span class="bg-surface-container-high md:bg-surface-container-low dark:bg-[#161616] px-4 py-2 rounded-xl md:rounded-lg text-sm font-semibold text-on-surface dark:text-text-dark flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary text-sm md:text-base">timer</span> <span id="match-duration">90 Minutos</span>
                         </span>
-                        <span class="bg-surface-container-high md:bg-surface-container-low px-4 py-2 rounded-xl md:rounded-lg text-sm font-semibold text-on-surface flex items-center gap-2">
+                        <span class="bg-surface-container-high md:bg-surface-container-low dark:bg-[#161616] px-4 py-2 rounded-xl md:rounded-lg text-sm font-semibold text-on-surface dark:text-text-dark flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary text-sm md:text-base">groups</span> <span id="match-players-count">4 Jugadores</span>
                         </span>
-                        <span class="bg-primary/10 md:bg-surface-container-low text-primary md:text-on-surface px-4 py-2 rounded-xl md:rounded-lg text-sm font-bold md:font-semibold flex items-center gap-2">
+                        <span class="bg-primary/10 md:bg-surface-container-low dark:bg-[#161616] text-primary md:text-on-surface dark:text-text-dark px-4 py-2 rounded-xl md:rounded-lg text-sm font-bold md:font-semibold flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary text-sm md:text-base">trending_up</span> Nivel Abierto
                         </span>
                     </div>
@@ -146,7 +146,7 @@
                         </button>
                     </div>
                      <!-- Action Button Mobile -->
-                     <button id="btn-leave-mobile" class="w-full md:hidden mt-4 bg-surface-container-lowest border-2 border-error/20 text-error font-bold py-4 rounded-full hover:bg-error/5 transition-all active:scale-95 flex items-center justify-center gap-2">
+                     <button id="btn-leave-mobile" class="w-full md:hidden mt-4 bg-surface-container-lowest dark:bg-surface-dark border-2 border-error/20 text-error font-bold py-4 rounded-full hover:bg-error/5 transition-all active:scale-95 flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined">logout</span>
                         Retirarse de la partida
                     </button>
@@ -156,7 +156,7 @@
             <!-- Players Grid -->
             <section class="space-y-4 md:space-y-6">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-bold tracking-tight text-on-surface">Jugadores Inscritos</h3>
+                    <h3 class="text-xl font-bold tracking-tight text-on-surface dark:text-text-dark">Jugadores Inscritos</h3>
                     <span id="players-completion" class="text-sm font-bold md:font-medium text-primary bg-primary/10 md:bg-transparent px-3 py-1 rounded-lg md:p-0">--/-- Completado</span>
                 </div>
 
@@ -170,12 +170,12 @@
         <!-- Right Column: Chat Panel -->
         <aside class="lg:col-span-4 lg:h-[calc(100vh-140px)] lg:sticky top-24 mt-4 lg:mt-0 space-y-4 lg:space-y-0">
             <!-- Chat Title Mobile Only -->
-            <h3 class="lg:hidden text-xl font-bold tracking-tight text-on-surface flex items-center gap-2 mb-2">
+            <h3 class="lg:hidden text-xl font-bold tracking-tight text-on-surface dark:text-text-dark flex items-center gap-2 mb-2">
                 <span class="material-symbols-outlined text-primary">forum</span>
                 Chat de la partida
             </h3>
 
-            <div class="bg-surface-container-low lg:bg-surface-container-lowest h-[500px] lg:h-full rounded-3xl lg:rounded-2xl flex flex-col overflow-hidden lg:shadow-sm">
+            <div class="bg-surface-container-low lg:bg-surface-container-lowest dark:bg-surface-dark h-[500px] lg:h-full rounded-3xl lg:rounded-2xl flex flex-col overflow-hidden lg:shadow-sm">
 
                 <!-- Chat Header Desktop -->
                 <div class="hidden lg:flex p-5 bg-white dark:bg-slate-800 items-center justify-between border-b border-slate-100 dark:border-slate-700">
@@ -184,7 +184,7 @@
                             <span class="material-symbols-outlined text-primary">forum</span>
                         </div>
                         <div>
-                            <h3 class="font-bold text-on-surface leading-tight">Chat de la Partida</h3>
+                            <h3 class="font-bold text-on-surface dark:text-text-dark leading-tight">Chat de la Partida</h3>
                             <p class="text-[10px] text-primary font-bold uppercase tracking-widest">En línea</p>
                         </div>
                     </div>
@@ -196,12 +196,12 @@
                 </div>
 
                 <!-- Chat Input -->
-                <div class="p-4 lg:p-5 bg-surface-container-low dark:bg-slate-800 lg:bg-white lg:dark:bg-slate-800 rounded-b-3xl lg:rounded-b-none">
-                    <form id="chat-form" class="flex items-center gap-2 bg-surface-container-lowest lg:bg-surface-container-high rounded-full px-4 py-2 shadow-inner lg:shadow-none border border-outline-variant/10 lg:border-none">
-                        <button type="button" class="hidden lg:block text-on-surface-variant hover:text-primary transition-colors">
+                <div class="p-4 lg:p-5 bg-surface-container-low dark:bg-[#161616]bg-slate-800 lg:bg-white lg:dark:bg-slate-800 rounded-b-3xl lg:rounded-b-none">
+                    <form id="chat-form" class="flex items-center gap-2 bg-surface-container-lowest dark:bg-surface-dark lg:bg-surface-container-high dark:bg-[#1a1a1a] rounded-full px-4 py-2 shadow-inner lg:shadow-none border border-outline-variant/10 lg:border-none">
+                        <button type="button" class="hidden lg:block text-on-surface dark:text-text-dark-variant dark:text-text-muted-dark hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-xl">add_circle</span>
                         </button>
-                        <input id="chat-input" type="text" autocomplete="off" class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-1 lg:py-0 text-on-surface placeholder:text-outline-variant" placeholder="Escribe un mensaje..."/>
+                        <input id="chat-input" type="text" autocomplete="off" class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-1 lg:py-0 text-on-surface dark:text-text-dark placeholder:text-outline-variant" placeholder="Escribe un mensaje..."/>
                         <button type="submit" class="bg-primary text-on-primary w-10 h-10 rounded-lg flex items-center justify-center transition-transform active:scale-90">
                             <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">send</span>
                         </button>

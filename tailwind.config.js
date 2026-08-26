@@ -22,18 +22,30 @@ module.exports = {
         'surface-light': '#FFFFFF',
         'surface-dark': '#0A0A0A',
         'surface-card': '#0A0A0A',
+        card: '#0A0A0A',
+        'card-dark': '#0A0A0A',
 
         // Texto
+        'text-light': '#111827',
+        'text-dark': '#EDEDED',
         'text-main-light': '#111827',
         'text-main-dark': '#EDEDED',
         'text-primary-light': '#111827',
         'text-primary-dark': '#EDEDED',
         'text-muted-light': '#666666',
         'text-muted-dark': '#888888',
+        'on-surface': '#111827',
+        'surface-container': '#EDEDED',
 
         // Bordes
         'border-light': '#EAEAEA',
         'border-dark': '#333333',
+        'outline-variant': '#DDDDDD',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#FAFAFA',
+        'surface-container-high': '#EDEDED',
+        'on-surface-variant': '#666666',
+        error: '#E00000',
 
         // Estados
         'status-available-light': '#16A34A',
