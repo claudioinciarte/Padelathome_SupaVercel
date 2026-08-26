@@ -1,216 +1,103 @@
 ---
-version: alpha
+version: vercel-aligned-dual
 name: Padel@Home
 description: >-
-  Sistema de diseño de la web de Padel@Home — reserva de pistas. Azul primario
-  (#2563EB) sobre superficies de slate, acento verde (#006e37) para "disponible",
-  con modos claro y oscuro y tokens Material. Consistente en todas las páginas
-  (login, dashboard, detalle de partida, perfil, admin, FAQ).
+  Sistema de diseño de la web de Padel@Home — reserva de pistas.
+  Alineado con Vercel Web Interface Guidelines (excepto tipografía).
+  Foco en accesibilidad extrema, gestión del teclado, animaciones rápidas (150ms)
+  y minimalismo funcional (Geist-like UI). Soporte definido para modos Claro y Oscuro.
 colors:
   primary: "#2563EB"
-  primary-dark: "#1D4ED8"
+  primary-dark: "#60A5FA"
   primary-hover: "#1D4ED8"
   on-primary: "#FFFFFF"
-  primary-light-bg: "#EFF6FF"
-  secondary: "#006e37"
-  on-secondary: "#FFFFFF"
-  background-light: "#F8FAFC"
-  background-dark: "#0F172A"
+  on-primary-dark: "#000000"
+  brand: "#006E37"
+  background-light: "#FAFAFA"
+  background-dark: "#000000"
   surface-light: "#FFFFFF"
-  surface-dark: "#1E293B"
-  surface-container-low: "#f1f4f5"
-  surface-container-high: "#e5e9eb"
-  on-surface: "#2d3335"
-  on-surface-variant: "#5a6062"
-  text-primary-light: "#1F2937"
-  text-primary-dark: "#F3F4F6"
-  text-muted-light: "#6B7280"
-  text-muted-dark: "#9CA3AF"
-  border-light: "#E5E7EB"
-  border-dark: "#374151"
-  success: "#16A34A"
-  success-surface-light: "#D1FAE5"
-  success-surface-dark: "#064E3B"
-  warning: "#F59E0B"
-  warning-surface-light: "#FEF3C7"
-  warning-surface-dark: "#78350F"
-  danger: "#DC2626"
-  danger-surface-light: "#FFE4E6"
-  danger-surface-dark: "#7F1D1D"
-  error: "#a83836"
-  slot-available: "#22C55E"
-  slot-booked: "#EF4444"
-  slot-open: "#F59E0B"
-  slot-mine: "#2563EB"
-  slot-blocked: "#64748B"
+  surface-dark: "#0A0A0A"
+  text-primary-light: "#111827"
+  text-primary-dark: "#EDEDED"
+  text-muted-light: "#666666"
+  text-muted-dark: "#888888"
+  border-light: "#EAEAEA"
+  border-dark: "#333333"
+  success-available: "#16A34A"
+  success-available-dark: "#4ADE80"
+  warning-open: "#F59E0B"
+  warning-open-dark: "#FBBF24"
+  danger-error: "#E00"
+  blocked: "#888888"
 typography:
   display:
     fontFamily: Manrope
-    fontSize: 2rem
     fontWeight: 700
-    lineHeight: 1.1
-    letterSpacing: "-0.02em"
-  headline:
-    fontFamily: Inter
-    fontSize: 1.25rem
-    fontWeight: 700
-    lineHeight: 1.25
-  title-lg:
-    fontFamily: Inter
-    fontSize: 1.125rem
-    fontWeight: 600
-    lineHeight: 1.25
+    letterSpacing: "-0.04em"
   body:
     fontFamily: Inter
-    fontSize: 1rem
     fontWeight: 400
-    lineHeight: 1.5
-  body-sm:
-    fontFamily: Inter
-    fontSize: 0.875rem
-    fontWeight: 400
-    lineHeight: 1.4
-  label:
-    fontFamily: Inter
-    fontSize: 0.75rem
-    fontWeight: 500
-    lineHeight: 1.25
-    letterSpacing: "0.02em"
-rounded:
-  DEFAULT: 8px
-  lg: 12px
-  xl: 16px
-  full: 9999px
-spacing:
-  xs: 4px
-  sm: 8px
-  md: 12px
-  lg: 16px
-  xl: 24px
-  '2xl': 32px
-  '3xl': 48px
+transitions:
+  default: "150ms ease-out"
+  motion-reduce: "0ms"
 components:
+  focus-ring:
+    boxShadow: "0 0 0 2px {colors.background-light}, 0 0 0 4px {colors.primary}"
+    outline: "none"
   button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.DEFAULT}"
-    padding: 12px
-  button-primary-hover:
-    backgroundColor: "{colors.primary-hover}"
-    textColor: "{colors.on-primary}"
+    backgroundColorLight: "{colors.primary}"
+    backgroundColorDark: "{colors.primary-dark}"
+    textColorLight: "{colors.on-primary}"
+    textColorDark: "{colors.on-primary-dark}"
+    rounded: "6px"
+    transition: "{transitions.default}"
   button-secondary:
-    backgroundColor: "{colors.secondary}"
-    textColor: "{colors.on-secondary}"
-    rounded: "{rounded.DEFAULT}"
+    backgroundColor: "transparent"
+    borderColorLight: "{colors.border-light}"
+    borderColorDark: "{colors.border-dark}"
+    textColorLight: "{colors.text-primary-light}"
+    textColorDark: "{colors.text-primary-dark}"
+    rounded: "6px"
   card:
-    backgroundColor: "{colors.surface-light}"
-    rounded: "{rounded.xl}"
-    padding: 24px
-  card-dark:
-    backgroundColor: "{colors.surface-dark}"
-    rounded: "{rounded.xl}"
-  input-field:
-    backgroundColor: "{colors.surface-light}"
-    textColor: "{colors.text-primary-light}"
-    rounded: "{rounded.DEFAULT}"
-    padding: 10px
-  chip-status:
-    padding: 4px
-    rounded: "{rounded.DEFAULT}"
-  pill-available:
-    backgroundColor: "{colors.slot-available}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.full}"
-  pill-booked:
-    backgroundColor: "{colors.slot-booked}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.full}"
-  pill-open:
-    backgroundColor: "{colors.slot-open}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.full}"
-  pill-mine:
-    backgroundColor: "{colors.slot-mine}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.full}"
-  accordion-header:
-    backgroundColor: "{colors.surface-light}"
-    textColor: "{colors.text-primary-light}"
-    padding: 16px
-    rounded: "{rounded.lg}"
-  nav-link:
-    textColor: "{colors.text-muted-light}"
-    rounded: "{rounded.DEFAULT}"
-  match-player-avatar:
-    rounded: "{rounded.full}"
+    backgroundColorLight: "{colors.surface-light}"
+    backgroundColorDark: "{colors.surface-dark}"
+    borderColorLight: "{colors.border-light}"
+    borderColorDark: "{colors.border-dark}"
+    borderWidth: "1px"
+    rounded: "12px"
+    boxShadowLight: "0 2px 4px rgba(0,0,0,0.02)"
+    boxShadowDark: "none"
 ---
 
-## Overview
+## Overview: Vercel Best Practices (Dual Mode)
 
-Padel@Home es una web de reserva de pistas de pádel. El sistema se apoya en un
-**azul primario (#2563EB)** como único color de acción, un **acento verde
-(#006e37)** ligado al branding de la pista y al estado "disponible", y una
-paleta de superficie **slate** con modos claro y oscuro. Todo el UI usa
-**Tailwind CSS con darkMode class**, tokens CSS propios (`--pah-*`) y el
-conjunto de iconos **Material Symbols Rounded**. La misma identidad se aplica
-a todas las páginas para evitar divergencias de fuentes, colores y espaciado.
+Sistema que aplica los principios de diseño de Vercel manteniendo las
+tipografías originales (Manrope/Inter) con soporte explícito para temas claro
+y oscuro. Prioriza la interfaz como herramienta de ingeniería: elimina ruido
+visual y apuesta por rendimiento, accesibilidad y control por teclado.
 
-## Colors
+## Reglas Clave (WCAG / Vercel)
 
-- **Primario (#2563EB)**: único color de acción (botones, enlaces activos,
-  "Mi Reserva"). Hover #1D4ED8. Fondo claro #EFF6FF.
-- **Secundario (#006e37)**: branding y acento de la pista; indica éxito/"disponible".
-- **Fondo/Superficie**: claro `#F8FAFC` / `#FFFFFF`; oscuro `#0F172A` / `#1E293B`.
-- **Texto**: claro `#1F2937` (primario), `#6B7280` (muted); oscuro `#F3F4F6` / `#9CA3AF`.
-- **Bordes**: claro `#E5E7EB`; oscuro `#374151`.
-- **Estados de slot**: Disponible=verde #22C55E, Ocupado=rojo #EF4444,
-  Partida Abierta=ámbar #F59E0B, Mi Reserva=azul #2563EB, Bloqueado=slate.
-- **Semánticos**: success/warning/danger con variantes de superficie claro y oscuro.
+* **Focus Management**: todo elemento interactivo tiene estado `:focus-visible`
+  con doble anillo de alto contraste (offset + ring) que no interfiere con el
+  ratón pero es evidente al tabular.
+* **Transiciones rápidas**: 150ms `ease-out`; con `prefers-reduced-motion` se
+  reducen a 0ms.
+* **Estados deshabilitados**: contraste bajo (`#888`), `cursor: not-allowed`,
+  `aria-disabled="true"`. Errores con borde rojo puro `#E00` + icono.
+* **Geist-like**: radios reducidos (6px botones, 12px tarjetas), sombras casi
+  imperceptibles en claro y nulas en oscuro, bordes definidos (`#EAEAEA`/`#333`).
 
-## Typography
+## Implementación Técnica (Tailwind)
 
-**Manrope** para títulos display (700) y **Inter** para el resto (headings,
-body, etiquetas). Jerarquía consistente: display 2rem/700 → headline 1.25rem/700
-→ title-lg 1.125rem/600 → body 1rem → body-sm 0.875rem → label 0.75rem/500.
+La fuente de verdad de colores/fuentes/radios es `tailwind.config.js`; el CSS
+se compila con `npm run css:build` a `public/tailwind.css` (no editar a mano).
 
-## Layout & Spacing
-
-Escala de espaciado: 4/8/12/16/24/32/48px. Radios: 8px (default), 12px (lg),
-16px (xl), pill (9999px). Tarjetas con sombras suaves (0 1-4px rgba) y grid
-responsive: escritorio en tabla, móvil en acordeón con tira de fechas
-deslizable horizontal.
-
-## Elevation & Depth
-
-Sombras discretas tipo Material: `0 1px 2px rgba(0,0,0,0.05)` en slots,
-`0 4px 6px -1px / 0 2px 4px -1px` en tarjetas. Sin elevación excesiva; las
-interacciones se marcan con borde/hover (hover:border-green-500).
-
-## Shapes
-
-Radios consistentes. Modales, tarjetas y acordeones usan xl (16px); inputs y
-botones DEFAULT (8px); pills y avatares full (9999px). La barra de estado del
-slot es una franja vertical de 6px (`w-1.5`) en el borde izquierdo.
-
-## Components
-
-- **Button Primary**: fondo azul #2563EB, texto blanco, radius 8px, padding 12px.
-  Hover #1D4ED8. Usado para reservar, guardar, acciones principales.
-- **Card**: superficie, radius 16px, padding 24px, sombra suave. Variante dark
-  con `surface-dark`.
-- **Pill (estado de slot)**: chip con color semántico (disponible/ocupado/abierta/
-  mi reserva/bloqueado) y radius full.
-- **Accordion (móvil)**: header 16px con estado + hora + chevron; contenido
-  colapsable con borde superior.
-- **Match player avatar**: círculo (radius full) con iniciales del jugador; el
-  dueño de la reserva se marca claramente.
-- **Input**: superficie, border-ligero, radius 8px, padding 10px.
-
-## Do's and Don'ts
-
-- **Haz**: Usar #2563EB como único azul de acción; respetar los modos claro/oscuro
-  via `--pah-*` / `dark:`; marcar siempre el estado del slot (disponible/ocupado/…);
-  usar Inter/Manrope.
-- **No hagas**: Introducir otros colores de botón, fuentes fuera de la familia,
-  ni fijar colores en hex sin pasar por el token (romperían el modo oscuro y la
-  consistencia entre páginas).
+* **Ambos modos vía `dark:`** (ej. `bg-surface-light dark:bg-surface-dark`,
+  `text-status-available dark:text-status-available-dark`).
+* **CTA primario**: `bg-primary text-on-primary rounded-lg` (azul `#2563EB`
+  + texto blanco; en oscuro el component. CSS opcional usa `#60A5FA` + negro).
+* **Estados**: Disponible verde, Abierta ámbar, Ocupada/Llena gris apagado,
+  Mi reserva azul — solo texto + icono, sin pills (fondo transparente).
+* **Escala neutra** slate/gray/zinc remapeada a neutros Vercel
+  (claro `#FAFAFA`, oscuro `#000`).

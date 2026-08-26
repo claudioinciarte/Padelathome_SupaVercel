@@ -189,13 +189,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="w-16 h-16 rounded-full border-2 border-primary flex items-center justify-center bg-primary/10 text-primary font-bold text-xl uppercase tracking-wider">
                             ${initials}
                         </div>
-                        <div class="absolute -bottom-1 -right-1 bg-secondary text-white rounded-full p-0.5 shadow-md">
+                        <div class="absolute -bottom-1 -right-1 bg-primary text-on-primary rounded-full p-0.5 shadow-md">
                             <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
                         </div>
                     </div>
                     <div>
                         <p class="font-bold text-on-surface leading-tight">${p.name}</p>
-                        <p class="text-[10px] text-secondary font-bold uppercase tracking-wider">Confirmado</p>
+                        <p class="text-[10px] text-primary font-bold uppercase tracking-wider">Confirmado</p>
                     </div>
                 </div>
             `;
@@ -248,11 +248,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isSent) {
             return `
             <div class="flex items-start justify-end gap-3 w-full">
-                <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%]">
+                <div class="bg-primary text-on-primary p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%]">
                     <p class="text-sm leading-relaxed font-medium">${data.message}</p>
                     <div class="flex items-center justify-end gap-1 mt-1">
-                        <p class="text-[10px] text-white/70">${time}</p>
-                        <span class="material-symbols-outlined text-[12px] text-white/90" style="font-variation-settings: 'FILL' 1;">done_all</span>
+                        <p class="text-[10px] text-on-primary">${time}</p>
+                        <span class="material-symbols-outlined text-[12px] text-on-primary" style="font-variation-settings: 'FILL' 1;">done_all</span>
                     </div>
                 </div>
             </div>`;
