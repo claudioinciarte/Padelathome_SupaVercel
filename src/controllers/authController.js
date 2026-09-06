@@ -63,7 +63,18 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Credenciales inválidas.' });
     }
 
-    const payload = { id: user.id, role: user.role, name: user.name, email: user.email };
+    // `role` es el claim estándar que Supabase Realtime/Postgres usa para
+    // resolver permisos. El rol interno de Padel@Home va separado en
+    // `app_role`; así no enviamos `user`/`admin` como rol de Postgres.
+    const payload = {
+      sub: String(user.id),
+      user_id: user.id,
+      role: 'authenticated',
+      app_role: user.role,
+      name: user.name,
+      email: user.email,
+      aud: 'authenticated',
+    };
     const token = jwt.sign(
       payload,
       process.env.JWT_SECRET,

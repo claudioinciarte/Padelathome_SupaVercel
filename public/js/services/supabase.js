@@ -11,9 +11,23 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
+// La aplicación no usa Supabase Auth: el backend emite el JWT propio. Para
+// que Realtime pueda aplicar RLS, el token debe llegar también al socket.
+// `setAuth` es asíncrono y el cliente Realtime espera internamente a que
+// termine antes de unir un canal.
+export function configureRealtimeAuth(token = localStorage.getItem('authToken')) {
+  if (!token) return;
+  supabase.realtime.setAuth(token).catch((error) => {
+    console.warn('No se pudo configurar el JWT de Supabase Realtime:', error?.message || error);
+  });
+}
+
+configureRealtimeAuth();
+
 // Suscribe a los cambios de reservas/participantes/bloqueos relevantes para el
 // dashboard. El callback se invoca con { event, table, row }.
 export function subscribeToCalendarChanges(callback) {
+  configureRealtimeAuth();
   const channel = supabase.channel('dashboard-changes');
   for (const table of ['bookings', 'match_participants', 'blocked_periods', 'waiting_list_entries', 'courts']) {
     channel.on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
@@ -32,6 +46,7 @@ export function subscribeToCalendarChanges(callback) {
 // Devuelve el canal para poder cancelarlo si la página se cierra.
 // onStatus recibe los estados del canal (SUBSCRIBED, CHANNEL_ERROR, TIMED_OUT...).
 export function subscribeToMatchChat(bookingId, callback, onStatus) {
+  configureRealtimeAuth();
   const channel = supabase.channel(`chat-${bookingId}`);
   channel.on('postgres_changes', {
     event: 'INSERT',

@@ -1,5 +1,7 @@
 const request = require('supertest');
 const express = require('express');
+const jwt = require('jsonwebtoken');
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-only-jwt-secret';
 const authRoutes = require('./authRoutes');
 const pool = require('../config/database');
 const bcrypt = require('bcrypt');
@@ -93,6 +95,15 @@ describe('Auth Routes', () => {
       expect(res.body.user).toHaveProperty('id');
       expect(res.body.user).toHaveProperty('name', 'Test User');
       expect(res.body.user).toHaveProperty('role', 'user');
+
+      const claims = jwt.verify(res.body.token, process.env.JWT_SECRET);
+      expect(claims).toMatchObject({
+        sub: '1',
+        user_id: 1,
+        role: 'authenticated',
+        app_role: 'user',
+        aud: 'authenticated',
+      });
     });
 
     it('should return 401 for invalid credentials during login (user not found)', async () => {
