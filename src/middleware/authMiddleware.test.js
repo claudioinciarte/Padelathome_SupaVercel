@@ -26,7 +26,7 @@ describe('custom JWT middleware', () => {
     protect(req, res, next);
 
     expect(next).toHaveBeenCalledTimes(1);
-    expect(req.user).toMatchObject({ user_id: 7, role: 'authenticated', app_role: 'admin' });
+    expect(req.user).toMatchObject({ id: 7, user_id: 7, role: 'authenticated', app_role: 'admin' });
     expect(res.status).not.toHaveBeenCalled();
   });
 
