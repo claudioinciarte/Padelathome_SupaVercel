@@ -25,6 +25,12 @@
 
 /* Base resets handled by Tailwind Preflight */
 
+/* Keyboard focus: never hide the focus indicator. */
+:where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 3px solid #f59e0b;
+    outline-offset: 3px;
+}
+
 /* --- Calendar Styles --- */
 /* (Legacy grid styles removed in favor of Tailwind table) */
 

@@ -20,7 +20,9 @@ registerForm.addEventListener('submit', async (event) => {
       password: document.getElementById('password').value,
       building: document.getElementById('building').value,
       floor: document.getElementById('floor').value,
-      door: document.getElementById('door').value
+      door: document.getElementById('door').value,
+      termsAccepted: document.getElementById('terms-consent').checked,
+      privacyPolicyVersion: '2026-09-06'
   };
 
   messageParagraph.textContent = 'Enviando registro...';

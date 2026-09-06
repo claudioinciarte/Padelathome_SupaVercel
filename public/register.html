@@ -118,19 +118,15 @@
             </div>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" for="phone_number">Teléfono (opcional)</label>
-            <div class="relative rounded-md shadow-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span class="material-icons-round text-slate-400 text-xl">phone</span>
-                </div>
-                <input class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm bg-white dark:bg-slate-800 transition-shadow duration-200" id="phone_number" type="tel" placeholder="Ej. +34 600 000 000"/>
-            </div>
+        <div class="flex items-start gap-3 pt-2">
+            <input id="terms-consent" name="termsAccepted" type="checkbox" required class="mt-1 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" aria-describedby="terms-consent-help">
+            <label for="terms-consent" id="terms-consent-help" class="text-sm text-slate-700 dark:text-slate-300">
+                He leído y acepto los <a class="text-primary underline" href="/terms.html" target="_blank" rel="noopener">términos y condiciones</a> y la <a class="text-primary underline" href="/privacy.html" target="_blank" rel="noopener">política de privacidad</a>.
+            </label>
         </div>
-
         <div class="pt-2">
             <button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm text-on-primary bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform active:scale-[0.98] font-medium" type="submit">
-                Registrarse
+                Crear cuenta
             </button>
         </div>
     </form>
@@ -153,5 +149,6 @@
 
 <script type="module" src="register.js"></script>
 <script src="main.js"></script>
+<script src="/legal.js" defer></script>
 </body>
 </html>

@@ -53,7 +53,7 @@
 <header class="bg-white/85 dark:bg-slate-800/85 backdrop-blur-lg sticky top-0 z-50 shadow-sm md:border-b-0 border-b border-slate-200 dark:border-slate-700">
     <div class="flex justify-between items-center w-full px-4 md:px-6 py-4 max-w-7xl mx-auto">
         <div class="flex items-center gap-4">
-            <button onclick="window.location.href='/dashboard.html'" class="text-primary hover:bg-slate-100 transition-colors p-2 rounded-full active:scale-95 duration-200">
+            <button type="button" aria-label="Volver al dashboard" onclick="window.location.href='/dashboard.html'" class="text-primary hover:bg-slate-100 transition-colors p-2 rounded-full active:scale-95 duration-200">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
             <h1 class="font-['Inter'] font-bold tracking-tight text-lg text-primary">Detalles de la partida</h1>
@@ -71,7 +71,7 @@
             <button id="btn-notifications" title="Activar notificaciones de la partida" class="hidden text-primary md:text-slate-500 hover:bg-slate-100 transition-colors p-2 rounded-full active:scale-95 duration-200">
                 <span id="notifications-icon" class="material-symbols-outlined">notifications_none</span>
             </button>
-            <button class="text-primary md:text-slate-500 hover:bg-slate-100 transition-colors p-2 rounded-full active:scale-95 duration-200">
+            <button aria-label="Compartir partida" class="text-primary md:text-slate-500 hover:bg-slate-100 transition-colors p-2 rounded-full active:scale-95 duration-200">
                 <span class="material-symbols-outlined">share</span>
             </button>
             <!-- Desktop Profile Icon -->
@@ -91,7 +91,7 @@
             <!-- Hero Section / Match Summary -->
             <section class="bg-surface-container-lowest dark:bg-surface-dark md:p-1 md:border border-outline-variant/10 md:rounded-xl md:shadow-sm overflow-hidden">
                 <div class="relative h-48 md:h-64 rounded-3xl md:rounded-lg overflow-hidden mb-4 md:mb-6 shadow-lg md:shadow-none">
-                    <img src="/images/match-hero.png" alt="Padel Court" class="w-full h-full object-cover"/>
+                    <img src="/images/match-hero.png" alt="Pista de pádel al aire libre" class="w-full h-full object-cover"/>
 
                     <div class="absolute top-4 left-4 md:inset-0 md:bg-gradient-to-t md:from-black/60 md:to-transparent md:flex md:flex-end md:items-end md:p-6 md:top-auto md:left-auto">
                         <span id="match-status-badge" class="bg-amber-100 dark:bg-gray-800 text-amber-800 dark:text-amber-300 px-4 py-1.5 md:px-3 md:py-1 rounded-full font-bold text-xs tracking-widest uppercase flex items-center gap-2 backdrop-blur-sm shadow-md md:shadow-none">
@@ -233,5 +233,6 @@
 
 <script type="module" src="/js/utils.js"></script>
 <script type="module" src="match-details.js"></script>
+<script src="/legal.js" defer></script>
 </body>
 </html>

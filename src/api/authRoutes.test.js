@@ -29,6 +29,8 @@ describe('Auth Routes', () => {
           name: 'Test User',
           email: 'test@example.com',
           password: 'password123',
+          termsAccepted: true,
+          privacyPolicyVersion: '2026-09-06',
         });
 
       expect(res.statusCode).toEqual(201);
@@ -62,6 +64,8 @@ describe('Auth Routes', () => {
           name: 'Existing User',
           email: 'existing@example.com',
           password: 'password123',
+          termsAccepted: true,
+          privacyPolicyVersion: '2026-09-06',
         });
 
       expect(res.statusCode).toEqual(400);

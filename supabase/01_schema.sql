@@ -100,8 +100,9 @@ CREATE TABLE public.users (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     building_id bigint,
     is_active boolean DEFAULT true,
-    is_approved boolean DEFAULT false
-);
+    is_approved boolean DEFAULT false,
+    terms_accepted_at timestamp with time zone,
+    privacy_policy_version character varying(32));
 
 CREATE SEQUENCE public.users_id_seq
     START WITH 1

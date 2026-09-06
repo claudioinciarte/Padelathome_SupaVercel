@@ -5,12 +5,17 @@ const crypto = require('crypto');
 const sendEmail = require('../services/emailService');
 const { renderTemplate } = require('../services/emailTemplateService');
 
+const CURRENT_PRIVACY_POLICY_VERSION = '2026-09-06';
+
 // Nota: La función 'registerUser' se mantiene para el registro público
 // aunque el flujo principal ahora es 'inviteUser' (en adminController)
 const registerUser = async (req, res) => {
-  const { name, email, password, building, floor, door } = req.body;
+  const { name, email, password, building, floor, door, termsAccepted, privacyPolicyVersion } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'Nombre, email y contraseña son requeridos.' });
+  }
+  if (termsAccepted !== true || privacyPolicyVersion !== CURRENT_PRIVACY_POLICY_VERSION) {
+    return res.status(400).json({ message: 'Debes aceptar los términos y la política de privacidad vigente.' });
   }
   try {
     const salt = await bcrypt.genSalt(10);
@@ -21,8 +26,8 @@ const registerUser = async (req, res) => {
     const building_id = buildingResult.rows.length > 0 ? buildingResult.rows[0].id : null;
 
     const newUser = await pool.query(
-      "INSERT INTO users (name, email, password_hash, building_id, floor, door) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, account_status",
-      [name, email, password_hash, building_id, floor, door]
+      "INSERT INTO users (name, email, password_hash, building_id, floor, door, terms_accepted_at, privacy_policy_version) VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7) RETURNING id, name, email, account_status",
+      [name, email, password_hash, building_id, floor, door, privacyPolicyVersion]
     );
     res.status(201).json({
       message: "Registro exitoso. Tu cuenta está pendiente de aprobación.",
