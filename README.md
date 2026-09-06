@@ -7,7 +7,7 @@ Sistema de reservas de pistas de pádel para comunidades residenciales. PWA inst
 - **Frontend**: HTML/CSS/JS vanilla + Tailwind CSS (build estático)
 - **Email**: nodemailer vía SMTP (Gmail App Password)
 - **Cron jobs**: endpoints HTTP `/api/cron/*` llamados por GitHub Actions
-- **Tiempo real**: Socket.IO en despliegues persistentes; REST + polling en Vercel serverless
+- **Tiempo real**: Socket.IO en despliegues persistentes; Supabase Realtime con JWT propio en Vercel serverless
 
 ---
 
@@ -294,7 +294,7 @@ Se ejecuta automáticamente en cada `npm install` (postinstall), por lo que cada
 
 ## Notas y decisiones de diseño
 
-1. **Supabase como Postgres gestionado**: no se usa Supabase Auth ni RLS; la autenticación sigue siendo JWT + bcrypt propios (fase 2 posible: Supabase Auth + supabase-js + RLS).
+1. **Supabase como Postgres gestionado**: la autenticación sigue siendo JWT + bcrypt propios. El branch `feat/test-custom-jwt` añade claims compatibles con Supabase (`role=authenticated`, `sub`, `user_id`, `app_role`) y entrega el token a Realtime mediante `realtime.setAuth()`; las políticas de prueba están en `supabase/05_custom_jwt_realtime.sql`.
 2. **Transaction pooler (6543)**: imprescindible en serverless por el límite de 15 clientes del session pooler. `src/config/database.js` usa `max=1` por instancia y reintentos automáticos con backoff ante `EMAXCONNSESSION`.
 3. **Zona horaria**: Vercel corre en UTC y reserva la variable `TZ`; todo el cálculo de calendario es explícito con `date-fns-tz` y `APP_TIMEZONE`.
 4. **Chat sin WebSocket**: en serverless el envío es REST y la recepción es polling (5 s); en la Pi sigue funcionando Socket.IO.

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'padelathome-cache-v3';
+const CACHE_NAME = 'padelathome-cache-v4';
 // Lista de archivos base para que la app cargue offline
 const urlsToCache = [
   '/',
@@ -59,7 +59,7 @@ self.addEventListener('fetch', event => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(event.request).then(cached => cached || Response.error()))
   );
 });
 
